@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { ArrowRight, Edit, Trash2, Users } from 'lucide-react';
 
-import type { Cat, Room, RoomMovement, UserRole } from '@/lib/supabase/types';
+import type { Cat, Room, RoomMovement, UserRole } from '@/lib/supabase/aliases';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

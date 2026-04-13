@@ -26,9 +26,25 @@ export async function GET() {
 
   const weightByCat = new Map((latestWeights ?? []).map((w) => [w.cat_id, w.recorded_at]));
 
+  // Count open/in-progress health tickets per assigned cat
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: openTickets } = catIds.length
+    ? await (supabase as any)
+        .from('health_tickets')
+        .select('cat_id')
+        .in('cat_id', catIds)
+        .in('status', ['open', 'in_progress'])
+    : { data: [] };
+
+  const ticketCountByCat = new Map<string, number>();
+  for (const tk of openTickets ?? []) {
+    ticketCountByCat.set(tk.cat_id, (ticketCountByCat.get(tk.cat_id) ?? 0) + 1);
+  }
+
   const result = cats.map((c) => ({
     ...c,
-    last_weight_recorded_at: weightByCat.get(c.id) ?? null
+    last_weight_recorded_at: weightByCat.get(c.id) ?? null,
+    open_ticket_count: ticketCountByCat.get(c.id) ?? 0
   }));
 
   return NextResponse.json({ cats: result });

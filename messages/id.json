@@ -6,6 +6,7 @@
   "nav": {
     "dashboard": "Dasbor",
     "cats": "Kucing",
+    "healthTickets": "Tiket kesehatan",
     "rooms": "Ruangan",
     "food": "Katalog makanan",
     "users": "Pengguna",
@@ -407,5 +408,60 @@
     "required": "Kolom ini wajib diisi.",
     "email": "Masukkan alamat email yang valid.",
     "minPassword": "Kata sandi minimal 8 karakter."
+  },
+  "healthTickets": {
+    "title": "Tiket Kesehatan",
+    "openTicket": "Buat tiket",
+    "noOpenTickets": "Tidak ada tiket kesehatan terbuka.",
+    "noTickets": "Belum ada tiket kesehatan.",
+    "openCount": "{n} terbuka",
+    "showResolved": "Tampilkan selesai ({n})",
+    "hideResolved": "Sembunyikan selesai",
+    "addComment": "Tambah komentar",
+    "commentPlaceholder": "Jelaskan apa yang Anda amati atau perbarui...",
+    "resolveTicket": "Selesaikan tiket",
+    "resolutionSummary": "Ringkasan penyelesaian",
+    "resolutionPlaceholder": "Apa hasil / perawatan yang berhasil?",
+    "reopen": "Buka kembali",
+    "changeStatus": "Ubah status",
+    "applyStatus": "Terapkan",
+    "fields": {
+      "title": "Judul",
+      "titlePlaceholder": "mis. Bersin + keluar cairan sejak kemarin",
+      "description": "Detail pengamatan",
+      "descriptionPlaceholder": "Jelaskan apa yang Anda perhatikan secara rinci...",
+      "severity": "Tingkat keparahan"
+    },
+    "severities": {
+      "low": "Rendah",
+      "medium": "Sedang",
+      "high": "Tinggi",
+      "critical": "Kritis"
+    },
+    "statuses": {
+      "open": "Terbuka",
+      "in_progress": "Sedang ditangani",
+      "resolved": "Selesai"
+    },
+    "eventTypes": {
+      "comment": "berkomentar",
+      "status_change": "mengubah status menjadi",
+      "resolved": "menyelesaikan tiket",
+      "reopened": "membuka kembali tiket"
+    },
+    "created": "Tiket dibuka.",
+    "eventAdded": "Pembaruan ditambahkan.",
+    "resolvedMsg": "Tiket diselesaikan.",
+    "reopenedMsg": "Tiket dibuka kembali.",
+    "submitOpen": "Buka tiket",
+    "submitComment": "Kirim pembaruan",
+    "openedBy": "Dibuka oleh {name}",
+    "resolvedBy": "Diselesaikan oleh {name}",
+    "allTickets": "Semua tiket kesehatan",
+    "filterBySeverity": "Filter berdasarkan keparahan",
+    "allSeverities": "Semua keparahan",
+    "cat": "Kucing",
+    "openedAt": "Dibuka",
+    "lastUpdated": "Diperbarui"
   }
 }

@@ -3,9 +3,11 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard,
   Cat,
+  HeartPulse,
   Home,
   Users,
   Utensils,
@@ -13,7 +15,8 @@ import {
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
-import type { Profile } from '@/lib/supabase/types';
+import type { Profile } from '@/lib/supabase/aliases';
+import { Badge } from '@/components/ui/badge';
 import { UserMenu } from '@/components/app/user-menu';
 import { PushOptIn } from '@/components/pwa/push-opt-in';
 import { InstallPrompt } from '@/components/pwa/install-prompt';
@@ -22,6 +25,7 @@ type NavItem = {
   href: string;
   label: string;
   icon: LucideIcon;
+  badge?: number;
 };
 
 type NavSection = {
@@ -40,6 +44,16 @@ export function AdminSidebar({ profile, brandName, onNavigate }: Props) {
   const t = useTranslations('nav');
   const ta = useTranslations('adminNav');
 
+  const { data: openTicketCount = 0 } = useQuery({
+    queryKey: ['health-tickets-count'],
+    queryFn: async () => {
+      const r = await fetch('/api/health-tickets?count_only=1');
+      if (!r.ok) return 0;
+      return ((await r.json()).count as number) ?? 0;
+    },
+    staleTime: 60_000
+  });
+
   const sections: NavSection[] = [
     {
       label: ta('sectionOverview'),
@@ -49,6 +63,7 @@ export function AdminSidebar({ profile, brandName, onNavigate }: Props) {
       label: ta('sectionManage'),
       items: [
         { href: '/cats', label: t('cats'), icon: Cat },
+        { href: '/health-tickets', label: t('healthTickets'), icon: HeartPulse, badge: openTicketCount || undefined },
         { href: '/rooms', label: t('rooms'), icon: Home },
         { href: '/food-items', label: t('food'), icon: Utensils }
       ]
@@ -106,7 +121,12 @@ export function AdminSidebar({ profile, brandName, onNavigate }: Props) {
                           active ? '' : 'text-muted-foreground group-hover:text-foreground'
                         )}
                       />
-                      <span className="truncate">{item.label}</span>
+                      <span className="truncate flex-1">{item.label}</span>
+                      {item.badge ? (
+                        <Badge className="ml-auto h-4 min-w-4 px-1 text-[10px] bg-destructive text-destructive-foreground border-0">
+                          {item.badge}
+                        </Badge>
+                      ) : null}
                     </Link>
                   </li>
                 );

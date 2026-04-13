@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Laptop, LogOut, Moon, Sun, User, Globe } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
-import type { Profile } from '@/lib/supabase/types';
+import type { Profile } from '@/lib/supabase/aliases';
 import { createClient } from '@/lib/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';

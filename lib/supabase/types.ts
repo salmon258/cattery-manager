@@ -419,6 +419,139 @@ export type Database = {
           },
         ]
       }
+      health_ticket_events: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          event_type: Database["public"]["Enums"]["ticket_event_type"]
+          id: string
+          new_status: Database["public"]["Enums"]["ticket_status"] | null
+          note: string | null
+          ticket_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          event_type: Database["public"]["Enums"]["ticket_event_type"]
+          id?: string
+          new_status?: Database["public"]["Enums"]["ticket_status"] | null
+          note?: string | null
+          ticket_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          event_type?: Database["public"]["Enums"]["ticket_event_type"]
+          id?: string
+          new_status?: Database["public"]["Enums"]["ticket_status"] | null
+          note?: string | null
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "health_ticket_events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "health_ticket_events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "health_ticket_events_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "health_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      health_tickets: {
+        Row: {
+          cat_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          resolution_summary: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: Database["public"]["Enums"]["ticket_severity"]
+          status: Database["public"]["Enums"]["ticket_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          cat_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          resolution_summary?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: Database["public"]["Enums"]["ticket_severity"]
+          status?: Database["public"]["Enums"]["ticket_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          cat_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          resolution_summary?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: Database["public"]["Enums"]["ticket_severity"]
+          status?: Database["public"]["Enums"]["ticket_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "health_tickets_cat_id_fkey"
+            columns: ["cat_id"]
+            isOneToOne: false
+            referencedRelation: "cats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "health_tickets_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "health_tickets_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "health_tickets_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "health_tickets_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       medication_tasks: {
         Row: {
           cat_id: string
@@ -1006,6 +1139,9 @@ export type Database = {
         | "isolation"
         | "other"
       theme_pref: "light" | "dark" | "system"
+      ticket_event_type: "comment" | "status_change" | "resolved" | "reopened"
+      ticket_severity: "low" | "medium" | "high" | "critical"
+      ticket_status: "open" | "in_progress" | "resolved"
       user_role: "admin" | "cat_sitter"
       vaccine_type: "f3" | "f4" | "tricat" | "felv" | "rabies" | "other"
     }
@@ -1153,38 +1289,11 @@ export const Constants = {
         "other",
       ],
       theme_pref: ["light", "dark", "system"],
+      ticket_event_type: ["comment", "status_change", "resolved", "reopened"],
+      ticket_severity: ["low", "medium", "high", "critical"],
+      ticket_status: ["open", "in_progress", "resolved"],
       user_role: ["admin", "cat_sitter"],
       vaccine_type: ["f3", "f4", "tricat", "felv", "rabies", "other"],
     },
   },
 } as const
-
-export type Profile = Database['public']['Tables']['profiles']['Row']
-export type Cat = Database['public']['Tables']['cats']['Row']
-export type CatPhoto = Database['public']['Tables']['cat_photos']['Row']
-export type Room = Database['public']['Tables']['rooms']['Row']
-export type RoomMovement = Database['public']['Tables']['room_movements']['Row']
-export type WeightLog = Database['public']['Tables']['weight_logs']['Row']
-export type FoodItem = Database['public']['Tables']['food_items']['Row']
-export type EatingLog = Database['public']['Tables']['eating_logs']['Row']
-export type EatingLogItem = Database['public']['Tables']['eating_log_items']['Row']
-export type Vaccination = Database['public']['Tables']['vaccinations']['Row']
-export type PreventiveTreatment = Database['public']['Tables']['preventive_treatments']['Row']
-export type Medication = Database['public']['Tables']['medications']['Row']
-export type MedicationTask = Database['public']['Tables']['medication_tasks']['Row']
-export type AdHocMedicine = Database['public']['Tables']['ad_hoc_medicines']['Row']
-export type PushSubscription = Database['public']['Tables']['push_subscriptions']['Row']
-export type BackgroundSyncQueue = Database['public']['Tables']['background_sync_queue']['Row']
-export type UserRole = Database['public']['Enums']['user_role']
-export type ThemePref = Database['public']['Enums']['theme_pref']
-export type LangCode = Database['public']['Enums']['lang_code']
-export type CatGender = Database['public']['Enums']['cat_gender']
-export type CatStatus = Database['public']['Enums']['cat_status']
-export type RoomType = Database['public']['Enums']['room_type']
-export type FoodType = Database['public']['Enums']['food_type']
-export type FoodUnit = Database['public']['Enums']['food_unit']
-export type FeedingMethod = Database['public']['Enums']['feeding_method']
-export type EatenRatio = Database['public']['Enums']['eaten_ratio']
-export type VaccineType = Database['public']['Enums']['vaccine_type']
-export type PreventiveType = Database['public']['Enums']['preventive_treatment_type']
-export type MedRoute = Database['public']['Enums']['med_route']

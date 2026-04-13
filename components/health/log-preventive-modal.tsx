@@ -13,7 +13,7 @@ import {
   type PreventiveTreatmentInput,
   type PreventiveTypeInput
 } from '@/lib/schemas/preventive';
-import type { PreventiveType } from '@/lib/supabase/types';
+import type { PreventiveType } from '@/lib/supabase/aliases';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

@@ -9,7 +9,7 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Edit, Home, MoveRight, Pencil, Trash2, Upload, User } from 'lucide-react';
 
-import type { Cat, CatPhoto, UserRole } from '@/lib/supabase/types';
+import type { Cat, CatPhoto, UserRole } from '@/lib/supabase/aliases';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +25,7 @@ import { CatKcalBanner } from '@/components/cats/cat-kcal-banner';
 import { VaccinationsCard } from '@/components/health/vaccinations-card';
 import { PreventiveCard } from '@/components/health/preventive-card';
 import { MedicationsCard } from '@/components/medications/medications-card';
+import { HealthTicketsCard } from '@/components/health/health-tickets-card';
 import { uploadImage } from '@/lib/storage/upload';
 import { formatDate } from '@/lib/utils';
 
@@ -243,6 +244,8 @@ export function CatDetail({ cat, initialPhotos, currentRoom, assignee, role }: P
         <PreventiveCard catId={cat.id} />
 
         <MedicationsCard catId={cat.id} role={role} />
+
+        <HealthTicketsCard catId={cat.id} role={role} />
 
         {/* Room history + pedigree are admin-only surfaces. Sitters don't see
             lineage paperwork or movement audit trails. */}

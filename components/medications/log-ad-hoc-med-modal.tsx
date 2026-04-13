@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { adHocMedicineSchema, type AdHocMedicineInput, type MedRouteInput } from '@/lib/schemas/medications';
-import type { MedRoute } from '@/lib/supabase/types';
+import type { MedRoute } from '@/lib/supabase/aliases';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

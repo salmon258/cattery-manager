@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Plus, Scale } from 'lucide-react';
 
-import type { WeightLog } from '@/lib/supabase/types';
+import type { WeightLog } from '@/lib/supabase/aliases';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LogWeightModal } from '@/components/weight/log-weight-modal';

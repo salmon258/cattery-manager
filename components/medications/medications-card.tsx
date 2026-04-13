@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Check, Pill, Plus, Timer } from 'lucide-react';
 
-import type { Medication, MedicationTask, UserRole } from '@/lib/supabase/types';
+import type { Medication, MedicationTask, UserRole } from '@/lib/supabase/aliases';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

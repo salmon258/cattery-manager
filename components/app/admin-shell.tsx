@@ -8,7 +8,7 @@ import { Drawer, DrawerContent, DrawerPortal, DrawerOverlay } from '@/components
 import { DrawerTitle } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { AdminSidebar } from '@/components/app/admin-sidebar';
-import type { Profile } from '@/lib/supabase/types';
+import type { Profile } from '@/lib/supabase/aliases';
 
 interface Props {
   profile: Profile;

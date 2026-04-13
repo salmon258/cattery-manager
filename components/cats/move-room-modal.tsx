@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
-import type { Room } from '@/lib/supabase/types';
+import type { Room } from '@/lib/supabase/aliases';
 
 type RoomWithCount = Room & { occupant_count: number };
 

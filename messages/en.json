@@ -6,6 +6,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "cats": "Cats",
+    "healthTickets": "Health tickets",
     "rooms": "Rooms",
     "food": "Food catalogue",
     "users": "Users",
@@ -407,5 +408,60 @@
     "required": "This field is required.",
     "email": "Enter a valid email address.",
     "minPassword": "Password must be at least 8 characters."
+  },
+  "healthTickets": {
+    "title": "Health Tickets",
+    "openTicket": "Open ticket",
+    "noOpenTickets": "No open health tickets.",
+    "noTickets": "No health tickets yet.",
+    "openCount": "{n} open",
+    "showResolved": "Show resolved ({n})",
+    "hideResolved": "Hide resolved",
+    "addComment": "Add comment",
+    "commentPlaceholder": "Describe what you observed or any update...",
+    "resolveTicket": "Resolve ticket",
+    "resolutionSummary": "Resolution summary",
+    "resolutionPlaceholder": "What was the outcome / treatment that worked?",
+    "reopen": "Reopen",
+    "changeStatus": "Change status",
+    "applyStatus": "Apply",
+    "fields": {
+      "title": "Title",
+      "titlePlaceholder": "e.g. Sneezing + discharge since yesterday",
+      "description": "Observation details",
+      "descriptionPlaceholder": "Describe what you noticed in detail...",
+      "severity": "Severity"
+    },
+    "severities": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
+    },
+    "statuses": {
+      "open": "Open",
+      "in_progress": "In progress",
+      "resolved": "Resolved"
+    },
+    "eventTypes": {
+      "comment": "commented",
+      "status_change": "changed status to",
+      "resolved": "resolved the ticket",
+      "reopened": "reopened the ticket"
+    },
+    "created": "Ticket opened.",
+    "eventAdded": "Update added.",
+    "resolvedMsg": "Ticket resolved.",
+    "reopenedMsg": "Ticket reopened.",
+    "submitOpen": "Open ticket",
+    "submitComment": "Post update",
+    "openedBy": "Opened by {name}",
+    "resolvedBy": "Resolved by {name}",
+    "allTickets": "All health tickets",
+    "filterBySeverity": "Filter by severity",
+    "allSeverities": "All severities",
+    "cat": "Cat",
+    "openedAt": "Opened",
+    "lastUpdated": "Updated"
   }
 }

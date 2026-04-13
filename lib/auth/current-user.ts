@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import type { Profile } from '@/lib/supabase/types';
+import type { Profile } from '@/lib/supabase/aliases';
 
 export async function getCurrentUser(): Promise<{ authId: string; profile: Profile } | null> {
   const supabase = createClient();

@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import type { Cat, UserRole } from '@/lib/supabase/types';
+import type { Cat, UserRole } from '@/lib/supabase/aliases';
 import { Home, User } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 

@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Edit, Plus, Trash2, Utensils } from 'lucide-react';
 
-import type { FoodItem, FoodType, FoodUnit } from '@/lib/supabase/types';
+import type { FoodItem, FoodType, FoodUnit } from '@/lib/supabase/aliases';
 import { foodItemSchema, type FoodItemInput } from '@/lib/schemas/food';
 
 import { Button } from '@/components/ui/button';

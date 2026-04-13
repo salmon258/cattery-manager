@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { ArrowRight } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { Room, RoomMovement } from '@/lib/supabase/types';
+import type { Room, RoomMovement } from '@/lib/supabase/aliases';
 import { formatDate } from '@/lib/utils';
 
 type RoomWithCount = Room & { occupant_count: number };

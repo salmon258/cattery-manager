@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
-import type { Room, RoomType, UserRole } from '@/lib/supabase/types';
+import type { Room, RoomType, UserRole } from '@/lib/supabase/aliases';
 import { RoomForm } from '@/components/rooms/room-form';
 
 type RoomWithCount = Room & { occupant_count: number };

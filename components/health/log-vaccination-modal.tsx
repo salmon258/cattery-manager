@@ -13,7 +13,7 @@ import {
   type VaccinationInput,
   type VaccineTypeInput
 } from '@/lib/schemas/vaccinations';
-import type { VaccineType } from '@/lib/supabase/types';
+import type { VaccineType } from '@/lib/supabase/aliases';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

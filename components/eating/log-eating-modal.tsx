@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2 } from 'lucide-react';
 
-import type { EatenRatio, FeedingMethod, FoodItem } from '@/lib/supabase/types';
+import type { EatenRatio, FeedingMethod, FoodItem } from '@/lib/supabase/aliases';
 import { eatingLogSchema, type EatingLogInput, EATEN_RATIO_FACTOR } from '@/lib/schemas/eating';
 
 import { Button } from '@/components/ui/button';

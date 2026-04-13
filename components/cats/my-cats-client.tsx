@@ -21,15 +21,17 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import type { Cat } from '@/lib/supabase/types';
+import type { Cat } from '@/lib/supabase/aliases';
 import { LogWeightModal } from '@/components/weight/log-weight-modal';
 import { LogEatingModal } from '@/components/eating/log-eating-modal';
 import { LogAdHocMedModal } from '@/components/medications/log-ad-hoc-med-modal';
+import { OpenTicketModal } from '@/components/health/open-ticket-modal';
 
 type MyCat = Cat & {
   current_room?: { id: string; name: string } | null;
   assignee?: { id: string; full_name: string } | null;
   last_weight_recorded_at?: string | null;
+  open_ticket_count?: number;
 };
 
 function isToday(dateStr: string): boolean {
@@ -71,6 +73,7 @@ export function MyCatsClient({ firstName }: { firstName: string }) {
   const [weightTarget, setWeightTarget] = useState<{ id: string; name: string } | null>(null);
   const [mealTarget, setMealTarget] = useState<{ id: string; name: string } | null>(null);
   const [medTarget, setMedTarget] = useState<{ id: string; name: string } | null>(null);
+  const [reportTarget, setReportTarget] = useState<{ id: string; name: string } | null>(null);
 
   const { data: cats = [], isLoading, error, refetch } = useQuery({
     queryKey: ['me-cats'],
@@ -103,9 +106,6 @@ export function MyCatsClient({ firstName }: { firstName: string }) {
     onError: (e: Error) => toast.error(e.message)
   });
 
-  const reportIssueComingSoon = () => {
-    toast.message(tq('comingSoon'), { description: tq('reportIssue') });
-  };
 
   return (
     <div className="space-y-4">
@@ -143,6 +143,7 @@ export function MyCatsClient({ firstName }: { firstName: string }) {
           const catTasks = tasksByCat.get(c.id) ?? [];
           const needsWeightToday = !c.last_weight_recorded_at || !isToday(c.last_weight_recorded_at);
           const totalTodoCount = catTasks.length + (needsWeightToday ? 1 : 0);
+          const openTickets = c.open_ticket_count ?? 0;
           return (
             <Card key={c.id}>
               <CardContent className="p-4 space-y-3">
@@ -157,6 +158,11 @@ export function MyCatsClient({ firstName }: { firstName: string }) {
                       {totalTodoCount > 0 && (
                         <Badge variant="destructive" className="gap-1">
                           <Timer className="h-3 w-3" /> {totalTodoCount}
+                        </Badge>
+                      )}
+                      {openTickets > 0 && (
+                        <Badge className="gap-1 bg-orange-100 text-orange-700 border-0 dark:bg-orange-900/30 dark:text-orange-300">
+                          <AlertTriangle className="h-3 w-3" /> {openTickets}
                         </Badge>
                       )}
                     </div>
@@ -240,7 +246,7 @@ export function MyCatsClient({ firstName }: { firstName: string }) {
                   <QuickAction
                     icon={AlertTriangle}
                     label={tq('reportIssue')}
-                    onClick={reportIssueComingSoon}
+                    onClick={() => setReportTarget({ id: c.id, name: c.name })}
                   />
                 </div>
               </CardContent>
@@ -266,6 +272,12 @@ export function MyCatsClient({ firstName }: { firstName: string }) {
         onClose={() => setMedTarget(null)}
         catId={medTarget?.id ?? ''}
         catName={medTarget?.name}
+      />
+      <OpenTicketModal
+        open={!!reportTarget}
+        onClose={() => setReportTarget(null)}
+        catId={reportTarget?.id ?? ''}
+        catName={reportTarget?.name}
       />
     </div>
   );

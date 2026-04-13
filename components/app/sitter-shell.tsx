@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Cat, ListChecks, User } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
-import type { Profile } from '@/lib/supabase/types';
+import type { Profile } from '@/lib/supabase/aliases';
 import { UserMenu } from '@/components/app/user-menu';
 import { PushOptIn } from '@/components/pwa/push-opt-in';
 
