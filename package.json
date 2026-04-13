@@ -46,7 +46,11 @@
   "overrides": {
     "@types/minimatch": "3"
   },
+  "resolutions": {
+    "@types/minimatch": "3"
+  },
   "devDependencies": {
+    "@types/minimatch": "3",
     "@types/node": "^22.8.1",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
