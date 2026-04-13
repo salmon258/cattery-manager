@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import type { Database } from '@/lib/supabase/types';
+import { persistAuthCookieOptions } from '@/lib/supabase/cookie-options';
 
 export function createClient() {
   const cookieStore = cookies();
@@ -15,7 +16,7 @@ export function createClient() {
         setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
+              cookieStore.set(name, value, persistAuthCookieOptions(name, options))
             );
           } catch {
             // Called from a Server Component — safe to ignore if middleware refreshes.

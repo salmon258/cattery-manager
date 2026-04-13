@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { persistAuthCookieOptions } from '@/lib/supabase/cookie-options';
 
 const PUBLIC_PATHS = ['/login', '/auth/callback', '/auth/signout'];
 
@@ -16,7 +17,7 @@ export async function middleware(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           response = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
+            response.cookies.set(name, value, persistAuthCookieOptions(name, options))
           );
         }
       }
