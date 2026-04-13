@@ -1,0 +1,409 @@
+{
+  "app": {
+    "name": "Onatuchi Cattery Manager",
+    "tagline": "Cattery Management System"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "cats": "Cats",
+    "rooms": "Rooms",
+    "food": "Food catalogue",
+    "users": "Users",
+    "settings": "Settings",
+    "profile": "Profile",
+    "logout": "Log out",
+    "theme": "Theme",
+    "language": "Language"
+  },
+  "adminNav": {
+    "panelLabel": "Admin Panel",
+    "adminBadge": "Administrator",
+    "sectionOverview": "Overview",
+    "sectionManage": "Manage",
+    "sectionAccess": "Access"
+  },
+  "sitterNav": {
+    "myCats": "My Cats",
+    "allCats": "All Cats",
+    "profile": "Profile"
+  },
+  "adminDashboard": {
+    "welcome": "Welcome back, {name}.",
+    "subtitle": "Here's what's happening across your cattery today.",
+    "activeProfiles": "Active profiles",
+    "activeRooms": "Active rooms",
+    "activeUsers": "Active users",
+    "quickActions": "Quick actions"
+  },
+  "sitterHome": {
+    "title": "Hi {name},",
+    "subtitle": "Your daily tasks at a glance.",
+    "assignedTitle": "Assigned cats",
+    "comingSoon": "Your assigned cats and pending tasks will appear here soon.",
+    "emptyHint": "No cats are assigned to you yet. Admin can set your primary cats from any cat profile."
+  },
+  "sitterActions": {
+    "logWeight": "Log weight",
+    "logMeal": "Log meal",
+    "logMed": "Log med",
+    "reportIssue": "Report issue",
+    "comingSoon": "Coming soon"
+  },
+  "weight": {
+    "title": "Weight",
+    "titleFor": "Log weight — {name}",
+    "log": "Log",
+    "logged": "Weight logged.",
+    "fields": {
+      "weightKg": "Weight (kg)",
+      "notes": "Notes"
+    },
+    "emptyHint": "No weight recorded yet. Log the first reading to enable kcal recommendations.",
+    "lastRecorded": "Last recorded"
+  },
+  "food": {
+    "title": "Food catalogue",
+    "new": "New item",
+    "empty": "No food items yet. Add the first one to enable eating logs.",
+    "created": "Food item created.",
+    "updated": "Food item updated.",
+    "deactivated": "Food item deactivated.",
+    "inactive": "Inactive",
+    "showInactive": "Show inactive",
+    "hideInactive": "Hide inactive",
+    "deactivateConfirm": "Deactivate this food item? Existing meal logs keep their snapshotted calorie values.",
+    "fields": {
+      "name": "Name",
+      "brand": "Brand",
+      "type": "Type",
+      "unit": "Unit",
+      "caloriesPerGram": "Calories per gram (kcal/g)",
+      "notes": "Notes",
+      "active": "Active"
+    },
+    "types": {
+      "wet": "Wet food",
+      "dry": "Dry food",
+      "raw": "Raw",
+      "treat": "Treat",
+      "supplement": "Supplement",
+      "other": "Other"
+    },
+    "units": {
+      "g": "g",
+      "ml": "ml",
+      "sachet": "sachet",
+      "piece": "piece"
+    }
+  },
+  "eating": {
+    "title": "Eating",
+    "titleFor": "Log meal — {name}",
+    "log": "Log meal",
+    "logged": "Meal logged.",
+    "dailyTarget": "Today's intake",
+    "needWeight": "Log a weight reading to compute the recommended daily kcal.",
+    "recent": "Recent meals",
+    "noMeals": "No meals logged yet.",
+    "addFood": "Add food",
+    "selectFood": "Select food item",
+    "totalKcal": "Estimated total kcal",
+    "fields": {
+      "feedingMethod": "Feeding method",
+      "items": "Food items",
+      "quantityGivenG": "Quantity given (g)",
+      "quantityEaten": "Amount eaten",
+      "notes": "Notes"
+    },
+    "methods": {
+      "self": "Ate by itself",
+      "assisted": "With assistance",
+      "force_fed": "Force fed"
+    },
+    "ratios": {
+      "all": "All",
+      "most": "Most",
+      "half": "Half",
+      "little": "Little",
+      "none": "None"
+    },
+    "status": {
+      "green": "On track",
+      "amber": "Under target",
+      "red": "Well under / force fed",
+      "none": "—"
+    }
+  },
+  "vaccines": {
+    "title": "Vaccinations",
+    "log": "Log",
+    "logged": "Vaccination recorded.",
+    "empty": "No vaccinations recorded yet.",
+    "nextDue": "Next due",
+    "fields": {
+      "type": "Vaccine type",
+      "vaccineName": "Vaccine name",
+      "administeredDate": "Administered date",
+      "batchNumber": "Batch number",
+      "administeredByVet": "Administered by",
+      "nextDueDate": "Next due date",
+      "notes": "Notes"
+    },
+    "types": {
+      "f3": "F3",
+      "f4": "F4",
+      "tricat": "Tricat",
+      "felv": "FeLV",
+      "rabies": "Rabies",
+      "other": "Other"
+    },
+    "chip": {
+      "overdue": "Overdue",
+      "dueSoon": "Due soon",
+      "ok": "Up to date",
+      "none": "No record",
+      "inDays": "in {n}d",
+      "agoDays": "{n}d ago"
+    }
+  },
+  "preventive": {
+    "title": "Deworming / flea",
+    "log": "Log",
+    "logged": "Treatment recorded.",
+    "empty": "No treatments recorded yet.",
+    "nextDue": "Next due",
+    "fields": {
+      "type": "Treatment type",
+      "productName": "Product name",
+      "administeredDate": "Administered date",
+      "nextDueDate": "Next due date",
+      "notes": "Notes"
+    },
+    "types": {
+      "deworming": "Deworming",
+      "flea": "Flea",
+      "combined": "Combined"
+    },
+    "chip": {
+      "overdue": "Overdue",
+      "dueSoon": "Due soon",
+      "ok": "Up to date",
+      "none": "No record",
+      "inDays": "in {n}d",
+      "agoDays": "{n}d ago"
+    }
+  },
+  "medications": {
+    "title": "Medications",
+    "newSchedule": "New schedule",
+    "created": "Medication scheduled.",
+    "noSchedules": "No active medications.",
+    "activeSchedules": "Active schedules",
+    "todayTasks": "Due today",
+    "noTasksToday": "No doses due today.",
+    "confirm": "Confirm",
+    "taskConfirmed": "Dose confirmed.",
+    "overdue": "Overdue",
+    "addSlot": "Add time",
+    "slotsHint": "Each time slot creates one dose per dose-day. Use `interval_days > 1` for every-other-day schedules.",
+    "intervalLabel": "every {n} day(s)",
+    "fields": {
+      "name": "Medicine name",
+      "dose": "Dose",
+      "route": "Route",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "intervalDays": "Interval (days)",
+      "timeSlots": "Times of day",
+      "notes": "Notes"
+    },
+    "routes": {
+      "oral": "Oral",
+      "topical": "Topical",
+      "injection": "Injection",
+      "other": "Other"
+    },
+    "adHoc": {
+      "title": "Log one-off medicine",
+      "titleFor": "Log medicine — {name}",
+      "log": "Log ad hoc",
+      "logged": "Medicine logged.",
+      "fields": {
+        "medicineName": "Medicine name",
+        "dose": "Dose",
+        "unit": "Unit",
+        "notes": "Notes"
+      }
+    }
+  },
+  "assignees": {
+    "primaryAssignee": "Primary assignee",
+    "unassigned": "Unassigned",
+    "selectAssignee": "Select assignee",
+    "changeTitle": "Change primary assignee",
+    "changeHint": "Only active Cat Sitters can be primary assignees. This setting is informational — any sitter can log reports for any cat.",
+    "updated": "Assignee updated.",
+    "reassignTitle": "Reassign before deactivating",
+    "reassignWarning": "{name} is currently assigned to {count} cat(s).",
+    "reassignExplanation": "Pick a new primary assignee (or leave as unassigned). The target sitter will be deactivated after the reassignment.",
+    "reassignTo": "Reassign to",
+    "reassignHint": "Leave blank to move these cats to Unassigned."
+  },
+  "profile": {
+    "title": "My profile",
+    "lastLogin": "Last login",
+    "language": "Language",
+    "theme": "Theme",
+    "editHint": "Use the avatar menu in the top bar to change your language, theme, or sign out."
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Enter your email and password to access the cattery system.",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "invalidCredentials": "Invalid email or password.",
+      "accountDisabled": "This account has been deactivated. Contact your administrator."
+    }
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "language": {
+    "en": "English",
+    "id": "Bahasa Indonesia"
+  },
+  "common": {
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "close": "Close",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "back": "Back",
+    "loading": "Loading…",
+    "empty": "Nothing here yet.",
+    "error": "Something went wrong.",
+    "retry": "Retry",
+    "required": "Required",
+    "optional": "optional"
+  },
+  "users": {
+    "title": "Users",
+    "new": "New user",
+    "fields": {
+      "fullName": "Full name",
+      "email": "Email",
+      "role": "Role",
+      "tempPassword": "Temporary password",
+      "isActive": "Active",
+      "lastLogin": "Last login"
+    },
+    "roles": {
+      "admin": "Admin",
+      "cat_sitter": "Cat Sitter"
+    },
+    "actions": {
+      "deactivate": "Deactivate",
+      "reactivate": "Reactivate",
+      "resetPassword": "Reset password"
+    },
+    "created": "User created.",
+    "updated": "User updated.",
+    "deactivated": "User deactivated.",
+    "reactivated": "User reactivated."
+  },
+  "cats": {
+    "title": "Cats",
+    "new": "New cat",
+    "list": {
+      "empty": "No cats yet. Add your first one."
+    },
+    "fields": {
+      "name": "Name",
+      "dateOfBirth": "Date of birth",
+      "gender": "Gender",
+      "breed": "Breed",
+      "microchip": "Microchip number",
+      "registration": "Registration number",
+      "colorPattern": "Color / pattern",
+      "status": "Status",
+      "assignee": "Primary assignee",
+      "notes": "Notes",
+      "photos": "Photos",
+      "pedigree": "Pedigree certificate"
+    },
+    "gender": {
+      "male": "Male",
+      "female": "Female"
+    },
+    "status": {
+      "active": "Active",
+      "retired": "Retired",
+      "deceased": "Deceased",
+      "sold": "Sold"
+    },
+    "created": "Cat profile created.",
+    "updated": "Cat profile updated."
+  },
+  "rooms": {
+    "title": "Rooms",
+    "new": "New room",
+    "list": {
+      "empty": "No rooms yet. Add your first one."
+    },
+    "fields": {
+      "name": "Name",
+      "type": "Type",
+      "capacity": "Capacity",
+      "description": "Description",
+      "active": "Active"
+    },
+    "types": {
+      "breeding": "Breeding",
+      "kitten": "Kitten",
+      "quarantine": "Quarantine",
+      "general": "General",
+      "isolation": "Isolation",
+      "other": "Other"
+    },
+    "created": "Room created.",
+    "updated": "Room updated.",
+    "deactivated": "Room deactivated.",
+    "moved": "Cat moved.",
+    "moveTitle": "Move room",
+    "moveAction": "Move",
+    "destination": "Destination room",
+    "reason": "Reason",
+    "unassigned": "Unassigned",
+    "currentRoom": "Current room",
+    "currentOccupants": "Current occupants",
+    "noOccupants": "No cats currently in this room.",
+    "movementHistory": "Movement history",
+    "roomHistory": "Room history",
+    "movedIn": "Moved in",
+    "movedOut": "Moved out",
+    "occupants": "occupants",
+    "overCapacity": "Over capacity",
+    "inactive": "Inactive",
+    "showInactive": "Show inactive",
+    "hideInactive": "Hide inactive",
+    "deactivate": "Deactivate",
+    "deactivateConfirm": "Deactivate this room? This hides it from lists but preserves history.",
+    "hasOccupants": "Move all cats out before deactivating."
+  },
+  "validation": {
+    "required": "This field is required.",
+    "email": "Enter a valid email address.",
+    "minPassword": "Password must be at least 8 characters."
+  }
+}

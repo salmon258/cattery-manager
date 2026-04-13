@@ -1,0 +1,409 @@
+{
+  "app": {
+    "name": "Onatuchi Cattery Manager",
+    "tagline": "Sistem pengelolaan cattery"
+  },
+  "nav": {
+    "dashboard": "Dasbor",
+    "cats": "Kucing",
+    "rooms": "Ruangan",
+    "food": "Katalog makanan",
+    "users": "Pengguna",
+    "settings": "Pengaturan",
+    "profile": "Profil",
+    "logout": "Keluar",
+    "theme": "Tema",
+    "language": "Bahasa"
+  },
+  "adminNav": {
+    "panelLabel": "Panel Admin",
+    "adminBadge": "Administrator",
+    "sectionOverview": "Ringkasan",
+    "sectionManage": "Kelola",
+    "sectionAccess": "Akses"
+  },
+  "sitterNav": {
+    "myCats": "Kucing Saya",
+    "allCats": "Semua Kucing",
+    "profile": "Profil"
+  },
+  "adminDashboard": {
+    "welcome": "Selamat datang kembali, {name}.",
+    "subtitle": "Ringkasan kondisi cattery Anda hari ini.",
+    "activeProfiles": "Profil aktif",
+    "activeRooms": "Ruangan aktif",
+    "activeUsers": "Pengguna aktif",
+    "quickActions": "Aksi cepat"
+  },
+  "sitterHome": {
+    "title": "Halo {name},",
+    "subtitle": "Tugas harian Anda dalam satu pandangan.",
+    "assignedTitle": "Kucing yang ditugaskan",
+    "comingSoon": "Kucing yang ditugaskan kepada Anda dan tugas tertunda akan muncul di sini.",
+    "emptyHint": "Belum ada kucing yang ditugaskan kepada Anda. Admin dapat mengatur penugasan dari profil kucing."
+  },
+  "sitterActions": {
+    "logWeight": "Catat berat",
+    "logMeal": "Catat makan",
+    "logMed": "Catat obat",
+    "reportIssue": "Lapor masalah",
+    "comingSoon": "Segera hadir"
+  },
+  "weight": {
+    "title": "Berat badan",
+    "titleFor": "Catat berat — {name}",
+    "log": "Catat",
+    "logged": "Berat badan tercatat.",
+    "fields": {
+      "weightKg": "Berat (kg)",
+      "notes": "Catatan"
+    },
+    "emptyHint": "Belum ada catatan berat. Catat berat pertama untuk mengaktifkan rekomendasi kalori.",
+    "lastRecorded": "Terakhir dicatat"
+  },
+  "food": {
+    "title": "Katalog makanan",
+    "new": "Item baru",
+    "empty": "Belum ada item makanan. Tambahkan yang pertama untuk mengaktifkan pencatatan makan.",
+    "created": "Item makanan dibuat.",
+    "updated": "Item makanan diperbarui.",
+    "deactivated": "Item makanan dinonaktifkan.",
+    "inactive": "Nonaktif",
+    "showInactive": "Tampilkan nonaktif",
+    "hideInactive": "Sembunyikan nonaktif",
+    "deactivateConfirm": "Nonaktifkan item ini? Catatan makan yang sudah ada tetap menggunakan nilai kalori yang disimpan saat submit.",
+    "fields": {
+      "name": "Nama",
+      "brand": "Merek",
+      "type": "Tipe",
+      "unit": "Satuan",
+      "caloriesPerGram": "Kalori per gram (kkal/g)",
+      "notes": "Catatan",
+      "active": "Aktif"
+    },
+    "types": {
+      "wet": "Makanan basah",
+      "dry": "Makanan kering",
+      "raw": "Mentah",
+      "treat": "Camilan",
+      "supplement": "Suplemen",
+      "other": "Lainnya"
+    },
+    "units": {
+      "g": "g",
+      "ml": "ml",
+      "sachet": "sachet",
+      "piece": "butir"
+    }
+  },
+  "eating": {
+    "title": "Pemberian makan",
+    "titleFor": "Catat makan — {name}",
+    "log": "Catat makan",
+    "logged": "Makanan tercatat.",
+    "dailyTarget": "Asupan hari ini",
+    "needWeight": "Catat berat badan dulu untuk menghitung rekomendasi kalori harian.",
+    "recent": "Makanan terbaru",
+    "noMeals": "Belum ada makanan dicatat.",
+    "addFood": "Tambah makanan",
+    "selectFood": "Pilih item makanan",
+    "totalKcal": "Total estimasi kkal",
+    "fields": {
+      "feedingMethod": "Metode pemberian",
+      "items": "Item makanan",
+      "quantityGivenG": "Jumlah diberikan (g)",
+      "quantityEaten": "Jumlah dimakan",
+      "notes": "Catatan"
+    },
+    "methods": {
+      "self": "Makan sendiri",
+      "assisted": "Dibantu",
+      "force_fed": "Disuapkan paksa"
+    },
+    "ratios": {
+      "all": "Habis",
+      "most": "Sebagian besar",
+      "half": "Setengah",
+      "little": "Sedikit",
+      "none": "Tidak dimakan"
+    },
+    "status": {
+      "green": "Sesuai target",
+      "amber": "Di bawah target",
+      "red": "Jauh di bawah / disuapkan paksa",
+      "none": "—"
+    }
+  },
+  "vaccines": {
+    "title": "Vaksinasi",
+    "log": "Catat",
+    "logged": "Vaksinasi tercatat.",
+    "empty": "Belum ada vaksinasi tercatat.",
+    "nextDue": "Jatuh tempo",
+    "fields": {
+      "type": "Jenis vaksin",
+      "vaccineName": "Nama vaksin",
+      "administeredDate": "Tanggal pemberian",
+      "batchNumber": "Nomor batch",
+      "administeredByVet": "Diberikan oleh",
+      "nextDueDate": "Jatuh tempo berikutnya",
+      "notes": "Catatan"
+    },
+    "types": {
+      "f3": "F3",
+      "f4": "F4",
+      "tricat": "Tricat",
+      "felv": "FeLV",
+      "rabies": "Rabies",
+      "other": "Lainnya"
+    },
+    "chip": {
+      "overdue": "Lewat jatuh tempo",
+      "dueSoon": "Segera jatuh tempo",
+      "ok": "Aman",
+      "none": "Belum ada",
+      "inDays": "{n} hari lagi",
+      "agoDays": "{n} hari lalu"
+    }
+  },
+  "preventive": {
+    "title": "Obat cacing / kutu",
+    "log": "Catat",
+    "logged": "Tercatat.",
+    "empty": "Belum ada pemberian.",
+    "nextDue": "Jatuh tempo",
+    "fields": {
+      "type": "Jenis",
+      "productName": "Nama produk",
+      "administeredDate": "Tanggal pemberian",
+      "nextDueDate": "Jatuh tempo berikutnya",
+      "notes": "Catatan"
+    },
+    "types": {
+      "deworming": "Obat cacing",
+      "flea": "Obat kutu",
+      "combined": "Kombinasi"
+    },
+    "chip": {
+      "overdue": "Lewat jatuh tempo",
+      "dueSoon": "Segera jatuh tempo",
+      "ok": "Aman",
+      "none": "Belum ada",
+      "inDays": "{n} hari lagi",
+      "agoDays": "{n} hari lalu"
+    }
+  },
+  "medications": {
+    "title": "Obat",
+    "newSchedule": "Jadwal baru",
+    "created": "Jadwal obat dibuat.",
+    "noSchedules": "Tidak ada jadwal aktif.",
+    "activeSchedules": "Jadwal aktif",
+    "todayTasks": "Tenggat hari ini",
+    "noTasksToday": "Tidak ada dosis untuk hari ini.",
+    "confirm": "Konfirmasi",
+    "taskConfirmed": "Dosis dikonfirmasi.",
+    "overdue": "Lewat tenggat",
+    "addSlot": "Tambah waktu",
+    "slotsHint": "Setiap slot waktu menghasilkan satu dosis per hari pemberian. Gunakan interval > 1 untuk jadwal tiap beberapa hari.",
+    "intervalLabel": "tiap {n} hari",
+    "fields": {
+      "name": "Nama obat",
+      "dose": "Dosis",
+      "route": "Rute",
+      "startDate": "Tanggal mulai",
+      "endDate": "Tanggal selesai",
+      "intervalDays": "Interval (hari)",
+      "timeSlots": "Waktu pemberian",
+      "notes": "Catatan"
+    },
+    "routes": {
+      "oral": "Oral",
+      "topical": "Topikal",
+      "injection": "Suntik",
+      "other": "Lainnya"
+    },
+    "adHoc": {
+      "title": "Catat obat sekali pakai",
+      "titleFor": "Catat obat — {name}",
+      "log": "Catat",
+      "logged": "Obat tercatat.",
+      "fields": {
+        "medicineName": "Nama obat",
+        "dose": "Dosis",
+        "unit": "Satuan",
+        "notes": "Catatan"
+      }
+    }
+  },
+  "assignees": {
+    "primaryAssignee": "Penjaga utama",
+    "unassigned": "Belum ditugaskan",
+    "selectAssignee": "Pilih penjaga",
+    "changeTitle": "Ubah penjaga utama",
+    "changeHint": "Hanya Penjaga Kucing aktif yang dapat menjadi penjaga utama. Pengaturan ini bersifat informatif — setiap penjaga tetap dapat mencatat laporan untuk kucing mana pun.",
+    "updated": "Penjaga diperbarui.",
+    "reassignTitle": "Alihkan sebelum menonaktifkan",
+    "reassignWarning": "{name} saat ini ditugaskan untuk {count} kucing.",
+    "reassignExplanation": "Pilih penjaga utama baru (atau biarkan tidak ditugaskan). Penjaga yang dipilih akan dinonaktifkan setelah pengalihan selesai.",
+    "reassignTo": "Alihkan ke",
+    "reassignHint": "Kosongkan untuk memindahkan kucing-kucing ini ke Belum ditugaskan."
+  },
+  "profile": {
+    "title": "Profil saya",
+    "lastLogin": "Login terakhir",
+    "language": "Bahasa",
+    "theme": "Tema",
+    "editHint": "Gunakan menu avatar di bilah atas untuk mengubah bahasa, tema, atau keluar."
+  },
+  "auth": {
+    "login": {
+      "title": "Masuk",
+      "subtitle": "Masukkan email dan kata sandi untuk mengakses sistem cattery.",
+      "email": "Email",
+      "password": "Kata sandi",
+      "submit": "Masuk",
+      "submitting": "Memproses…",
+      "invalidCredentials": "Email atau kata sandi tidak valid.",
+      "accountDisabled": "Akun ini telah dinonaktifkan. Hubungi administrator Anda."
+    }
+  },
+  "theme": {
+    "light": "Terang",
+    "dark": "Gelap",
+    "system": "Sistem"
+  },
+  "language": {
+    "en": "English",
+    "id": "Bahasa Indonesia"
+  },
+  "common": {
+    "save": "Simpan",
+    "saving": "Menyimpan…",
+    "cancel": "Batal",
+    "delete": "Hapus",
+    "edit": "Ubah",
+    "create": "Buat",
+    "search": "Cari",
+    "close": "Tutup",
+    "confirm": "Konfirmasi",
+    "yes": "Ya",
+    "no": "Tidak",
+    "back": "Kembali",
+    "loading": "Memuat…",
+    "empty": "Belum ada data.",
+    "error": "Terjadi kesalahan.",
+    "retry": "Coba lagi",
+    "required": "Wajib diisi",
+    "optional": "opsional"
+  },
+  "users": {
+    "title": "Pengguna",
+    "new": "Pengguna baru",
+    "fields": {
+      "fullName": "Nama lengkap",
+      "email": "Email",
+      "role": "Peran",
+      "tempPassword": "Kata sandi sementara",
+      "isActive": "Aktif",
+      "lastLogin": "Login terakhir"
+    },
+    "roles": {
+      "admin": "Administrator",
+      "cat_sitter": "Penjaga Kucing"
+    },
+    "actions": {
+      "deactivate": "Nonaktifkan",
+      "reactivate": "Aktifkan kembali",
+      "resetPassword": "Reset kata sandi"
+    },
+    "created": "Pengguna dibuat.",
+    "updated": "Pengguna diperbarui.",
+    "deactivated": "Pengguna dinonaktifkan.",
+    "reactivated": "Pengguna diaktifkan kembali."
+  },
+  "cats": {
+    "title": "Kucing",
+    "new": "Kucing baru",
+    "list": {
+      "empty": "Belum ada kucing. Tambahkan yang pertama."
+    },
+    "fields": {
+      "name": "Nama",
+      "dateOfBirth": "Tanggal lahir",
+      "gender": "Jenis kelamin",
+      "breed": "Ras",
+      "microchip": "Nomor microchip",
+      "registration": "Nomor pendaftaran",
+      "colorPattern": "Warna / corak",
+      "status": "Status",
+      "assignee": "Penjaga utama",
+      "notes": "Catatan",
+      "photos": "Foto",
+      "pedigree": "Sertifikat pedigri"
+    },
+    "gender": {
+      "male": "Jantan",
+      "female": "Betina"
+    },
+    "status": {
+      "active": "Aktif",
+      "retired": "Pensiun",
+      "deceased": "Meninggal",
+      "sold": "Terjual"
+    },
+    "created": "Profil kucing dibuat.",
+    "updated": "Profil kucing diperbarui."
+  },
+  "rooms": {
+    "title": "Ruangan",
+    "new": "Ruangan baru",
+    "list": {
+      "empty": "Belum ada ruangan. Tambahkan yang pertama."
+    },
+    "fields": {
+      "name": "Nama",
+      "type": "Tipe",
+      "capacity": "Kapasitas",
+      "description": "Deskripsi",
+      "active": "Aktif"
+    },
+    "types": {
+      "breeding": "Pembiakan",
+      "kitten": "Anak kucing",
+      "quarantine": "Karantina",
+      "general": "Umum",
+      "isolation": "Isolasi",
+      "other": "Lainnya"
+    },
+    "created": "Ruangan dibuat.",
+    "updated": "Ruangan diperbarui.",
+    "deactivated": "Ruangan dinonaktifkan.",
+    "moved": "Kucing dipindahkan.",
+    "moveTitle": "Pindah ruangan",
+    "moveAction": "Pindahkan",
+    "destination": "Ruangan tujuan",
+    "reason": "Alasan",
+    "unassigned": "Tidak ditempatkan",
+    "currentRoom": "Ruangan saat ini",
+    "currentOccupants": "Penghuni saat ini",
+    "noOccupants": "Tidak ada kucing di ruangan ini.",
+    "movementHistory": "Riwayat perpindahan",
+    "roomHistory": "Riwayat ruangan",
+    "movedIn": "Masuk",
+    "movedOut": "Keluar",
+    "occupants": "penghuni",
+    "overCapacity": "Melebihi kapasitas",
+    "inactive": "Nonaktif",
+    "showInactive": "Tampilkan nonaktif",
+    "hideInactive": "Sembunyikan nonaktif",
+    "deactivate": "Nonaktifkan",
+    "deactivateConfirm": "Nonaktifkan ruangan ini? Ruangan akan disembunyikan namun riwayat tetap tersimpan.",
+    "hasOccupants": "Pindahkan semua kucing keluar sebelum dinonaktifkan."
+  },
+  "validation": {
+    "required": "Kolom ini wajib diisi.",
+    "email": "Masukkan alamat email yang valid.",
+    "minPassword": "Kata sandi minimal 8 karakter."
+  }
+}
