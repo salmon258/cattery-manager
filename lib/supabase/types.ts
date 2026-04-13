@@ -105,6 +105,59 @@ export type Database = {
         }
         Relationships: []
       }
+      cat_lineage: {
+        Row: {
+          father_id: string | null
+          id: string
+          kitten_id: string
+          litter_id: string | null
+          mother_id: string | null
+        }
+        Insert: {
+          father_id?: string | null
+          id?: string
+          kitten_id: string
+          litter_id?: string | null
+          mother_id?: string | null
+        }
+        Update: {
+          father_id?: string | null
+          id?: string
+          kitten_id?: string
+          litter_id?: string | null
+          mother_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cat_lineage_father_fkey"
+            columns: ["father_id"]
+            isOneToOne: false
+            referencedRelation: "cats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cat_lineage_kitten_fkey"
+            columns: ["kitten_id"]
+            isOneToOne: true
+            referencedRelation: "cats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cat_lineage_litter_fkey"
+            columns: ["litter_id"]
+            isOneToOne: false
+            referencedRelation: "litters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cat_lineage_mother_fkey"
+            columns: ["mother_id"]
+            isOneToOne: false
+            referencedRelation: "cats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cat_photos: {
         Row: {
           cat_id: string
@@ -471,6 +524,65 @@ export type Database = {
           },
         ]
       }
+      health_ticket_photos: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          event_id: string | null
+          id: string
+          storage_path: string
+          ticket_id: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          event_id?: string | null
+          id?: string
+          storage_path: string
+          ticket_id: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          event_id?: string | null
+          id?: string
+          storage_path?: string
+          ticket_id?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "health_ticket_photos_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "health_ticket_photos_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "health_ticket_photos_event_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "health_ticket_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "health_ticket_photos_ticket_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "health_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       health_tickets: {
         Row: {
           cat_id: string
@@ -548,6 +660,187 @@ export type Database = {
             columns: ["resolved_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      heat_logs: {
+        Row: {
+          cat_id: string
+          created_at: string
+          id: string
+          intensity: Database["public"]["Enums"]["heat_intensity"]
+          logged_by: string | null
+          notes: string | null
+          observed_date: string
+        }
+        Insert: {
+          cat_id: string
+          created_at?: string
+          id?: string
+          intensity: Database["public"]["Enums"]["heat_intensity"]
+          logged_by?: string | null
+          notes?: string | null
+          observed_date: string
+        }
+        Update: {
+          cat_id?: string
+          created_at?: string
+          id?: string
+          intensity?: Database["public"]["Enums"]["heat_intensity"]
+          logged_by?: string | null
+          notes?: string | null
+          observed_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "heat_logs_cat_fkey"
+            columns: ["cat_id"]
+            isOneToOne: false
+            referencedRelation: "cats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "heat_logs_logged_by_fkey"
+            columns: ["logged_by"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "heat_logs_logged_by_fkey"
+            columns: ["logged_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      litters: {
+        Row: {
+          birth_date: string
+          created_at: string
+          created_by: string | null
+          id: string
+          litter_size_born: number
+          litter_size_survived: number | null
+          mating_record_id: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          birth_date: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          litter_size_born: number
+          litter_size_survived?: number | null
+          mating_record_id: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          birth_date?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          litter_size_born?: number
+          litter_size_survived?: number | null
+          mating_record_id?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "litters_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "litters_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "litters_mating_record_fkey"
+            columns: ["mating_record_id"]
+            isOneToOne: false
+            referencedRelation: "mating_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mating_records: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          expected_labor_date: string | null
+          female_cat_id: string
+          id: string
+          male_cat_id: string
+          mating_date: string
+          mating_method: Database["public"]["Enums"]["mating_method"]
+          notes: string | null
+          status: Database["public"]["Enums"]["mating_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          expected_labor_date?: string | null
+          female_cat_id: string
+          id?: string
+          male_cat_id: string
+          mating_date: string
+          mating_method?: Database["public"]["Enums"]["mating_method"]
+          notes?: string | null
+          status?: Database["public"]["Enums"]["mating_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          expected_labor_date?: string | null
+          female_cat_id?: string
+          id?: string
+          male_cat_id?: string
+          mating_date?: string
+          mating_method?: Database["public"]["Enums"]["mating_method"]
+          notes?: string | null
+          status?: Database["public"]["Enums"]["mating_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mating_records_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "mating_records_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mating_records_female_cat_fkey"
+            columns: ["female_cat_id"]
+            isOneToOne: false
+            referencedRelation: "cats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mating_records_male_cat_fkey"
+            columns: ["male_cat_id"]
+            isOneToOne: false
+            referencedRelation: "cats"
             referencedColumns: ["id"]
           },
         ]
@@ -1128,7 +1421,15 @@ export type Database = {
       feeding_method: "self" | "assisted" | "force_fed"
       food_type: "wet" | "dry" | "raw" | "treat" | "supplement" | "other"
       food_unit: "g" | "ml" | "sachet" | "piece"
+      heat_intensity: "mild" | "moderate" | "strong"
       lang_code: "en" | "id"
+      mating_method: "natural" | "ai"
+      mating_status:
+        | "planned"
+        | "confirmed"
+        | "pregnant"
+        | "delivered"
+        | "failed"
       med_route: "oral" | "topical" | "injection" | "other"
       preventive_treatment_type: "deworming" | "flea" | "combined"
       room_type:
@@ -1277,7 +1578,16 @@ export const Constants = {
       feeding_method: ["self", "assisted", "force_fed"],
       food_type: ["wet", "dry", "raw", "treat", "supplement", "other"],
       food_unit: ["g", "ml", "sachet", "piece"],
+      heat_intensity: ["mild", "moderate", "strong"],
       lang_code: ["en", "id"],
+      mating_method: ["natural", "ai"],
+      mating_status: [
+        "planned",
+        "confirmed",
+        "pregnant",
+        "delivered",
+        "failed",
+      ],
       med_route: ["oral", "topical", "injection", "other"],
       preventive_treatment_type: ["deworming", "flea", "combined"],
       room_type: [

@@ -82,7 +82,10 @@ export function CatsClient({ role }: { role: UserRole }) {
                   <AvatarFallback>{c.name.slice(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="min-w-0 flex-1">
-                  <div className="font-medium truncate flex items-center gap-2">
+                  <div className="font-medium truncate flex items-center gap-1.5">
+                    <span className={c.gender === 'female' ? 'text-pink-500' : 'text-blue-500'} aria-label={c.gender}>
+                      {c.gender === 'female' ? '♀' : '♂'}
+                    </span>
                     {c.name}
                     <Badge variant={c.status === 'active' ? 'secondary' : 'outline'} className="capitalize">
                       {ts(c.status)}

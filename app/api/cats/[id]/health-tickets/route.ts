@@ -47,5 +47,23 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Attach photos (ticket-level, event_id = null)
+  const photoUrls = parsed.data.photo_urls ?? [];
+  if (photoUrls.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any)
+      .from('health_ticket_photos')
+      .insert(
+        photoUrls.map((url: string) => ({
+          ticket_id:    data.id,
+          event_id:     null,
+          url,
+          storage_path: new URL(url).pathname,
+          created_by:   user.profile.id
+        }))
+      );
+  }
+
   return NextResponse.json({ ticket: data }, { status: 201 });
 }

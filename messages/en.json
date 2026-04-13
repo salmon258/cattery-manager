@@ -7,6 +7,7 @@
     "dashboard": "Dashboard",
     "cats": "Cats",
     "healthTickets": "Health tickets",
+    "breeding": "Breeding",
     "rooms": "Rooms",
     "food": "Food catalogue",
     "users": "Users",
@@ -298,7 +299,10 @@
     "error": "Something went wrong.",
     "retry": "Retry",
     "required": "Required",
-    "optional": "optional"
+    "optional": "optional",
+    "notes": "Notes",
+    "showMore": "Show {count} more",
+    "showLess": "Show less"
   },
   "users": {
     "title": "Users",
@@ -430,7 +434,8 @@
       "titlePlaceholder": "e.g. Sneezing + discharge since yesterday",
       "description": "Observation details",
       "descriptionPlaceholder": "Describe what you noticed in detail...",
-      "severity": "Severity"
+      "severity": "Severity",
+      "photos": "Photos"
     },
     "severities": {
       "low": "Low",
@@ -463,5 +468,72 @@
     "cat": "Cat",
     "openedAt": "Opened",
     "lastUpdated": "Updated"
+  },
+  "breeding": {
+    "title": "Breeding",
+    "newMating": "New mating",
+    "logHeat": "Log heat",
+    "registerLitter": "Register litter",
+    "updateStatus": "Update status",
+    "matingCreated": "Mating record created.",
+    "statusUpdated": "Status updated.",
+    "litterRegistered": "Litter registered.",
+    "heatLogged": "Heat event logged.",
+    "heatDeleted": "Heat log deleted.",
+    "noMatings": "No mating records yet.",
+    "noHeatLogs": "No heat logs yet.",
+    "matings": "Mating records",
+    "heatHistory": "Heat cycle history",
+    "lineage": "Lineage",
+    "offspring": "Offspring",
+    "kittens": "Kittens",
+    "addKitten": "Add kitten",
+    "kittensOptional": "No kittens added. You can register them later.",
+    "male": "Male",
+    "female": "Female",
+    "mother": "Mother",
+    "father": "Father",
+    "siblings": "Siblings",
+    "failedCount": "{count} failed record(s)",
+    "litterBorn": "Born {date} · {born} born, {survived} survived",
+    "fields": {
+      "femaleCat": "Female cat (queen)",
+      "maleCat": "Male cat (stud)",
+      "matingDate": "Mating date",
+      "expectedLabor": "Expected labor",
+      "method": "Method",
+      "status": "Status",
+      "observedDate": "Observed date",
+      "intensity": "Intensity",
+      "birthDate": "Birth date",
+      "bornCount": "Born",
+      "survivedCount": "Survived",
+      "kittenName": "Kitten name"
+    },
+    "placeholders": {
+      "selectFemale": "Select female cat",
+      "selectMale": "Select male cat"
+    },
+    "methods": {
+      "natural": "Natural",
+      "ai": "Artificial insemination"
+    },
+    "statuses": {
+      "planned": "Planned",
+      "confirmed": "Confirmed",
+      "pregnant": "Pregnant",
+      "delivered": "Delivered",
+      "failed": "Failed"
+    },
+    "intensities": {
+      "mild": "Mild",
+      "moderate": "Moderate",
+      "strong": "Strong"
+    },
+    "errors": {
+      "selectBothCats": "Please select both female and male cat.",
+      "litterSizeRequired": "Please enter the number of kittens born.",
+      "kittenNameRequired": "Each added kitten must have a name."
+    }
   }
 }

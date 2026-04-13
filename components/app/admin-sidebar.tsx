@@ -11,6 +11,7 @@ import {
   Home,
   Users,
   Utensils,
+  Dna,
   type LucideIcon
 } from 'lucide-react';
 
@@ -64,6 +65,7 @@ export function AdminSidebar({ profile, brandName, onNavigate }: Props) {
       items: [
         { href: '/cats', label: t('cats'), icon: Cat },
         { href: '/health-tickets', label: t('healthTickets'), icon: HeartPulse, badge: openTicketCount || undefined },
+        { href: '/breeding', label: t('breeding'), icon: Dna },
         { href: '/rooms', label: t('rooms'), icon: Home },
         { href: '/food-items', label: t('food'), icon: Utensils }
       ]

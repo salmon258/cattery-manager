@@ -21,7 +21,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { event_type, note, new_status, resolution_summary } = parsed.data;
+  const { event_type, note, new_status, resolution_summary, photo_urls } = parsed.data;
   const isAdmin = user.profile.role === 'admin';
 
   // Admin-only actions
@@ -57,6 +57,22 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     .single();
 
   if (eventError) return NextResponse.json({ error: eventError.message }, { status: 500 });
+
+  // Attach photos to this event
+  if (photo_urls && photo_urls.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any)
+      .from('health_ticket_photos')
+      .insert(
+        photo_urls.map((url: string) => ({
+          ticket_id:    params.id,
+          event_id:     event.id,
+          url,
+          storage_path: new URL(url).pathname,
+          created_by:   user.profile.id
+        }))
+      );
+  }
 
   // Side-effect: update ticket record
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

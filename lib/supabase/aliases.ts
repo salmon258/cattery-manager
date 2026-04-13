@@ -42,3 +42,12 @@ export type MedRoute      = Database['public']['Enums']['med_route']
 export type TicketSeverity  = Database['public']['Enums']['ticket_severity']
 export type TicketStatus    = Database['public']['Enums']['ticket_status']
 export type TicketEventType = Database['public']['Enums']['ticket_event_type']
+
+// ─── Phase 9 — Breeding (uncomment after migration + supabase gen types) ─────
+// export type MatingRecord  = Database['public']['Tables']['mating_records']['Row']
+// export type Litter        = Database['public']['Tables']['litters']['Row']
+// export type CatLineage    = Database['public']['Tables']['cat_lineage']['Row']
+// export type HeatLog       = Database['public']['Tables']['heat_logs']['Row']
+// export type MatingMethod  = Database['public']['Enums']['mating_method']
+// export type MatingStatus  = Database['public']['Enums']['mating_status']
+// export type HeatIntensity = Database['public']['Enums']['heat_intensity']

@@ -11,7 +11,7 @@ const DEFAULT_OPTIONS = {
 };
 
 export async function uploadImage(
-  bucket: 'cat-photos' | 'pedigree-photos' | 'avatars',
+  bucket: 'cat-photos' | 'pedigree-photos' | 'avatars' | 'health-photos',
   file: File,
   keyPrefix: string
 ): Promise<{ url: string; path: string }> {

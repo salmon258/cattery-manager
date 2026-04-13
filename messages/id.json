@@ -7,6 +7,7 @@
     "dashboard": "Dasbor",
     "cats": "Kucing",
     "healthTickets": "Tiket kesehatan",
+    "breeding": "Perkawinan",
     "rooms": "Ruangan",
     "food": "Katalog makanan",
     "users": "Pengguna",
@@ -298,7 +299,10 @@
     "error": "Terjadi kesalahan.",
     "retry": "Coba lagi",
     "required": "Wajib diisi",
-    "optional": "opsional"
+    "optional": "opsional",
+    "notes": "Catatan",
+    "showMore": "Tampilkan {count} lagi",
+    "showLess": "Tampilkan lebih sedikit"
   },
   "users": {
     "title": "Pengguna",
@@ -430,7 +434,8 @@
       "titlePlaceholder": "mis. Bersin + keluar cairan sejak kemarin",
       "description": "Detail pengamatan",
       "descriptionPlaceholder": "Jelaskan apa yang Anda perhatikan secara rinci...",
-      "severity": "Tingkat keparahan"
+      "severity": "Tingkat keparahan",
+      "photos": "Foto"
     },
     "severities": {
       "low": "Rendah",
@@ -463,5 +468,72 @@
     "cat": "Kucing",
     "openedAt": "Dibuka",
     "lastUpdated": "Diperbarui"
+  },
+  "breeding": {
+    "title": "Perkawinan",
+    "newMating": "Perkawinan baru",
+    "logHeat": "Catat birahi",
+    "registerLitter": "Daftarkan litter",
+    "updateStatus": "Perbarui status",
+    "matingCreated": "Catatan perkawinan dibuat.",
+    "statusUpdated": "Status diperbarui.",
+    "litterRegistered": "Litter didaftarkan.",
+    "heatLogged": "Birahi dicatat.",
+    "heatDeleted": "Catatan birahi dihapus.",
+    "noMatings": "Belum ada catatan perkawinan.",
+    "noHeatLogs": "Belum ada catatan birahi.",
+    "matings": "Catatan perkawinan",
+    "heatHistory": "Riwayat siklus birahi",
+    "lineage": "Silsilah",
+    "offspring": "Keturunan",
+    "kittens": "Anak kucing",
+    "addKitten": "Tambah anak kucing",
+    "kittensOptional": "Belum ada anak kucing. Bisa didaftarkan nanti.",
+    "male": "Jantan",
+    "female": "Betina",
+    "mother": "Induk betina",
+    "father": "Induk jantan",
+    "siblings": "Saudara satu litter",
+    "failedCount": "{count} catatan gagal",
+    "litterBorn": "Lahir {date} · {born} lahir, {survived} hidup",
+    "fields": {
+      "femaleCat": "Kucing betina (queen)",
+      "maleCat": "Kucing jantan (stud)",
+      "matingDate": "Tanggal perkawinan",
+      "expectedLabor": "Perkiraan melahirkan",
+      "method": "Metode",
+      "status": "Status",
+      "observedDate": "Tanggal observasi",
+      "intensity": "Intensitas",
+      "birthDate": "Tanggal lahir",
+      "bornCount": "Jumlah lahir",
+      "survivedCount": "Jumlah hidup",
+      "kittenName": "Nama anak kucing"
+    },
+    "placeholders": {
+      "selectFemale": "Pilih kucing betina",
+      "selectMale": "Pilih kucing jantan"
+    },
+    "methods": {
+      "natural": "Alami",
+      "ai": "Inseminasi buatan"
+    },
+    "statuses": {
+      "planned": "Direncanakan",
+      "confirmed": "Dikonfirmasi",
+      "pregnant": "Hamil",
+      "delivered": "Melahirkan",
+      "failed": "Gagal"
+    },
+    "intensities": {
+      "mild": "Ringan",
+      "moderate": "Sedang",
+      "strong": "Kuat"
+    },
+    "errors": {
+      "selectBothCats": "Harap pilih kucing betina dan jantan.",
+      "litterSizeRequired": "Harap masukkan jumlah anak kucing yang lahir.",
+      "kittenNameRequired": "Setiap anak kucing yang ditambahkan harus memiliki nama."
+    }
   }
 }

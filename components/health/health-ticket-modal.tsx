@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { AlertCircle, MessageSquare, RefreshCw } from 'lucide-react';
 
 import type { UserRole } from '@/lib/supabase/aliases';
+import { uploadImage } from '@/lib/storage/upload';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,9 +21,12 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import { PhotoPicker } from '@/components/health/photo-picker';
 import { cn, formatDate } from '@/lib/utils';
 
-// ─── types returned by GET /api/health-tickets/[id] ────────────────────────
+// ─── types ───────────────────────────────────────────────────────────────────
+type PhotoRow = { id: string; url: string; event_id: string | null };
+
 type EventRow = {
   id: string;
   event_type: 'comment' | 'status_change' | 'resolved' | 'reopened';
@@ -45,6 +50,7 @@ type TicketDetail = {
   resolved_at: string | null;
   resolver: { id: string; full_name: string } | null;
   resolution_summary: string | null;
+  photos: PhotoRow[];
   events: EventRow[];
 };
 
@@ -54,7 +60,7 @@ async function fetchTicket(id: string): Promise<TicketDetail> {
   return (await r.json()).ticket;
 }
 
-// ─── severity / status helpers ───────────────────────────────────────────────
+// ─── helpers ─────────────────────────────────────────────────────────────────
 function severityClass(s: string) {
   return {
     low:      'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
@@ -72,13 +78,27 @@ function statusClass(s: string) {
   }[s] ?? '';
 }
 
+// ─── Photo grid ──────────────────────────────────────────────────────────────
+function PhotoGrid({ photos }: { photos: PhotoRow[] }) {
+  if (!photos.length) return null;
+  return (
+    <div className="flex flex-wrap gap-2 mt-2">
+      {photos.map((p) => (
+        <a key={p.id} href={p.url} target="_blank" rel="noopener noreferrer"
+           className="relative h-20 w-20 rounded-md overflow-hidden border bg-muted block shrink-0 hover:opacity-80 transition-opacity">
+          <Image src={p.url} alt="" fill sizes="80px" className="object-cover" />
+        </a>
+      ))}
+    </div>
+  );
+}
+
 // ─── component ───────────────────────────────────────────────────────────────
 interface Props {
   ticketId: string;
   open: boolean;
   onClose: () => void;
   role: UserRole;
-  /** queryKey to invalidate on changes (e.g. ['health-tickets', catId]) */
   invalidateKey?: unknown[];
 }
 
@@ -95,18 +115,29 @@ export function HealthTicketModal({ ticketId, open, onClose, role, invalidateKey
   });
 
   // Comment form
-  const [note, setNote]           = useState('');
+  const [note, setNote]             = useState('');
+  const [commentPhotos, setCommentPhotos] = useState<File[]>([]);
   // Status change
   const [nextStatus, setNextStatus] = useState<string>('');
   // Resolve form
-  const [resolveMode, setResolveMode]     = useState(false);
-  const [resolution, setResolution] = useState('');
+  const [resolveMode, setResolveMode] = useState(false);
+  const [resolution, setResolution]   = useState('');
+  const [resolvePhotos, setResolvePhotos] = useState<File[]>([]);
 
   function invalidateAll() {
     qc.invalidateQueries({ queryKey: ['health-ticket', ticketId] });
     qc.invalidateQueries({ queryKey: ['health-tickets-count'] });
     if (invalidateKey) qc.invalidateQueries({ queryKey: invalidateKey });
     qc.invalidateQueries({ queryKey: ['me-cats'] });
+  }
+
+  async function uploadPhotos(files: File[], catId: string): Promise<string[]> {
+    const urls: string[] = [];
+    for (const file of files) {
+      const { url } = await uploadImage('health-photos', file, `tickets/${catId}`);
+      urls.push(url);
+    }
+    return urls;
   }
 
   const addEvent = useMutation({
@@ -118,37 +149,55 @@ export function HealthTicketModal({ ticketId, open, onClose, role, invalidateKey
       });
       if (!r.ok) throw new Error((await r.json()).error ?? 'Failed');
     },
-    onSuccess: () => {
-      invalidateAll();
-    },
-    onError: (e: Error) => toast.error(e.message)
+    onSuccess: () => { invalidateAll(); },
+    onError:   (e: Error) => toast.error(e.message)
   });
 
-  function submitComment() {
-    if (!note.trim()) return;
-    addEvent.mutate({ event_type: 'comment', note }, {
-      onSuccess: () => { toast.success(t('eventAdded')); setNote(''); }
-    });
+  async function submitComment() {
+    if (!note.trim() && commentPhotos.length === 0) return;
+    const photo_urls = ticket ? await uploadPhotos(commentPhotos, ticket.cat_id) : [];
+    addEvent.mutate(
+      { event_type: 'comment', note: note.trim() || null, photo_urls },
+      { onSuccess: () => { toast.success(t('eventAdded')); setNote(''); setCommentPhotos([]); } }
+    );
   }
 
   function submitStatusChange() {
     if (!nextStatus) return;
-    addEvent.mutate({ event_type: 'status_change', new_status: nextStatus }, {
-      onSuccess: () => { toast.success(t('eventAdded')); setNextStatus(''); }
-    });
+    addEvent.mutate(
+      { event_type: 'status_change', new_status: nextStatus, photo_urls: [] },
+      { onSuccess: () => { toast.success(t('eventAdded')); setNextStatus(''); } }
+    );
   }
 
-  function submitResolve() {
+  async function submitResolve() {
     if (!resolution.trim()) return;
-    addEvent.mutate({ event_type: 'resolved', resolution_summary: resolution }, {
-      onSuccess: () => { toast.success(t('resolvedMsg')); setResolution(''); setResolveMode(false); }
-    });
+    const photo_urls = ticket ? await uploadPhotos(resolvePhotos, ticket.cat_id) : [];
+    addEvent.mutate(
+      { event_type: 'resolved', resolution_summary: resolution, photo_urls },
+      { onSuccess: () => {
+        toast.success(t('resolvedMsg'));
+        setResolution(''); setResolvePhotos([]); setResolveMode(false);
+      }}
+    );
   }
 
   function submitReopen() {
-    addEvent.mutate({ event_type: 'reopened' }, {
-      onSuccess: () => { toast.success(t('reopenedMsg')); }
-    });
+    addEvent.mutate(
+      { event_type: 'reopened', photo_urls: [] },
+      { onSuccess: () => { toast.success(t('reopenedMsg')); } }
+    );
+  }
+
+  // Photos attached to ticket (no event_id)
+  const ticketPhotos  = ticket?.photos.filter((p) => p.event_id === null) ?? [];
+  // Map event_id → photos
+  const eventPhotosMap = new Map<string, PhotoRow[]>();
+  for (const p of ticket?.photos ?? []) {
+    if (p.event_id) {
+      if (!eventPhotosMap.has(p.event_id)) eventPhotosMap.set(p.event_id, []);
+      eventPhotosMap.get(p.event_id)!.push(p);
+    }
   }
 
   return (
@@ -171,9 +220,7 @@ export function HealthTicketModal({ ticketId, open, onClose, role, invalidateKey
               {t(`statuses.${ticket.status}`)}
             </Badge>
             {ticket.cat && (
-              <span className="text-xs text-muted-foreground">
-                {ticket.cat.name}
-              </span>
+              <span className="text-xs text-muted-foreground">{ticket.cat.name}</span>
             )}
             <span className="text-xs text-muted-foreground ml-auto">
               {t('openedBy', { name: ticket.creator?.full_name ?? '—' })} · {formatDate(ticket.created_at)}
@@ -182,7 +229,14 @@ export function HealthTicketModal({ ticketId, open, onClose, role, invalidateKey
 
           {/* Description */}
           {ticket.description && (
-            <p className="text-sm whitespace-pre-wrap border-b pb-3">{ticket.description}</p>
+            <p className="text-sm whitespace-pre-wrap">{ticket.description}</p>
+          )}
+
+          {/* Ticket-level photos (from initial report) */}
+          {ticketPhotos.length > 0 && (
+            <div className="border-b pb-3">
+              <PhotoGrid photos={ticketPhotos} />
+            </div>
           )}
 
           {/* Resolution summary (if resolved) */}
@@ -208,27 +262,31 @@ export function HealthTicketModal({ ticketId, open, onClose, role, invalidateKey
               <div className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1">
                 <MessageSquare className="h-3 w-3" /> Activity
               </div>
-              <ul className="space-y-2 max-h-60 overflow-y-auto pr-1">
-                {ticket.events.map((ev) => (
-                  <li key={ev.id} className="text-sm border-l-2 border-muted pl-3">
-                    <div className="text-xs text-muted-foreground">
-                      <span className="font-medium text-foreground">
-                        {ev.author?.full_name ?? '—'}
-                      </span>{' '}
-                      {t(`eventTypes.${ev.event_type}`)}
-                      {ev.event_type === 'status_change' && ev.new_status && (
-                        <span className={cn('ml-1 font-medium', statusClass(ev.new_status))}>
-                          {t(`statuses.${ev.new_status}`)}
-                        </span>
+              <ul className="space-y-3 max-h-72 overflow-y-auto pr-1">
+                {ticket.events.map((ev) => {
+                  const evPhotos = eventPhotosMap.get(ev.id) ?? [];
+                  return (
+                    <li key={ev.id} className="text-sm border-l-2 border-muted pl-3">
+                      <div className="text-xs text-muted-foreground">
+                        <span className="font-medium text-foreground">
+                          {ev.author?.full_name ?? '—'}
+                        </span>{' '}
+                        {t(`eventTypes.${ev.event_type}`)}
+                        {ev.event_type === 'status_change' && ev.new_status && (
+                          <span className={cn('ml-1 font-medium', statusClass(ev.new_status))}>
+                            {t(`statuses.${ev.new_status}`)}
+                          </span>
+                        )}
+                        {' · '}
+                        {new Date(ev.created_at).toLocaleString()}
+                      </div>
+                      {ev.note && (
+                        <p className="mt-0.5 whitespace-pre-wrap">{ev.note}</p>
                       )}
-                      {' · '}
-                      {new Date(ev.created_at).toLocaleString()}
-                    </div>
-                    {ev.note && (
-                      <p className="mt-0.5 whitespace-pre-wrap">{ev.note}</p>
-                    )}
-                  </li>
-                ))}
+                      {evPhotos.length > 0 && <PhotoGrid photos={evPhotos} />}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           )}
@@ -242,14 +300,20 @@ export function HealthTicketModal({ ticketId, open, onClose, role, invalidateKey
                 placeholder={t('commentPlaceholder')}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
+                disabled={addEvent.isPending}
+              />
+              <PhotoPicker
+                files={commentPhotos}
+                onChange={setCommentPhotos}
+                disabled={addEvent.isPending}
               />
               <div className="flex justify-end">
                 <Button
                   size="sm"
-                  disabled={!note.trim() || addEvent.isPending}
+                  disabled={(!note.trim() && commentPhotos.length === 0) || addEvent.isPending}
                   onClick={submitComment}
                 >
-                  {t('submitComment')}
+                  {addEvent.isPending ? tc('saving') : t('submitComment')}
                 </Button>
               </div>
             </div>
@@ -299,12 +363,18 @@ export function HealthTicketModal({ ticketId, open, onClose, role, invalidateKey
                     placeholder={t('resolutionPlaceholder')}
                     value={resolution}
                     onChange={(e) => setResolution(e.target.value)}
+                    disabled={addEvent.isPending}
+                  />
+                  <PhotoPicker
+                    files={resolvePhotos}
+                    onChange={setResolvePhotos}
+                    disabled={addEvent.isPending}
                   />
                   <div className="flex justify-end gap-2">
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => { setResolveMode(false); setResolution(''); }}
+                      onClick={() => { setResolveMode(false); setResolution(''); setResolvePhotos([]); }}
                     >
                       {tc('cancel')}
                     </Button>
@@ -313,7 +383,7 @@ export function HealthTicketModal({ ticketId, open, onClose, role, invalidateKey
                       disabled={!resolution.trim() || addEvent.isPending}
                       onClick={submitResolve}
                     >
-                      {t('resolveTicket')}
+                      {addEvent.isPending ? tc('saving') : t('resolveTicket')}
                     </Button>
                   </div>
                 </div>

@@ -19,6 +19,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
        cat:cats(id, name),
        creator:profiles!health_tickets_created_by_fkey(id, full_name),
        resolver:profiles!health_tickets_resolved_by_fkey(id, full_name),
+       photos:health_ticket_photos(id, url, event_id),
        events:health_ticket_events(
          *, author:profiles!health_ticket_events_created_by_fkey(id, full_name)
        )`

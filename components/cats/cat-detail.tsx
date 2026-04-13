@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Edit, Home, MoveRight, Pencil, Trash2, Upload, User } from 'lucide-react';
@@ -26,6 +26,7 @@ import { VaccinationsCard } from '@/components/health/vaccinations-card';
 import { PreventiveCard } from '@/components/health/preventive-card';
 import { MedicationsCard } from '@/components/medications/medications-card';
 import { HealthTicketsCard } from '@/components/health/health-tickets-card';
+import { BreedingCard } from '@/components/breeding/breeding-card';
 import { uploadImage } from '@/lib/storage/upload';
 import { formatDate } from '@/lib/utils';
 
@@ -246,6 +247,8 @@ export function CatDetail({ cat, initialPhotos, currentRoom, assignee, role }: P
         <MedicationsCard catId={cat.id} role={role} />
 
         <HealthTicketsCard catId={cat.id} role={role} />
+
+        <BreedingCard catId={cat.id} catName={cat.name} catGender={cat.gender} role={role} />
 
         {/* Room history + pedigree are admin-only surfaces. Sitters don't see
             lineage paperwork or movement audit trails. */}

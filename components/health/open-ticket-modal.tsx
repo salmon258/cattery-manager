@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { createTicketSchema, type CreateTicketInput } from '@/lib/schemas/health-tickets';
+import { uploadImage } from '@/lib/storage/upload';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -20,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import { PhotoPicker } from '@/components/health/photo-picker';
 
 interface Props {
   open: boolean;
@@ -33,6 +35,7 @@ export function OpenTicketModal({ open, onClose, catId, catName }: Props) {
   const tc = useTranslations('common');
   const qc = useQueryClient();
   const [submitting, setSubmitting] = useState(false);
+  const [photos, setPhotos] = useState<File[]>([]);
 
   const {
     register,
@@ -42,24 +45,36 @@ export function OpenTicketModal({ open, onClose, catId, catName }: Props) {
     formState: { errors }
   } = useForm<CreateTicketInput>({
     resolver: zodResolver(createTicketSchema),
-    defaultValues: { severity: 'low' }
+    defaultValues: { severity: 'low', photo_urls: [] }
   });
+
+  function handleClose() {
+    reset();
+    setPhotos([]);
+    onClose();
+  }
 
   async function onSubmit(values: CreateTicketInput) {
     setSubmitting(true);
     try {
+      // Upload photos first
+      const photoUrls: string[] = [];
+      for (const file of photos) {
+        const { url } = await uploadImage('health-photos', file, `tickets/${catId}`);
+        photoUrls.push(url);
+      }
+
       const r = await fetch(`/api/cats/${catId}/health-tickets`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(values)
+        body: JSON.stringify({ ...values, photo_urls: photoUrls })
       });
       if (!r.ok) throw new Error((await r.json()).error ?? 'Failed');
       toast.success(t('created'));
       qc.invalidateQueries({ queryKey: ['health-tickets', catId] });
       qc.invalidateQueries({ queryKey: ['health-tickets-count'] });
       qc.invalidateQueries({ queryKey: ['me-cats'] });
-      reset();
-      onClose();
+      handleClose();
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -70,7 +85,7 @@ export function OpenTicketModal({ open, onClose, catId, catName }: Props) {
   return (
     <ResponsiveModal
       open={open}
-      onOpenChange={(v) => { if (!v) { reset(); onClose(); } }}
+      onOpenChange={(v) => { if (!v) handleClose(); }}
       title={catName ? `${t('openTicket')} — ${catName}` : t('openTicket')}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-2">
@@ -118,8 +133,13 @@ export function OpenTicketModal({ open, onClose, catId, catName }: Props) {
           )}
         </div>
 
+        <div className="space-y-1.5">
+          <Label>{t('fields.photos')}</Label>
+          <PhotoPicker files={photos} onChange={setPhotos} disabled={submitting} />
+        </div>
+
         <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="outline" onClick={() => { reset(); onClose(); }}>
+          <Button type="button" variant="outline" onClick={handleClose}>
             {tc('cancel')}
           </Button>
           <Button type="submit" disabled={submitting}>
