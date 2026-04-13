@@ -15,11 +15,12 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
     .single();
   if (error || !room) return NextResponse.json({ error: error?.message ?? 'Not found' }, { status: 404 });
 
-  // Current occupants (any status — UI can filter)
+  // Current occupants — exclude deceased/sold from capacity counting
   const { data: occupants } = await supabase
     .from('cats')
     .select('id, name, profile_photo_url, status, breed, assignee_id')
     .eq('current_room_id', params.id)
+    .not('status', 'in', '(deceased,sold)')
     .order('name', { ascending: true });
 
   // Movement history (most recent first)
@@ -67,11 +68,12 @@ export async function DELETE(_: Request, { params }: { params: { id: string } })
 
   const supabase = createClient();
 
-  // Refuse to soft-delete if any active cat is currently in this room
+  // Refuse to soft-delete if any non-deceased/sold cat is currently in this room
   const { count: occCount, error: occErr } = await supabase
     .from('cats')
     .select('id', { count: 'exact', head: true })
-    .eq('current_room_id', params.id);
+    .eq('current_room_id', params.id)
+    .not('status', 'in', '(deceased,sold)');
   if (occErr) return NextResponse.json({ error: occErr.message }, { status: 500 });
   if ((occCount ?? 0) > 0) {
     return NextResponse.json(

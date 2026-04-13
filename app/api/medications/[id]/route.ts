@@ -60,6 +60,18 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     .select('*')
     .single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Side-effect: when a medication plan is stopped, drop any future unconfirmed
+  // tasks so they disappear from sitters' task lists immediately.
+  if (parsed.data.is_active === false) {
+    await supabase
+      .from('medication_tasks')
+      .delete()
+      .eq('medication_id', params.id)
+      .is('confirmed_at', null)
+      .gte('due_at', new Date().toISOString());
+  }
+
   return NextResponse.json({ medication: data });
 }
 

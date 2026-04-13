@@ -12,6 +12,9 @@ import {
   Users,
   Utensils,
   Dna,
+  Stethoscope,
+  BarChart3,
+  Settings,
   type LucideIcon
 } from 'lucide-react';
 
@@ -65,6 +68,7 @@ export function AdminSidebar({ profile, brandName, onNavigate }: Props) {
       items: [
         { href: '/cats', label: t('cats'), icon: Cat },
         { href: '/health-tickets', label: t('healthTickets'), icon: HeartPulse, badge: openTicketCount || undefined },
+        { href: '/clinics', label: t('clinics'), icon: Stethoscope },
         { href: '/breeding', label: t('breeding'), icon: Dna },
         { href: '/rooms', label: t('rooms'), icon: Home },
         { href: '/food-items', label: t('food'), icon: Utensils }
@@ -73,6 +77,13 @@ export function AdminSidebar({ profile, brandName, onNavigate }: Props) {
     {
       label: ta('sectionAccess'),
       items: [{ href: '/users', label: t('users'), icon: Users }]
+    },
+    {
+      label: ta('sectionInsights'),
+      items: [
+        { href: '/reports', label: t('reports'), icon: BarChart3 },
+        { href: '/settings', label: t('settings'), icon: Settings }
+      ]
     }
   ];
 

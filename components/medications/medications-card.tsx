@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Check, Pill, Plus, Timer } from 'lucide-react';
+import { Check, Pill, Plus, Timer, StopCircle, Trash2 } from 'lucide-react';
 
 import type { Medication, MedicationTask, UserRole } from '@/lib/supabase/aliases';
 import { Button } from '@/components/ui/button';
@@ -59,6 +59,38 @@ export function MedicationsCard({ catId, role }: { catId: string; role: UserRole
     },
     onSuccess: () => {
       toast.success(t('taskConfirmed'));
+      qc.invalidateQueries({ queryKey: ['medication-tasks', catId] });
+      qc.invalidateQueries({ queryKey: ['me-tasks'] });
+    },
+    onError: (e: Error) => toast.error(e.message)
+  });
+
+  const stopMed = useMutation({
+    mutationFn: async (medId: string) => {
+      const r = await fetch(`/api/medications/${medId}`, {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ is_active: false })
+      });
+      if (!r.ok) throw new Error((await r.json()).error ?? 'Failed');
+    },
+    onSuccess: () => {
+      toast.success(t('stopped'));
+      qc.invalidateQueries({ queryKey: ['medications', catId] });
+      qc.invalidateQueries({ queryKey: ['medication-tasks', catId] });
+      qc.invalidateQueries({ queryKey: ['me-tasks'] });
+    },
+    onError: (e: Error) => toast.error(e.message)
+  });
+
+  const deleteMed = useMutation({
+    mutationFn: async (medId: string) => {
+      const r = await fetch(`/api/medications/${medId}`, { method: 'DELETE' });
+      if (!r.ok) throw new Error((await r.json()).error ?? 'Failed');
+    },
+    onSuccess: () => {
+      toast.success(t('deleted'));
+      qc.invalidateQueries({ queryKey: ['medications', catId] });
       qc.invalidateQueries({ queryKey: ['medication-tasks', catId] });
       qc.invalidateQueries({ queryKey: ['me-tasks'] });
     },
@@ -140,8 +172,8 @@ export function MedicationsCard({ catId, role }: { catId: string; role: UserRole
           ) : (
             <ul className="space-y-1 text-sm">
               {activeMeds.map((m) => (
-                <li key={m.id} className="flex items-center justify-between gap-2 border-b pb-1 last:border-0">
-                  <div className="min-w-0">
+                <li key={m.id} className="flex items-center justify-between gap-2 border-b pb-1 last:border-0 group">
+                  <div className="min-w-0 flex-1">
                     <div className="font-medium truncate">
                       {m.medicine_name}
                       <span className="text-xs text-muted-foreground"> · {m.dose}</span>
@@ -152,6 +184,36 @@ export function MedicationsCard({ catId, role }: { catId: string; role: UserRole
                       {m.time_slots.join(', ')}
                     </div>
                   </div>
+                  {isAdmin && (
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7"
+                        disabled={stopMed.isPending}
+                        onClick={() => {
+                          if (window.confirm(t('confirmStop'))) stopMed.mutate(m.id);
+                        }}
+                        aria-label={t('stop')}
+                        title={t('stop')}
+                      >
+                        <StopCircle className="h-3.5 w-3.5 text-amber-600" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7"
+                        disabled={deleteMed.isPending}
+                        onClick={() => {
+                          if (window.confirm(t('confirmDelete'))) deleteMed.mutate(m.id);
+                        }}
+                        aria-label={tc('delete')}
+                        title={tc('delete')}
+                      >
+                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                      </Button>
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>

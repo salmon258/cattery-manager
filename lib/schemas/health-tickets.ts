@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const ticketSeveritySchema = z.enum(['low', 'medium', 'high', 'critical']);
 export const ticketStatusSchema   = z.enum(['open', 'in_progress', 'resolved']);
-export const ticketEventTypeSchema = z.enum(['comment', 'status_change', 'resolved', 'reopened']);
+export const ticketEventTypeSchema = z.enum(['comment', 'status_change', 'resolved', 'reopened', 'vet_referral']);
 
 const photoUrlsSchema = z.array(z.string().url()).max(10).optional().default([]);
 

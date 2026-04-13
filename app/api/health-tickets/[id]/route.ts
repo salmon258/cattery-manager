@@ -21,7 +21,13 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
        resolver:profiles!health_tickets_resolved_by_fkey(id, full_name),
        photos:health_ticket_photos(id, url, event_id),
        events:health_ticket_events(
-         *, author:profiles!health_ticket_events_created_by_fkey(id, full_name)
+         *,
+         author:profiles!health_ticket_events_created_by_fkey(id, full_name),
+         linked_visit:vet_visits!health_ticket_events_linked_vet_visit_fkey(
+           id, visit_date, visit_type, diagnosis, chief_complaint, visit_cost,
+           clinic:clinics(id, name),
+           doctor:doctors(id, full_name)
+         )
        )`
     )
     .eq('id', params.id)

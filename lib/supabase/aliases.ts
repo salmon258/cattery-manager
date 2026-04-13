@@ -51,3 +51,17 @@ export type TicketEventType = Database['public']['Enums']['ticket_event_type']
 // export type MatingMethod  = Database['public']['Enums']['mating_method']
 // export type MatingStatus  = Database['public']['Enums']['mating_status']
 // export type HeatIntensity = Database['public']['Enums']['heat_intensity']
+
+// ─── Phase 10 — Vet & Medical (uncomment after migration + regen) ────────────
+// export type Clinic              = Database['public']['Tables']['clinics']['Row']
+// export type Doctor              = Database['public']['Tables']['doctors']['Row']
+// export type VetVisit            = Database['public']['Tables']['vet_visits']['Row']
+// export type VetVisitMedicine    = Database['public']['Tables']['vet_visit_medicines']['Row']
+// export type LabResult           = Database['public']['Tables']['lab_results']['Row']
+// export type DoctorSpecialisation = Database['public']['Enums']['doctor_specialisation']
+// export type VetVisitType        = Database['public']['Enums']['vet_visit_type']
+// export type VetVisitStatus      = Database['public']['Enums']['vet_visit_status']
+// export type LabResultFileType   = Database['public']['Enums']['lab_result_file_type']
+
+// ─── Phase 12 — System Settings (uncomment after migration + regen) ──────────
+// export type SystemSettings      = Database['public']['Tables']['system_settings']['Row']

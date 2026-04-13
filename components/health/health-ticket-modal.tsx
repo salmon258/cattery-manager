@@ -27,13 +27,25 @@ import { cn, formatDate } from '@/lib/utils';
 // ─── types ───────────────────────────────────────────────────────────────────
 type PhotoRow = { id: string; url: string; event_id: string | null };
 
+type LinkedVisit = {
+  id: string;
+  visit_date: string;
+  visit_type: string;
+  diagnosis: string | null;
+  chief_complaint: string | null;
+  visit_cost: number | null;
+  clinic: { id: string; name: string } | null;
+  doctor: { id: string; full_name: string } | null;
+} | null;
+
 type EventRow = {
   id: string;
-  event_type: 'comment' | 'status_change' | 'resolved' | 'reopened';
+  event_type: 'comment' | 'status_change' | 'resolved' | 'reopened' | 'vet_referral';
   note: string | null;
   new_status: 'open' | 'in_progress' | 'resolved' | null;
   created_at: string;
   author: { id: string; full_name: string } | null;
+  linked_visit?: LinkedVisit;
 };
 
 type TicketDetail = {
@@ -266,7 +278,12 @@ export function HealthTicketModal({ ticketId, open, onClose, role, invalidateKey
                 {ticket.events.map((ev) => {
                   const evPhotos = eventPhotosMap.get(ev.id) ?? [];
                   return (
-                    <li key={ev.id} className="text-sm border-l-2 border-muted pl-3">
+                    <li key={ev.id} className={cn(
+                      'text-sm border-l-2 pl-3',
+                      ev.event_type === 'vet_referral'
+                        ? 'border-cyan-400 dark:border-cyan-600'
+                        : 'border-muted'
+                    )}>
                       <div className="text-xs text-muted-foreground">
                         <span className="font-medium text-foreground">
                           {ev.author?.full_name ?? '—'}
@@ -282,6 +299,24 @@ export function HealthTicketModal({ ticketId, open, onClose, role, invalidateKey
                       </div>
                       {ev.note && (
                         <p className="mt-0.5 whitespace-pre-wrap">{ev.note}</p>
+                      )}
+                      {ev.event_type === 'vet_referral' && ev.linked_visit && (
+                        <div className="mt-1.5 rounded-md border border-cyan-200 dark:border-cyan-800 bg-cyan-50/60 dark:bg-cyan-900/20 p-2 text-xs space-y-0.5">
+                          <div className="flex items-center gap-1.5 font-medium text-cyan-900 dark:text-cyan-200">
+                            🩺 {formatDate(ev.linked_visit.visit_date)} · {ev.linked_visit.clinic?.name ?? '—'}
+                          </div>
+                          {ev.linked_visit.doctor && (
+                            <div className="text-cyan-800 dark:text-cyan-300">Dr. {ev.linked_visit.doctor.full_name}</div>
+                          )}
+                          {ev.linked_visit.diagnosis && (
+                            <div className="text-cyan-800 dark:text-cyan-300">{ev.linked_visit.diagnosis}</div>
+                          )}
+                          {ev.linked_visit.visit_cost != null && (
+                            <div className="text-cyan-700 dark:text-cyan-400">
+                              {Number(ev.linked_visit.visit_cost).toLocaleString()}
+                            </div>
+                          )}
+                        </div>
                       )}
                       {evPhotos.length > 0 && <PhotoGrid photos={evPhotos} />}
                     </li>

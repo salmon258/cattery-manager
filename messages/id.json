@@ -7,10 +7,12 @@
     "dashboard": "Dasbor",
     "cats": "Kucing",
     "healthTickets": "Tiket kesehatan",
+    "clinics": "Klinik & dokter",
     "breeding": "Perkawinan",
     "rooms": "Ruangan",
     "food": "Katalog makanan",
     "users": "Pengguna",
+    "reports": "Laporan",
     "settings": "Pengaturan",
     "profile": "Profil",
     "logout": "Keluar",
@@ -22,7 +24,8 @@
     "adminBadge": "Administrator",
     "sectionOverview": "Ringkasan",
     "sectionManage": "Kelola",
-    "sectionAccess": "Akses"
+    "sectionAccess": "Akses",
+    "sectionInsights": "Wawasan"
   },
   "sitterNav": {
     "myCats": "Kucing Saya",
@@ -35,7 +38,31 @@
     "activeProfiles": "Profil aktif",
     "activeRooms": "Ruangan aktif",
     "activeUsers": "Pengguna aktif",
-    "quickActions": "Aksi cepat"
+    "quickActions": "Aksi cepat",
+    "openTickets": "Tiket kesehatan terbuka",
+    "noOpenTickets": "Aman semua",
+    "viewAll": "Lihat semua",
+    "upcomingVaccinations": "Vaksinasi akan datang (30h)",
+    "upcomingPreventive": "Preventif akan datang (30h)",
+    "vetFollowups": "Follow-up dokter (14h)",
+    "noneIn30": "Tidak ada dalam 30 hari ke depan",
+    "noneIn14": "Tidak ada dalam 14 hari ke depan",
+    "recentActivity": "Tiket terbaru",
+    "noActivity": "Belum ada aktivitas.",
+    "reports": "Laporan",
+    "tracker": {
+      "title": "Pelacak perawatan harian",
+      "subtitle": "Progres hari ini untuk setiap kucing, dikelompokkan per sitter.",
+      "noCats": "Tidak ada kucing untuk dilacak.",
+      "unassigned": "Belum ditugaskan",
+      "weightLogged": "Berat sudah dicatat hari ini",
+      "weightMissing": "Berat belum dicatat",
+      "mealsLogged": "{count} kali makan dicatat hari ini",
+      "noMeals": "Belum ada makan dicatat",
+      "medsConfirmed": "{done}/{total} dosis dikonfirmasi",
+      "dosesConfirmedShort": "dosis",
+      "allCaughtUp": "Semua selesai ✓"
+    }
   },
   "sitterHome": {
     "title": "Halo {name},",
@@ -63,7 +90,13 @@
       "notes": "Catatan"
     },
     "emptyHint": "Belum ada catatan berat. Catat berat pertama untuk mengaktifkan rekomendasi kalori.",
-    "lastRecorded": "Terakhir dicatat"
+    "lastRecorded": "Terakhir dicatat",
+    "updated": "Berat diperbarui.",
+    "deleted": "Catatan berat dihapus.",
+    "confirmDelete": "Hapus catatan berat ini?",
+    "errors": {
+      "invalidWeight": "Masukkan berat dalam kg yang valid."
+    }
   },
   "food": {
     "title": "Katalog makanan",
@@ -207,6 +240,11 @@
     "noTasksToday": "Tidak ada dosis untuk hari ini.",
     "confirm": "Konfirmasi",
     "taskConfirmed": "Dosis dikonfirmasi.",
+    "stop": "Hentikan",
+    "stopped": "Rencana obat dihentikan.",
+    "deleted": "Obat dihapus.",
+    "confirmStop": "Hentikan rencana obat ini? Tugas tersisa akan dibatalkan.",
+    "confirmDelete": "Hapus rencana obat ini secara permanen? Semua tugas terkait akan dihapus.",
     "overdue": "Lewat tenggat",
     "addSlot": "Tambah waktu",
     "slotsHint": "Setiap slot waktu menghasilkan satu dosis per hari pemberian. Gunakan interval > 1 untuk jadwal tiap beberapa hari.",
@@ -251,7 +289,18 @@
     "reassignWarning": "{name} saat ini ditugaskan untuk {count} kucing.",
     "reassignExplanation": "Pilih penjaga utama baru (atau biarkan tidak ditugaskan). Penjaga yang dipilih akan dinonaktifkan setelah pengalihan selesai.",
     "reassignTo": "Alihkan ke",
-    "reassignHint": "Kosongkan untuk memindahkan kucing-kucing ini ke Belum ditugaskan."
+    "reassignHint": "Kosongkan untuk memindahkan kucing-kucing ini ke Belum ditugaskan.",
+    "batchAssign": "Tugaskan massal",
+    "batchAssignTitle": "Tugaskan kucing secara massal",
+    "batchAssignDesc": "Tugaskan {count} kucing terpilih ke seorang sitter.",
+    "batchAssignHint": "Kosongkan untuk memindahkan kucing-kucing ini ke Belum ditugaskan.",
+    "batchUpdated": "{count} kucing diperbarui.",
+    "selectedCount": "{count} terpilih",
+    "selectAll": "Pilih semua",
+    "assignSelected": "Tugaskan terpilih",
+    "historyTitle": "Riwayat penugasan",
+    "historyEmpty": "Belum ada perubahan penugasan.",
+    "historyBy": "oleh {name}"
   },
   "profile": {
     "title": "Profil saya",
@@ -452,7 +501,8 @@
       "comment": "berkomentar",
       "status_change": "mengubah status menjadi",
       "resolved": "menyelesaikan tiket",
-      "reopened": "membuka kembali tiket"
+      "reopened": "membuka kembali tiket",
+      "vet_referral": "menautkan kunjungan dokter hewan"
     },
     "created": "Tiket dibuka.",
     "eventAdded": "Pembaruan ditambahkan.",
@@ -534,6 +584,158 @@
       "selectBothCats": "Harap pilih kucing betina dan jantan.",
       "litterSizeRequired": "Harap masukkan jumlah anak kucing yang lahir.",
       "kittenNameRequired": "Setiap anak kucing yang ditambahkan harus memiliki nama."
+    }
+  },
+  "vet": {
+    "title": "Klinik & Dokter Hewan",
+    "vetHistory": "Riwayat dokter hewan",
+    "newClinic": "Klinik baru",
+    "editClinic": "Ubah klinik",
+    "newDoctor": "Dokter baru",
+    "editDoctor": "Ubah dokter",
+    "newVisit": "Kunjungan dokter baru",
+    "addDoctor": "Tambah dokter",
+    "doctors": "Dokter",
+    "noClinics": "Belum ada klinik.",
+    "noDoctors": "Belum ada dokter di klinik ini.",
+    "noVisits": "Belum ada kunjungan dokter.",
+    "inactive": "Nonaktif",
+    "clinicCreated": "Klinik dibuat.",
+    "clinicUpdated": "Klinik diperbarui.",
+    "clinicDeleted": "Klinik dihapus.",
+    "doctorCreated": "Dokter ditambahkan.",
+    "doctorUpdated": "Dokter diperbarui.",
+    "doctorDeleted": "Dokter dihapus.",
+    "visitCreated": "Kunjungan dokter dicatat.",
+    "visitDeleted": "Kunjungan dokter dihapus.",
+    "confirmDeleteClinic": "Hapus klinik ini? Dokter akan tetap ada tapi tidak terhubung.",
+    "confirmDeleteDoctor": "Hapus dokter ini?",
+    "confirmDeleteVisit": "Hapus kunjungan dokter ini?",
+    "linkToTicket": "Tautkan ke tiket kesehatan terbuka?",
+    "linkHint": "Kunjungan ini akan muncul di timeline tiket yang ditautkan.",
+    "linkedToTicket": "Terhubung ke tiket",
+    "noTicketLink": "— Jangan tautkan —",
+    "medicinesPrescribed": "Obat yang diresepkan",
+    "addMedicine": "Tambah obat",
+    "labResults": "Hasil lab",
+    "addLabResult": "Tambah file",
+    "receipts": "Kuitansi",
+    "addReceipt": "Tambah kuitansi",
+    "autoSchedule": "Buat jadwal obat otomatis",
+    "autoScheduleHint": "membuat tugas harian untuk sitter",
+    "overdue": "Terlewat",
+    "overdueFollowUps": "{count} follow-up terlewat",
+    "fields": {
+      "name": "Nama",
+      "fullName": "Nama lengkap",
+      "address": "Alamat",
+      "phone": "Telepon",
+      "email": "Email",
+      "website": "Website",
+      "isActive": "Aktif",
+      "specialisation": "Spesialisasi",
+      "visitDate": "Tanggal kunjungan",
+      "visitType": "Jenis kunjungan",
+      "status": "Status",
+      "clinic": "Klinik",
+      "doctor": "Dokter",
+      "chiefComplaint": "Keluhan utama",
+      "diagnosis": "Diagnosis",
+      "treatment": "Tindakan yang dilakukan",
+      "followUpDate": "Tanggal follow-up",
+      "visitCost": "Biaya kunjungan",
+      "transportCost": "Biaya transport",
+      "medicineName": "Nama obat",
+      "dose": "Dosis",
+      "frequency": "Frekuensi",
+      "duration": "Durasi",
+      "startDate": "Mulai",
+      "endDate": "Selesai",
+      "intervalDays": "Setiap (hari)",
+      "route": "Cara pemberian",
+      "timeSlots": "Slot waktu"
+    },
+    "routes": {
+      "oral": "Oral",
+      "topical": "Topikal",
+      "injection": "Injeksi",
+      "other": "Lainnya"
+    },
+    "placeholders": {
+      "selectClinic": "Pilih klinik",
+      "selectClinicFirst": "Pilih klinik dahulu",
+      "selectDoctor": "Pilih dokter",
+      "selectTicket": "Pilih tiket",
+      "labNote": "Catatan (mis. CBC panel)",
+      "receiptNote": "Catatan (mis. invoice klinik)"
+    },
+    "specialisations": {
+      "general": "Umum",
+      "dermatology": "Dermatologi",
+      "cardiology": "Kardiologi",
+      "oncology": "Onkologi",
+      "dentistry": "Gigi",
+      "surgery": "Bedah",
+      "other": "Lainnya"
+    },
+    "visitTypes": {
+      "routine_checkup": "Pemeriksaan rutin",
+      "emergency": "Darurat",
+      "follow_up": "Follow-up",
+      "vaccination": "Vaksinasi",
+      "surgery": "Operasi",
+      "dental": "Gigi",
+      "other": "Lainnya"
+    },
+    "visitStatuses": {
+      "scheduled": "Terjadwal",
+      "in_progress": "Sedang berlangsung",
+      "completed": "Selesai",
+      "cancelled": "Dibatalkan"
+    },
+    "errors": {
+      "nameRequired": "Nama wajib diisi."
+    }
+  },
+  "reports": {
+    "title": "Laporan",
+    "tabs": {
+      "weight": "Berat",
+      "eating": "Makan",
+      "medication": "Obat",
+      "vaccinations": "Vaksinasi",
+      "vet": "Kunjungan dokter",
+      "tickets": "Tiket kesehatan",
+      "heat": "Siklus birahi",
+      "rooms": "Perpindahan ruangan",
+      "activity": "Aktivitas"
+    }
+  },
+  "settings": {
+    "title": "Pengaturan sistem",
+    "saved": "Pengaturan disimpan.",
+    "sections": {
+      "branding": "Branding",
+      "health": "Kesehatan & perkawinan",
+      "notifications": "Notifikasi"
+    },
+    "fields": {
+      "catteryName": "Nama cattery",
+      "logoUrl": "URL logo",
+      "currency": "Mata uang default",
+      "timezone": "Zona waktu cattery",
+      "gestation": "Periode kebuntingan (hari)",
+      "vaccLead": "Pengingat vaksinasi (hari sebelum)",
+      "prevLead": "Pengingat preventif (hari sebelum)",
+      "vetLead": "Pengingat follow-up dokter (hari sebelum)",
+      "weightDropAlert": "Ambang batas alert penurunan berat (%)",
+      "pushEnabled": "Kirim notifikasi push"
+    },
+    "hints": {
+      "gestation": "Digunakan untuk menghitung perkiraan tanggal melahirkan (default 63).",
+      "leadDays": "Jumlah hari sebelum tanggal jatuh tempo untuk mulai menampilkan pengingat.",
+      "weightDrop": "Tandai pembacaan berat yang turun lebih dari persen ini dibanding pembacaan sebelumnya.",
+      "timezone": "Slot waktu obat diinterpretasikan dalam zona waktu ini saat membuat tugas harian."
     }
   }
 }

@@ -75,6 +75,86 @@ export type Database = {
           },
         ]
       }
+      assignee_change_log: {
+        Row: {
+          cat_id: string
+          changed_at: string
+          changed_by: string | null
+          from_assignee_id: string | null
+          id: string
+          note: string | null
+          to_assignee_id: string | null
+        }
+        Insert: {
+          cat_id: string
+          changed_at?: string
+          changed_by?: string | null
+          from_assignee_id?: string | null
+          id?: string
+          note?: string | null
+          to_assignee_id?: string | null
+        }
+        Update: {
+          cat_id?: string
+          changed_at?: string
+          changed_by?: string | null
+          from_assignee_id?: string | null
+          id?: string
+          note?: string | null
+          to_assignee_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignee_change_log_cat_fkey"
+            columns: ["cat_id"]
+            isOneToOne: false
+            referencedRelation: "cats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignee_change_log_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "assignee_change_log_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignee_change_log_from_fkey"
+            columns: ["from_assignee_id"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "assignee_change_log_from_fkey"
+            columns: ["from_assignee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignee_change_log_to_fkey"
+            columns: ["to_assignee_id"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "assignee_change_log_to_fkey"
+            columns: ["to_assignee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       background_sync_queue: {
         Row: {
           action: string
@@ -315,6 +395,89 @@ export type Database = {
           },
         ]
       }
+      clinics: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          phone: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      doctors: {
+        Row: {
+          clinic_id: string | null
+          created_at: string
+          full_name: string
+          id: string
+          is_active: boolean
+          notes: string | null
+          phone: string | null
+          specialisation: Database["public"]["Enums"]["doctor_specialisation"]
+          updated_at: string
+        }
+        Insert: {
+          clinic_id?: string | null
+          created_at?: string
+          full_name: string
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          phone?: string | null
+          specialisation?: Database["public"]["Enums"]["doctor_specialisation"]
+          updated_at?: string
+        }
+        Update: {
+          clinic_id?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          phone?: string | null
+          specialisation?: Database["public"]["Enums"]["doctor_specialisation"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doctors_clinic_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       eating_log_items: {
         Row: {
           calories_per_gram_snapshot: number
@@ -478,6 +641,7 @@ export type Database = {
           created_by: string | null
           event_type: Database["public"]["Enums"]["ticket_event_type"]
           id: string
+          linked_vet_visit_id: string | null
           new_status: Database["public"]["Enums"]["ticket_status"] | null
           note: string | null
           ticket_id: string
@@ -487,6 +651,7 @@ export type Database = {
           created_by?: string | null
           event_type: Database["public"]["Enums"]["ticket_event_type"]
           id?: string
+          linked_vet_visit_id?: string | null
           new_status?: Database["public"]["Enums"]["ticket_status"] | null
           note?: string | null
           ticket_id: string
@@ -496,6 +661,7 @@ export type Database = {
           created_by?: string | null
           event_type?: Database["public"]["Enums"]["ticket_event_type"]
           id?: string
+          linked_vet_visit_id?: string | null
           new_status?: Database["public"]["Enums"]["ticket_status"] | null
           note?: string | null
           ticket_id?: string
@@ -513,6 +679,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "health_ticket_events_linked_vet_visit_fkey"
+            columns: ["linked_vet_visit_id"]
+            isOneToOne: false
+            referencedRelation: "vet_visits"
             referencedColumns: ["id"]
           },
           {
@@ -712,6 +885,67 @@ export type Database = {
             columns: ["logged_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lab_results: {
+        Row: {
+          file_name: string
+          file_size_bytes: number | null
+          file_type: Database["public"]["Enums"]["lab_result_file_type"]
+          file_url: string
+          id: string
+          notes: string | null
+          storage_path: string
+          uploaded_at: string
+          uploaded_by: string | null
+          vet_visit_id: string
+        }
+        Insert: {
+          file_name: string
+          file_size_bytes?: number | null
+          file_type: Database["public"]["Enums"]["lab_result_file_type"]
+          file_url: string
+          id?: string
+          notes?: string | null
+          storage_path: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+          vet_visit_id: string
+        }
+        Update: {
+          file_name?: string
+          file_size_bytes?: number | null
+          file_type?: Database["public"]["Enums"]["lab_result_file_type"]
+          file_url?: string
+          id?: string
+          notes?: string | null
+          storage_path?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+          vet_visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lab_results_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "lab_results_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lab_results_visit_fkey"
+            columns: ["vet_visit_id"]
+            isOneToOne: false
+            referencedRelation: "vet_visits"
             referencedColumns: ["id"]
           },
         ]
@@ -1230,6 +1464,66 @@ export type Database = {
           },
         ]
       }
+      system_settings: {
+        Row: {
+          cattery_logo_url: string | null
+          cattery_name: string
+          default_currency: string
+          gestation_days: number
+          id: number
+          preventive_lead_days: number
+          push_notifications_enabled: boolean
+          updated_at: string
+          updated_by: string | null
+          vaccination_lead_days: number
+          vet_followup_lead_days: number
+          weight_drop_alert_pct: number
+        }
+        Insert: {
+          cattery_logo_url?: string | null
+          cattery_name?: string
+          default_currency?: string
+          gestation_days?: number
+          id?: number
+          preventive_lead_days?: number
+          push_notifications_enabled?: boolean
+          updated_at?: string
+          updated_by?: string | null
+          vaccination_lead_days?: number
+          vet_followup_lead_days?: number
+          weight_drop_alert_pct?: number
+        }
+        Update: {
+          cattery_logo_url?: string | null
+          cattery_name?: string
+          default_currency?: string
+          gestation_days?: number
+          id?: number
+          preventive_lead_days?: number
+          push_notifications_enabled?: boolean
+          updated_at?: string
+          updated_by?: string | null
+          vaccination_lead_days?: number
+          vet_followup_lead_days?: number
+          weight_drop_alert_pct?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "system_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vaccinations: {
         Row: {
           administered_by_vet: string | null
@@ -1293,6 +1587,153 @@ export type Database = {
             columns: ["recorded_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vet_visit_medicines: {
+        Row: {
+          created_at: string
+          dose: string | null
+          duration: string | null
+          frequency: string | null
+          id: string
+          medicine_name: string
+          notes: string | null
+          vet_visit_id: string
+        }
+        Insert: {
+          created_at?: string
+          dose?: string | null
+          duration?: string | null
+          frequency?: string | null
+          id?: string
+          medicine_name: string
+          notes?: string | null
+          vet_visit_id: string
+        }
+        Update: {
+          created_at?: string
+          dose?: string | null
+          duration?: string | null
+          frequency?: string | null
+          id?: string
+          medicine_name?: string
+          notes?: string | null
+          vet_visit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vet_visit_medicines_visit_fkey"
+            columns: ["vet_visit_id"]
+            isOneToOne: false
+            referencedRelation: "vet_visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vet_visits: {
+        Row: {
+          cat_id: string
+          chief_complaint: string | null
+          clinic_id: string | null
+          created_at: string
+          created_by: string | null
+          diagnosis: string | null
+          doctor_id: string | null
+          follow_up_date: string | null
+          health_ticket_id: string | null
+          id: string
+          notes: string | null
+          status: Database["public"]["Enums"]["vet_visit_status"]
+          transport_cost: number | null
+          treatment_performed: string | null
+          updated_at: string
+          visit_cost: number | null
+          visit_date: string
+          visit_type: Database["public"]["Enums"]["vet_visit_type"]
+        }
+        Insert: {
+          cat_id: string
+          chief_complaint?: string | null
+          clinic_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          diagnosis?: string | null
+          doctor_id?: string | null
+          follow_up_date?: string | null
+          health_ticket_id?: string | null
+          id?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["vet_visit_status"]
+          transport_cost?: number | null
+          treatment_performed?: string | null
+          updated_at?: string
+          visit_cost?: number | null
+          visit_date: string
+          visit_type?: Database["public"]["Enums"]["vet_visit_type"]
+        }
+        Update: {
+          cat_id?: string
+          chief_complaint?: string | null
+          clinic_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          diagnosis?: string | null
+          doctor_id?: string | null
+          follow_up_date?: string | null
+          health_ticket_id?: string | null
+          id?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["vet_visit_status"]
+          transport_cost?: number | null
+          treatment_performed?: string | null
+          updated_at?: string
+          visit_cost?: number | null
+          visit_date?: string
+          visit_type?: Database["public"]["Enums"]["vet_visit_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vet_visits_cat_fkey"
+            columns: ["cat_id"]
+            isOneToOne: false
+            referencedRelation: "cats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_visits_clinic_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_visits_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "vet_visits_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_visits_doctor_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_visits_health_ticket_fkey"
+            columns: ["health_ticket_id"]
+            isOneToOne: false
+            referencedRelation: "health_tickets"
             referencedColumns: ["id"]
           },
         ]
@@ -1417,11 +1858,20 @@ export type Database = {
     Enums: {
       cat_gender: "male" | "female"
       cat_status: "active" | "retired" | "deceased" | "sold"
+      doctor_specialisation:
+        | "general"
+        | "dermatology"
+        | "cardiology"
+        | "oncology"
+        | "dentistry"
+        | "surgery"
+        | "other"
       eaten_ratio: "all" | "most" | "half" | "little" | "none"
       feeding_method: "self" | "assisted" | "force_fed"
       food_type: "wet" | "dry" | "raw" | "treat" | "supplement" | "other"
       food_unit: "g" | "ml" | "sachet" | "piece"
       heat_intensity: "mild" | "moderate" | "strong"
+      lab_result_file_type: "pdf" | "image"
       lang_code: "en" | "id"
       mating_method: "natural" | "ai"
       mating_status:
@@ -1440,11 +1890,25 @@ export type Database = {
         | "isolation"
         | "other"
       theme_pref: "light" | "dark" | "system"
-      ticket_event_type: "comment" | "status_change" | "resolved" | "reopened"
+      ticket_event_type:
+        | "comment"
+        | "status_change"
+        | "resolved"
+        | "reopened"
+        | "vet_referral"
       ticket_severity: "low" | "medium" | "high" | "critical"
       ticket_status: "open" | "in_progress" | "resolved"
       user_role: "admin" | "cat_sitter"
       vaccine_type: "f3" | "f4" | "tricat" | "felv" | "rabies" | "other"
+      vet_visit_status: "scheduled" | "in_progress" | "completed" | "cancelled"
+      vet_visit_type:
+        | "routine_checkup"
+        | "emergency"
+        | "follow_up"
+        | "vaccination"
+        | "surgery"
+        | "dental"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1574,11 +2038,21 @@ export const Constants = {
     Enums: {
       cat_gender: ["male", "female"],
       cat_status: ["active", "retired", "deceased", "sold"],
+      doctor_specialisation: [
+        "general",
+        "dermatology",
+        "cardiology",
+        "oncology",
+        "dentistry",
+        "surgery",
+        "other",
+      ],
       eaten_ratio: ["all", "most", "half", "little", "none"],
       feeding_method: ["self", "assisted", "force_fed"],
       food_type: ["wet", "dry", "raw", "treat", "supplement", "other"],
       food_unit: ["g", "ml", "sachet", "piece"],
       heat_intensity: ["mild", "moderate", "strong"],
+      lab_result_file_type: ["pdf", "image"],
       lang_code: ["en", "id"],
       mating_method: ["natural", "ai"],
       mating_status: [
@@ -1599,11 +2073,27 @@ export const Constants = {
         "other",
       ],
       theme_pref: ["light", "dark", "system"],
-      ticket_event_type: ["comment", "status_change", "resolved", "reopened"],
+      ticket_event_type: [
+        "comment",
+        "status_change",
+        "resolved",
+        "reopened",
+        "vet_referral",
+      ],
       ticket_severity: ["low", "medium", "high", "critical"],
       ticket_status: ["open", "in_progress", "resolved"],
       user_role: ["admin", "cat_sitter"],
       vaccine_type: ["f3", "f4", "tricat", "felv", "rabies", "other"],
+      vet_visit_status: ["scheduled", "in_progress", "completed", "cancelled"],
+      vet_visit_type: [
+        "routine_checkup",
+        "emergency",
+        "follow_up",
+        "vaccination",
+        "surgery",
+        "dental",
+        "other",
+      ],
     },
   },
 } as const

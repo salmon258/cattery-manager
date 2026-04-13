@@ -18,6 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CatForm } from '@/components/cats/cat-form';
 import { MoveRoomModal } from '@/components/cats/move-room-modal';
 import { CatRoomHistory } from '@/components/cats/cat-room-history';
+import { AssigneeHistory } from '@/components/assignees/assignee-history';
 import { AssignCatModal } from '@/components/assignees/assign-cat-modal';
 import { WeightCard } from '@/components/weight/weight-card';
 import { EatingCard } from '@/components/eating/eating-card';
@@ -27,6 +28,7 @@ import { PreventiveCard } from '@/components/health/preventive-card';
 import { MedicationsCard } from '@/components/medications/medications-card';
 import { HealthTicketsCard } from '@/components/health/health-tickets-card';
 import { BreedingCard } from '@/components/breeding/breeding-card';
+import { VetVisitsCard } from '@/components/vet/vet-visits-card';
 import { uploadImage } from '@/lib/storage/upload';
 import { formatDate } from '@/lib/utils';
 
@@ -36,9 +38,10 @@ interface Props {
   currentRoom: { id: string; name: string } | null;
   assignee: { id: string; full_name: string } | null;
   role: UserRole;
+  currentUserId: string;
 }
 
-export function CatDetail({ cat, initialPhotos, currentRoom, assignee, role }: Props) {
+export function CatDetail({ cat, initialPhotos, currentRoom, assignee, role, currentUserId }: Props) {
   const t = useTranslations('cats');
   const tc = useTranslations('common');
   const tr = useTranslations('rooms');
@@ -238,7 +241,7 @@ export function CatDetail({ cat, initialPhotos, currentRoom, assignee, role }: P
           </CardContent>
         </Card>
 
-        <WeightCard catId={cat.id} />
+        <WeightCard catId={cat.id} role={role} currentUserId={currentUserId} />
         <EatingCard catId={cat.id} />
 
         <VaccinationsCard catId={cat.id} />
@@ -248,11 +251,14 @@ export function CatDetail({ cat, initialPhotos, currentRoom, assignee, role }: P
 
         <HealthTicketsCard catId={cat.id} role={role} />
 
+        <VetVisitsCard catId={cat.id} catName={cat.name} role={role} />
+
         <BreedingCard catId={cat.id} catName={cat.name} catGender={cat.gender} role={role} />
 
         {/* Room history + pedigree are admin-only surfaces. Sitters don't see
             lineage paperwork or movement audit trails. */}
         {isAdmin && <CatRoomHistory catId={cat.id} />}
+        {isAdmin && <AssigneeHistory catId={cat.id} />}
 
         {isAdmin && (
           <Card className="md:col-span-2">

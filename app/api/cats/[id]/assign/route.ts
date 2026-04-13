@@ -34,6 +34,14 @@ export async function POST(request: Request, { params }: { params: { id: string 
     }
   }
 
+  // Capture the previous assignee for the audit log
+  const { data: prevCat } = await supabase
+    .from('cats')
+    .select('assignee_id')
+    .eq('id', params.id)
+    .single();
+  const fromAssigneeId = prevCat?.assignee_id ?? null;
+
   const { data, error } = await supabase
     .from('cats')
     .update({ assignee_id: parsed.data.assignee_id })
@@ -41,5 +49,19 @@ export async function POST(request: Request, { params }: { params: { id: string 
     .select('*')
     .single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Audit log — only record if something actually changed
+  if (fromAssigneeId !== parsed.data.assignee_id) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any)
+      .from('assignee_change_log')
+      .insert({
+        cat_id:           params.id,
+        from_assignee_id: fromAssigneeId,
+        to_assignee_id:   parsed.data.assignee_id,
+        changed_by:       user.authId
+      });
+  }
+
   return NextResponse.json({ cat: data });
 }

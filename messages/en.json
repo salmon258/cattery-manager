@@ -7,10 +7,12 @@
     "dashboard": "Dashboard",
     "cats": "Cats",
     "healthTickets": "Health tickets",
+    "clinics": "Clinics & vets",
     "breeding": "Breeding",
     "rooms": "Rooms",
     "food": "Food catalogue",
     "users": "Users",
+    "reports": "Reports",
     "settings": "Settings",
     "profile": "Profile",
     "logout": "Log out",
@@ -22,7 +24,8 @@
     "adminBadge": "Administrator",
     "sectionOverview": "Overview",
     "sectionManage": "Manage",
-    "sectionAccess": "Access"
+    "sectionAccess": "Access",
+    "sectionInsights": "Insights"
   },
   "sitterNav": {
     "myCats": "My Cats",
@@ -35,7 +38,31 @@
     "activeProfiles": "Active profiles",
     "activeRooms": "Active rooms",
     "activeUsers": "Active users",
-    "quickActions": "Quick actions"
+    "quickActions": "Quick actions",
+    "openTickets": "Open health tickets",
+    "noOpenTickets": "All clear",
+    "viewAll": "View all",
+    "upcomingVaccinations": "Upcoming vaccinations (30d)",
+    "upcomingPreventive": "Upcoming preventive (30d)",
+    "vetFollowups": "Vet follow-ups (14d)",
+    "noneIn30": "None in next 30 days",
+    "noneIn14": "None in next 14 days",
+    "recentActivity": "Recent tickets",
+    "noActivity": "Nothing recent.",
+    "reports": "Reports",
+    "tracker": {
+      "title": "Daily care tracker",
+      "subtitle": "Today's progress for every cat, grouped by sitter.",
+      "noCats": "No cats to track.",
+      "unassigned": "Unassigned",
+      "weightLogged": "Weight logged today",
+      "weightMissing": "Weight not logged yet",
+      "mealsLogged": "{count} meal(s) logged today",
+      "noMeals": "No meals logged yet",
+      "medsConfirmed": "{done}/{total} doses confirmed",
+      "dosesConfirmedShort": "doses",
+      "allCaughtUp": "All caught up ✓"
+    }
   },
   "sitterHome": {
     "title": "Hi {name},",
@@ -63,7 +90,13 @@
       "notes": "Notes"
     },
     "emptyHint": "No weight recorded yet. Log the first reading to enable kcal recommendations.",
-    "lastRecorded": "Last recorded"
+    "lastRecorded": "Last recorded",
+    "updated": "Weight updated.",
+    "deleted": "Weight log deleted.",
+    "confirmDelete": "Delete this weight log?",
+    "errors": {
+      "invalidWeight": "Enter a valid weight in kg."
+    }
   },
   "food": {
     "title": "Food catalogue",
@@ -207,6 +240,11 @@
     "noTasksToday": "No doses due today.",
     "confirm": "Confirm",
     "taskConfirmed": "Dose confirmed.",
+    "stop": "Stop plan",
+    "stopped": "Medication plan stopped.",
+    "deleted": "Medication deleted.",
+    "confirmStop": "Stop this medication plan? Remaining tasks will be cancelled.",
+    "confirmDelete": "Permanently delete this medication plan? All related tasks will be removed.",
     "overdue": "Overdue",
     "addSlot": "Add time",
     "slotsHint": "Each time slot creates one dose per dose-day. Use `interval_days > 1` for every-other-day schedules.",
@@ -251,7 +289,18 @@
     "reassignWarning": "{name} is currently assigned to {count} cat(s).",
     "reassignExplanation": "Pick a new primary assignee (or leave as unassigned). The target sitter will be deactivated after the reassignment.",
     "reassignTo": "Reassign to",
-    "reassignHint": "Leave blank to move these cats to Unassigned."
+    "reassignHint": "Leave blank to move these cats to Unassigned.",
+    "batchAssign": "Batch assign",
+    "batchAssignTitle": "Batch assign cats",
+    "batchAssignDesc": "Assign {count} selected cat(s) to a sitter.",
+    "batchAssignHint": "Leave unset to move these cats to Unassigned.",
+    "batchUpdated": "{count} cat(s) updated.",
+    "selectedCount": "{count} selected",
+    "selectAll": "Select all",
+    "assignSelected": "Assign selected",
+    "historyTitle": "Assignee history",
+    "historyEmpty": "No assignee changes recorded.",
+    "historyBy": "by {name}"
   },
   "profile": {
     "title": "My profile",
@@ -452,7 +501,8 @@
       "comment": "commented",
       "status_change": "changed status to",
       "resolved": "resolved the ticket",
-      "reopened": "reopened the ticket"
+      "reopened": "reopened the ticket",
+      "vet_referral": "linked a vet visit"
     },
     "created": "Ticket opened.",
     "eventAdded": "Update added.",
@@ -534,6 +584,158 @@
       "selectBothCats": "Please select both female and male cat.",
       "litterSizeRequired": "Please enter the number of kittens born.",
       "kittenNameRequired": "Each added kitten must have a name."
+    }
+  },
+  "vet": {
+    "title": "Clinics & Vets",
+    "vetHistory": "Vet history",
+    "newClinic": "New clinic",
+    "editClinic": "Edit clinic",
+    "newDoctor": "New doctor",
+    "editDoctor": "Edit doctor",
+    "newVisit": "New vet visit",
+    "addDoctor": "Add doctor",
+    "doctors": "Doctors",
+    "noClinics": "No clinics yet.",
+    "noDoctors": "No doctors at this clinic.",
+    "noVisits": "No vet visits logged.",
+    "inactive": "Inactive",
+    "clinicCreated": "Clinic created.",
+    "clinicUpdated": "Clinic updated.",
+    "clinicDeleted": "Clinic deleted.",
+    "doctorCreated": "Doctor added.",
+    "doctorUpdated": "Doctor updated.",
+    "doctorDeleted": "Doctor removed.",
+    "visitCreated": "Vet visit logged.",
+    "visitDeleted": "Vet visit deleted.",
+    "confirmDeleteClinic": "Delete this clinic? Doctors will remain but be unlinked.",
+    "confirmDeleteDoctor": "Delete this doctor?",
+    "confirmDeleteVisit": "Delete this vet visit?",
+    "linkToTicket": "Link to open health ticket?",
+    "linkHint": "This visit will appear on the linked ticket's timeline.",
+    "linkedToTicket": "Linked to ticket",
+    "noTicketLink": "— Don't link —",
+    "medicinesPrescribed": "Medicines prescribed",
+    "addMedicine": "Add medicine",
+    "labResults": "Lab results",
+    "addLabResult": "Add file",
+    "receipts": "Receipts",
+    "addReceipt": "Add receipt",
+    "autoSchedule": "Auto-create medication schedule",
+    "autoScheduleHint": "generates daily tasks for sitters",
+    "overdue": "Overdue",
+    "overdueFollowUps": "{count} overdue follow-up(s)",
+    "fields": {
+      "name": "Name",
+      "fullName": "Full name",
+      "address": "Address",
+      "phone": "Phone",
+      "email": "Email",
+      "website": "Website",
+      "isActive": "Active",
+      "specialisation": "Specialisation",
+      "visitDate": "Visit date",
+      "visitType": "Visit type",
+      "status": "Status",
+      "clinic": "Clinic",
+      "doctor": "Doctor",
+      "chiefComplaint": "Chief complaint",
+      "diagnosis": "Diagnosis",
+      "treatment": "Treatment performed",
+      "followUpDate": "Follow-up date",
+      "visitCost": "Visit cost",
+      "transportCost": "Transport cost",
+      "medicineName": "Medicine name",
+      "dose": "Dose",
+      "frequency": "Frequency",
+      "duration": "Duration",
+      "startDate": "Start",
+      "endDate": "End",
+      "intervalDays": "Every (days)",
+      "route": "Route",
+      "timeSlots": "Time slots"
+    },
+    "routes": {
+      "oral": "Oral",
+      "topical": "Topical",
+      "injection": "Injection",
+      "other": "Other"
+    },
+    "placeholders": {
+      "selectClinic": "Select clinic",
+      "selectClinicFirst": "Select clinic first",
+      "selectDoctor": "Select doctor",
+      "selectTicket": "Select a ticket",
+      "labNote": "Note (e.g. CBC panel)",
+      "receiptNote": "Note (e.g. clinic invoice)"
+    },
+    "specialisations": {
+      "general": "General practice",
+      "dermatology": "Dermatology",
+      "cardiology": "Cardiology",
+      "oncology": "Oncology",
+      "dentistry": "Dentistry",
+      "surgery": "Surgery",
+      "other": "Other"
+    },
+    "visitTypes": {
+      "routine_checkup": "Routine checkup",
+      "emergency": "Emergency",
+      "follow_up": "Follow-up",
+      "vaccination": "Vaccination",
+      "surgery": "Surgery",
+      "dental": "Dental",
+      "other": "Other"
+    },
+    "visitStatuses": {
+      "scheduled": "Scheduled",
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "errors": {
+      "nameRequired": "Name is required."
+    }
+  },
+  "reports": {
+    "title": "Reports",
+    "tabs": {
+      "weight": "Weight",
+      "eating": "Eating",
+      "medication": "Medication",
+      "vaccinations": "Vaccinations",
+      "vet": "Vet visits",
+      "tickets": "Health tickets",
+      "heat": "Heat cycles",
+      "rooms": "Room movements",
+      "activity": "Activity"
+    }
+  },
+  "settings": {
+    "title": "System settings",
+    "saved": "Settings saved.",
+    "sections": {
+      "branding": "Branding",
+      "health": "Health & breeding",
+      "notifications": "Notifications"
+    },
+    "fields": {
+      "catteryName": "Cattery name",
+      "logoUrl": "Logo URL",
+      "currency": "Default currency",
+      "timezone": "Cattery timezone",
+      "gestation": "Gestation period (days)",
+      "vaccLead": "Vaccination reminder lead (days)",
+      "prevLead": "Preventive treatment lead (days)",
+      "vetLead": "Vet follow-up reminder lead (days)",
+      "weightDropAlert": "Weight drop alert threshold (%)",
+      "pushEnabled": "Send push notifications"
+    },
+    "hints": {
+      "gestation": "Used to compute expected labor date in mating records (default 63).",
+      "leadDays": "Number of days before the due date to start showing reminders.",
+      "weightDrop": "Flag readings that drop more than this percent vs. the previous reading.",
+      "timezone": "Medication slots are interpreted in this timezone when generating daily tasks."
     }
   }
 }

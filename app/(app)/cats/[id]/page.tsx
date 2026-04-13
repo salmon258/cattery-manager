@@ -44,6 +44,7 @@ export default async function CatDetailPage({ params }: { params: { id: string }
       currentRoom={currentRoom}
       assignee={assignee}
       role={user.profile.role}
+      currentUserId={user.authId}
     />
   );
 }

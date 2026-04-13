@@ -17,12 +17,12 @@ export async function GET(request: Request) {
   const { data: rooms, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Attach occupant counts (single round-trip: count active cats per room).
+  // Attach occupant counts — count all cats except deceased/sold.
   const { data: occupantRows, error: occErr } = await supabase
     .from('cats')
     .select('current_room_id')
     .not('current_room_id', 'is', null)
-    .eq('status', 'active');
+    .not('status', 'in', '(deceased,sold)');
   if (occErr) return NextResponse.json({ error: occErr.message }, { status: 500 });
 
   const counts = new Map<string, number>();

@@ -1364,11 +1364,11 @@ has immediate context without needing to read the full spec first.
 | **8** | Health Tickets | Health ticket open/update/resolve flow; activity thread; ticket medications; vet visit linking; Admin + Sitter views |
 | **9** | Breeding | Mating records; kitten/litter registration; lineage tree; heat cycle log; breeding calendar; `.ics` export |
 | **10** | Vet & Medical | Clinic/doctor directory; vet visit records; prescribed medicines; lab result file upload (no OCR) |
-| **11** | Finance | Income/expense ledger; transaction categories (incl. Electricity); payroll + salary definitions; transfer proof upload; Cat Sitter payroll view (own only); auto-transactions from vet/adoption/stock |
-| **12** | Adoption | Adopter profile; adoption record; contract upload; cat status auto-update; financial auto-transaction |
-| **13** | Reports | Full admin reporting hub; all charts; CSV export; payroll summary; calorie intake trends; vet cost report |
-| **14** | Blood Test OCR | Claude API extraction of blood markers; structured storage; trend charts per marker *(future)* |
-| **15** | Polish | Audit log; system settings UI; export CSV/PDF; performance review; accessibility pass |
+| **11** | Reports | Full admin reporting hub; all charts; CSV export; payroll summary; calorie intake trends; vet cost report *(moved up from §13 — prioritised ahead of finance/adoption)* |
+| **12** | Polish | Audit log; system settings UI; export CSV/PDF; performance review; accessibility pass *(moved up from §15)* |
+| **13** | Finance | Income/expense ledger; transaction categories (incl. Electricity); payroll + salary definitions; transfer proof upload; Cat Sitter payroll view (own only); auto-transactions from vet/adoption/stock |
+| **14** | Adoption | Adopter profile; adoption record; contract upload; cat status auto-update; financial auto-transaction |
+| **15** | Blood Test OCR | Claude API extraction of blood markers; structured storage; trend charts per marker *(future)* |
 | **16** | Stock | Item catalogue; stock-in/out ledger; FIFO batch expiry; low stock alerts; expiry warnings |
 | **17** | Money Lover Sync | Node.js sync service; Supabase Realtime listener; category mapping UI; sync log in Admin panel |
 

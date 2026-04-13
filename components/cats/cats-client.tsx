@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, UserPlus, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import type { Cat, UserRole } from '@/lib/supabase/aliases';
 import { Home, User } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
+import { BatchAssignModal } from '@/components/assignees/batch-assign-modal';
 
 type CatRow = Cat & {
   current_room?: { id: string; name: string } | null;
@@ -32,20 +33,76 @@ export function CatsClient({ role }: { role: UserRole }) {
   const t = useTranslations('cats');
   const tc = useTranslations('common');
   const ts = useTranslations('cats.status');
+  const ta = useTranslations('assignees');
   const [q, setQ] = useState('');
+  const [selectMode, setSelectMode]     = useState(false);
+  const [selectedIds, setSelectedIds]   = useState<Set<string>>(new Set());
+  const [batchModalOpen, setBatchModalOpen] = useState(false);
+  const isAdmin = role === 'admin';
 
   const { data: cats = [], isLoading, error, refetch } = useQuery({
     queryKey: ['cats', q],
     queryFn: () => fetchCats(q)
   });
 
+  function toggleSelect(id: string, e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function enterSelectMode() {
+    setSelectMode(true);
+    setSelectedIds(new Set());
+  }
+
+  function exitSelectMode() {
+    setSelectMode(false);
+    setSelectedIds(new Set());
+  }
+
+  function selectAll() {
+    setSelectedIds(new Set(cats.map((c) => c.id)));
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-semibold">{t('title')}</h1>
-        {role === 'admin' && (
-          <Button asChild><Link href="/cats/new"><Plus className="h-4 w-4" /> {t('new')}</Link></Button>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          {isAdmin && !selectMode && (
+            <Button variant="outline" onClick={enterSelectMode}>
+              <UserPlus className="h-4 w-4" /> {ta('batchAssign')}
+            </Button>
+          )}
+          {isAdmin && selectMode && (
+            <>
+              <span className="text-sm text-muted-foreground">
+                {ta('selectedCount', { count: selectedIds.size })}
+              </span>
+              <Button variant="ghost" size="sm" onClick={selectAll}>
+                {ta('selectAll')}
+              </Button>
+              <Button
+                disabled={selectedIds.size === 0}
+                onClick={() => setBatchModalOpen(true)}
+              >
+                <UserPlus className="h-4 w-4" /> {ta('assignSelected')}
+              </Button>
+              <Button variant="outline" size="icon" onClick={exitSelectMode} aria-label={tc('cancel')}>
+                <X className="h-4 w-4" />
+              </Button>
+            </>
+          )}
+          {role === 'admin' && !selectMode && (
+            <Button asChild><Link href="/cats/new"><Plus className="h-4 w-4" /> {t('new')}</Link></Button>
+          )}
+        </div>
       </div>
 
       <div className="relative max-w-md">
@@ -73,10 +130,23 @@ export function CatsClient({ role }: { role: UserRole }) {
       )}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {cats.map((c) => (
-          <Link key={c.id} href={`/cats/${c.id}`}>
-            <Card className="hover:bg-accent/40 transition-colors">
+        {cats.map((c) => {
+          const selected = selectedIds.has(c.id);
+          const cardInner = (
+            <Card className={
+              'hover:bg-accent/40 transition-colors ' +
+              (selectMode && selected ? 'ring-2 ring-primary' : '')
+            }>
               <CardContent className="p-4 flex items-center gap-3">
+                {selectMode && (
+                  <input
+                    type="checkbox"
+                    checked={selected}
+                    readOnly
+                    className="h-4 w-4 shrink-0 pointer-events-none"
+                    aria-label="select"
+                  />
+                )}
                 <Avatar className="h-14 w-14">
                   {c.profile_photo_url ? <AvatarImage src={c.profile_photo_url} alt={c.name} /> : null}
                   <AvatarFallback>{c.name.slice(0, 2).toUpperCase()}</AvatarFallback>
@@ -107,9 +177,34 @@ export function CatsClient({ role }: { role: UserRole }) {
                 </div>
               </CardContent>
             </Card>
-          </Link>
-        ))}
+          );
+
+          if (selectMode) {
+            return (
+              <button
+                key={c.id}
+                type="button"
+                onClick={(e) => toggleSelect(c.id, e)}
+                className="text-left"
+              >
+                {cardInner}
+              </button>
+            );
+          }
+          return (
+            <Link key={c.id} href={`/cats/${c.id}`}>
+              {cardInner}
+            </Link>
+          );
+        })}
       </div>
+
+      <BatchAssignModal
+        open={batchModalOpen}
+        onClose={() => setBatchModalOpen(false)}
+        catIds={Array.from(selectedIds)}
+        onSuccess={() => { exitSelectMode(); }}
+      />
     </div>
   );
 }
