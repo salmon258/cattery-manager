@@ -62,3 +62,15 @@
   /* iOS auto-zoom prevention on form fields */
   input, select, textarea { font-size: 16px; }
 }
+
+/* Top navigation progress bar — indeterminate sliding stripe that plays while
+   a client-side navigation is pending. */
+@keyframes nav-progress-slide {
+  0%   { transform: translateX(-100%); }
+  50%  { transform: translateX(20%); }
+  100% { transform: translateX(110%); }
+}
+.nav-progress-bar {
+  animation: nav-progress-slide 1.1s ease-in-out infinite;
+  will-change: transform;
+}

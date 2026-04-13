@@ -69,7 +69,14 @@
     "subtitle": "Tugas harian Anda dalam satu pandangan.",
     "assignedTitle": "Kucing yang ditugaskan",
     "comingSoon": "Kucing yang ditugaskan kepada Anda dan tugas tertunda akan muncul di sini.",
-    "emptyHint": "Belum ada kucing yang ditugaskan kepada Anda. Admin dapat mengatur penugasan dari profil kucing."
+    "emptyHint": "Belum ada kucing yang ditugaskan kepada Anda. Admin dapat mengatur penugasan dari profil kucing.",
+    "todayTitle": "Aktivitas hari ini",
+    "todayEmpty": "Belum ada catatan hari ini.",
+    "todayWeights": "Berat",
+    "todayMeals": "Makan",
+    "todayConfirmedMeds": "Obat terkonfirmasi",
+    "todayAdHocMeds": "Obat tambahan",
+    "todayMealFallback": "Makan"
   },
   "sitterActions": {
     "logWeight": "Catat berat",

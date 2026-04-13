@@ -69,7 +69,14 @@
     "subtitle": "Your daily tasks at a glance.",
     "assignedTitle": "Assigned cats",
     "comingSoon": "Your assigned cats and pending tasks will appear here soon.",
-    "emptyHint": "No cats are assigned to you yet. Admin can set your primary cats from any cat profile."
+    "emptyHint": "No cats are assigned to you yet. Admin can set your primary cats from any cat profile.",
+    "todayTitle": "Today's activity",
+    "todayEmpty": "Nothing logged today yet.",
+    "todayWeights": "Weights",
+    "todayMeals": "Meals",
+    "todayConfirmedMeds": "Confirmed meds",
+    "todayAdHocMeds": "Ad-hoc meds",
+    "todayMealFallback": "Meal"
   },
   "sitterActions": {
     "logWeight": "Log weight",

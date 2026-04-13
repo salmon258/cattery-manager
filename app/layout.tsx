@@ -1,8 +1,10 @@
+import { Suspense } from 'react';
 import type { Metadata, Viewport } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { QueryProvider } from '@/components/providers/query-provider';
+import { NavigationProgress } from '@/components/app/navigation-progress';
 import { Toaster } from 'sonner';
 import './globals.css';
 
@@ -60,6 +62,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <NextIntlClientProvider locale={locale} messages={messages}>
             <QueryProvider>
+              <Suspense fallback={null}>
+                <NavigationProgress />
+              </Suspense>
               {children}
               <Toaster richColors position="top-right" />
             </QueryProvider>
