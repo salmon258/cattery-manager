@@ -75,6 +75,36 @@ export type Database = {
           },
         ]
       }
+      background_sync_queue: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          payload: Json
+          processed: boolean
+          processed_at: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          payload: Json
+          processed?: boolean
+          processed_at?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          payload?: Json
+          processed?: boolean
+          processed_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       cat_photos: {
         Row: {
           cat_id: string
@@ -627,6 +657,36 @@ export type Database = {
         }
         Relationships: []
       }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          last_used_at: string | null
+          p256dh: string
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          last_used_at?: string | null
+          p256dh: string
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          last_used_at?: string | null
+          p256dh?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       room_movements: {
         Row: {
           cat_id: string
@@ -1099,10 +1159,6 @@ export const Constants = {
   },
 } as const
 
-// ---------------------------------------------------------------------------
-// App-level aliases. Keep below the generated block so `supabase gen types`
-// output can be pasted above without clobbering them.
-// ---------------------------------------------------------------------------
 export type Profile = Database['public']['Tables']['profiles']['Row']
 export type Cat = Database['public']['Tables']['cats']['Row']
 export type CatPhoto = Database['public']['Tables']['cat_photos']['Row']
@@ -1117,7 +1173,8 @@ export type PreventiveTreatment = Database['public']['Tables']['preventive_treat
 export type Medication = Database['public']['Tables']['medications']['Row']
 export type MedicationTask = Database['public']['Tables']['medication_tasks']['Row']
 export type AdHocMedicine = Database['public']['Tables']['ad_hoc_medicines']['Row']
-
+export type PushSubscription = Database['public']['Tables']['push_subscriptions']['Row']
+export type BackgroundSyncQueue = Database['public']['Tables']['background_sync_queue']['Row']
 export type UserRole = Database['public']['Enums']['user_role']
 export type ThemePref = Database['public']['Enums']['theme_pref']
 export type LangCode = Database['public']['Enums']['lang_code']

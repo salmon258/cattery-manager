@@ -14,5 +14,22 @@ export async function GET() {
     .eq('status', 'active')
     .order('name', { ascending: true });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ cats: data ?? [] });
+
+  const cats = data ?? [];
+
+  // Fetch the latest weight recorded_at for each assigned cat so the client
+  // can show a "log today's weight" reminder when no weight has been logged today.
+  const catIds = cats.map((c) => c.id);
+  const { data: latestWeights } = catIds.length
+    ? await supabase.from('cat_latest_weight').select('cat_id, recorded_at').in('cat_id', catIds)
+    : { data: [] };
+
+  const weightByCat = new Map((latestWeights ?? []).map((w) => [w.cat_id, w.recorded_at]));
+
+  const result = cats.map((c) => ({
+    ...c,
+    last_weight_recorded_at: weightByCat.get(c.id) ?? null
+  }));
+
+  return NextResponse.json({ cats: result });
 }

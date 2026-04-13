@@ -15,6 +15,8 @@ import {
 import { cn } from '@/lib/utils';
 import type { Profile } from '@/lib/supabase/types';
 import { UserMenu } from '@/components/app/user-menu';
+import { PushOptIn } from '@/components/pwa/push-opt-in';
+import { InstallPrompt } from '@/components/pwa/install-prompt';
 
 type NavItem = {
   href: string;
@@ -113,6 +115,12 @@ export function AdminSidebar({ profile, brandName, onNavigate }: Props) {
           </div>
         ))}
       </nav>
+
+      {/* PWA prompts */}
+      <div className="space-y-2 border-t px-3 py-3">
+        <InstallPrompt />
+        <PushOptIn />
+      </div>
 
       {/* User */}
       <div className="flex items-center gap-3 border-t bg-background/50 p-3">

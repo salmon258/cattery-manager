@@ -47,7 +47,9 @@
     "logMeal": "Log meal",
     "logMed": "Log med",
     "reportIssue": "Report issue",
-    "comingSoon": "Coming soon"
+    "comingSoon": "Coming soon",
+    "weightDue": "Log today's weight",
+    "weightDueHint": "No weight recorded today"
   },
   "weight": {
     "title": "Weight",

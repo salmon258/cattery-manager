@@ -47,7 +47,9 @@
     "logMeal": "Catat makan",
     "logMed": "Catat obat",
     "reportIssue": "Lapor masalah",
-    "comingSoon": "Segera hadir"
+    "comingSoon": "Segera hadir",
+    "weightDue": "Catat berat hari ini",
+    "weightDueHint": "Belum ada catatan berat hari ini"
   },
   "weight": {
     "title": "Berat badan",

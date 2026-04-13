@@ -1,0 +1,43 @@
+{
+  "name": "Onatuchi Cattery Manager",
+  "short_name": "Onatuchi",
+  "description": "Cattery Management System — track cats, health, feeding, and medications.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "My Cats",
+      "short_name": "My Cats",
+      "description": "View assigned cats and today's tasks",
+      "url": "/my-cats",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "All Cats",
+      "short_name": "Cats",
+      "description": "Browse all cat profiles",
+      "url": "/cats",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "categories": ["health", "productivity", "utilities"],
+  "lang": "en"
+}

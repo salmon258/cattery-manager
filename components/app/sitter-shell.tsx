@@ -8,6 +8,7 @@ import { Cat, ListChecks, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Profile } from '@/lib/supabase/types';
 import { UserMenu } from '@/components/app/user-menu';
+import { PushOptIn } from '@/components/pwa/push-opt-in';
 
 interface Props {
   profile: Profile;
@@ -46,6 +47,11 @@ export function SitterShell({ profile, brandName, children }: Props) {
       <main className="flex-1">
         <div className="mx-auto max-w-3xl px-4 py-4 pb-24">{children}</div>
       </main>
+
+      {/* PWA: push opt-in banner shown once at top of content area */}
+      <div className="mx-auto max-w-3xl px-4 pt-2">
+        <PushOptIn />
+      </div>
 
       {/* Bottom tab bar */}
       <nav

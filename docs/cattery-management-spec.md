@@ -1360,13 +1360,13 @@ has immediate context without needing to read the full spec first.
 | **4** | Daily Care Logs | Weight logs; eating logs (multi-food, feeding method, calorie tracking); food catalogue with `calories_per_gram`; daily kcal progress on cat profile |
 | **5** | Preventive Health | Vaccination records + reminders; deworming/flea records + reminders |
 | **6** | Medication | Scheduled medication (admin-set plans → daily task list); ad hoc medicine/vitamin log; compliance tracking |
-| **7** | Health Tickets | Health ticket open/update/resolve flow; activity thread; ticket medications; vet visit linking; Admin + Sitter views |
-| **8** | Breeding | Mating records; kitten/litter registration; lineage tree; heat cycle log; breeding calendar; `.ics` export |
-| **9** | Vet & Medical | Clinic/doctor directory; vet visit records; prescribed medicines; lab result file upload (no OCR) |
-| **10** | Finance | Income/expense ledger; transaction categories (incl. Electricity); payroll + salary definitions; transfer proof upload; Cat Sitter payroll view (own only); auto-transactions from vet/adoption/stock |
-| **11** | Adoption | Adopter profile; adoption record; contract upload; cat status auto-update; financial auto-transaction |
-| **12** | Reports | Full admin reporting hub; all charts; CSV export; payroll summary; calorie intake trends; vet cost report |
-| **13** | PWA | next-pwa config; push notifications; offline caching; background sync for task ticks; iOS splash screens |
+| **7** | PWA | next-pwa config; push notifications; offline caching; background sync for task ticks; iOS splash screens |
+| **8** | Health Tickets | Health ticket open/update/resolve flow; activity thread; ticket medications; vet visit linking; Admin + Sitter views |
+| **9** | Breeding | Mating records; kitten/litter registration; lineage tree; heat cycle log; breeding calendar; `.ics` export |
+| **10** | Vet & Medical | Clinic/doctor directory; vet visit records; prescribed medicines; lab result file upload (no OCR) |
+| **11** | Finance | Income/expense ledger; transaction categories (incl. Electricity); payroll + salary definitions; transfer proof upload; Cat Sitter payroll view (own only); auto-transactions from vet/adoption/stock |
+| **12** | Adoption | Adopter profile; adoption record; contract upload; cat status auto-update; financial auto-transaction |
+| **13** | Reports | Full admin reporting hub; all charts; CSV export; payroll summary; calorie intake trends; vet cost report |
 | **14** | Blood Test OCR | Claude API extraction of blood markers; structured storage; trend charts per marker *(future)* |
 | **15** | Polish | Audit log; system settings UI; export CSV/PDF; performance review; accessibility pass |
 | **16** | Stock | Item catalogue; stock-in/out ledger; FIFO batch expiry; low stock alerts; expiry warnings |

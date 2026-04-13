@@ -29,7 +29,18 @@ import { LogAdHocMedModal } from '@/components/medications/log-ad-hoc-med-modal'
 type MyCat = Cat & {
   current_room?: { id: string; name: string } | null;
   assignee?: { id: string; full_name: string } | null;
+  last_weight_recorded_at?: string | null;
 };
+
+function isToday(dateStr: string): boolean {
+  const d = new Date(dateStr);
+  const now = new Date();
+  return (
+    d.getFullYear() === now.getFullYear() &&
+    d.getMonth() === now.getMonth() &&
+    d.getDate() === now.getDate()
+  );
+}
 
 type MyTask = {
   id: string;
@@ -130,6 +141,8 @@ export function MyCatsClient({ firstName }: { firstName: string }) {
       <div className="grid gap-3">
         {cats.map((c) => {
           const catTasks = tasksByCat.get(c.id) ?? [];
+          const needsWeightToday = !c.last_weight_recorded_at || !isToday(c.last_weight_recorded_at);
+          const totalTodoCount = catTasks.length + (needsWeightToday ? 1 : 0);
           return (
             <Card key={c.id}>
               <CardContent className="p-4 space-y-3">
@@ -141,9 +154,9 @@ export function MyCatsClient({ firstName }: { firstName: string }) {
                   <div className="min-w-0 flex-1">
                     <div className="font-medium truncate flex items-center gap-2">
                       {c.name}
-                      {catTasks.length > 0 && (
+                      {totalTodoCount > 0 && (
                         <Badge variant="destructive" className="gap-1">
-                          <Timer className="h-3 w-3" /> {catTasks.length}
+                          <Timer className="h-3 w-3" /> {totalTodoCount}
                         </Badge>
                       )}
                     </div>
@@ -155,8 +168,26 @@ export function MyCatsClient({ firstName }: { firstName: string }) {
                   </div>
                 </Link>
 
-                {catTasks.length > 0 && (
+                {(catTasks.length > 0 || needsWeightToday) && (
                   <ul className="space-y-1">
+                    {needsWeightToday && (
+                      <li className="flex items-center justify-between gap-2 rounded-md border border-amber-500/40 bg-amber-500/5 p-2 text-sm">
+                        <div className="min-w-0">
+                          <div className="font-medium truncate flex items-center gap-1.5">
+                            <Scale className="h-3.5 w-3.5 shrink-0 text-amber-600 dark:text-amber-400" />
+                            {tq('weightDue')}
+                          </div>
+                          <div className="text-xs text-muted-foreground">{tq('weightDueHint')}</div>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setWeightTarget({ id: c.id, name: c.name })}
+                        >
+                          <Scale className="h-3.5 w-3.5" /> {tq('logWeight')}
+                        </Button>
+                      </li>
+                    )}
                     {catTasks.map((task) => {
                       const overdue = new Date(task.due_at) < new Date();
                       return (

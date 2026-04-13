@@ -124,7 +124,7 @@ _None observed._ Typecheck clean; build clean after a single `rm -rf .next` (Nex
 
 ## Notes for Next Agent
 
-> Read this before starting **Phase 7 — Health Tickets** (ticket open/update/resolve flow; activity thread; ticket medications; vet visit linking; Admin + Sitter views) per §16.3.
+> Read this before starting **Phase 7 — PWA** (next-pwa config; push notifications; offline caching; background sync for task ticks; iOS splash screens) per §16.3.
 
 ### Must-Read Files Before Starting
 - `supabase/migrations/20260417000000_phase5_6_preventive_medication.sql` — the `regenerate_medication_tasks()` trigger is the template for any other "plan → daily tasks" surface. If Phase 7 needs recurring task-like artifacts (follow-ups, re-check reminders), reuse this shape.
@@ -165,7 +165,7 @@ _None._ `cattery-management-spec.md` unchanged (phase table reorder from the pre
 
 ## Next Phase Preview
 
-**Phase 7 — Health Tickets** — ticket open/update/resolve flow; activity thread; ticket medications; vet visit linking; Admin + Sitter views.
+**Phase 7 — PWA** — next-pwa config; push notifications (VAPID); offline caching strategies; background sync for medication task ticks; iOS splash screens; installable on iOS/Android/desktop.
 
 Expected work (ballpark):
 - **DB**: `health_tickets` (severity, status, assignee, created_by, cat_id), `health_ticket_events` (append-only thread of status changes, comments, linked meds/vet visits), optional `health_ticket_medications` join table if tickets own their own scheduled meds. Consider reusing the Phase 5-6 `medication_tasks` shape by allowing a ticket to spawn a scheduled medication.
