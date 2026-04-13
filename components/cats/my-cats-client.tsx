@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import {
   AlertTriangle,
+  ArrowUpDown,
   Check,
   ChevronDown,
   FlaskConical,
@@ -14,14 +15,24 @@ import {
   ListChecks,
   Pill,
   Scale,
+  Search,
   Timer,
-  Utensils
+  Utensils,
+  X
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import type { Cat } from '@/lib/supabase/aliases';
 import { LogWeightModal } from '@/components/weight/log-weight-modal';
@@ -97,17 +108,27 @@ async function fetchMyTasks(): Promise<MyTask[]> {
   return (await r.json()).tasks;
 }
 
+type SortKey = 'name_asc' | 'name_desc' | 'pending_desc' | 'tickets_desc' | 'room_asc';
+type StatusFilter = 'all' | 'pending' | 'tickets' | 'clean';
+
 export function MyCatsClient({ firstName }: { firstName: string }) {
   const ts = useTranslations('sitterHome');
   const tc = useTranslations('common');
   const tq = useTranslations('sitterActions');
   const tm = useTranslations('medications');
+  const tf = useTranslations('sitterFilters');
   const qc = useQueryClient();
 
   const [weightTarget, setWeightTarget] = useState<{ id: string; name: string } | null>(null);
   const [mealTarget, setMealTarget] = useState<{ id: string; name: string } | null>(null);
   const [medTarget, setMedTarget] = useState<{ id: string; name: string } | null>(null);
   const [reportTarget, setReportTarget] = useState<{ id: string; name: string } | null>(null);
+
+  // Filter / sort state for the cat list.
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [roomFilter, setRoomFilter] = useState<string>('all');
+  const [sortKey, setSortKey] = useState<SortKey>('name_asc');
 
   const { data: cats = [], isLoading, error, refetch } = useQuery({
     queryKey: ['me-cats'],
@@ -126,6 +147,82 @@ export function MyCatsClient({ firstName }: { firstName: string }) {
     }
     return map;
   }, [tasks]);
+
+  // All distinct rooms represented in the current cat set, used to populate
+  // the room filter dropdown.
+  const availableRooms = useMemo(() => {
+    const seen = new Map<string, string>();
+    for (const c of cats) {
+      if (c.current_room?.id) seen.set(c.current_room.id, c.current_room.name);
+    }
+    return Array.from(seen.entries())
+      .map(([id, name]) => ({ id, name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [cats]);
+
+  // Computed list that respects search + status + room filters and the
+  // selected sort order. Shared across rendering and the "no matches" state.
+  const visibleCats = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    const filtered = cats.filter((c) => {
+      if (needle && !c.name.toLowerCase().includes(needle)) return false;
+      if (roomFilter !== 'all' && c.current_room?.id !== roomFilter) return false;
+
+      const catTasks = tasksByCat.get(c.id) ?? [];
+      const needsWeightToday =
+        !c.last_weight_recorded_at || !isToday(c.last_weight_recorded_at);
+      const pendingCount = catTasks.length + (needsWeightToday ? 1 : 0);
+      const openTickets = c.open_ticket_count ?? 0;
+
+      if (statusFilter === 'pending' && pendingCount === 0) return false;
+      if (statusFilter === 'tickets' && openTickets === 0) return false;
+      if (statusFilter === 'clean' && (pendingCount > 0 || openTickets > 0)) return false;
+      return true;
+    });
+
+    function pending(c: MyCat): number {
+      const catTasks = tasksByCat.get(c.id) ?? [];
+      const needsWeightToday =
+        !c.last_weight_recorded_at || !isToday(c.last_weight_recorded_at);
+      return catTasks.length + (needsWeightToday ? 1 : 0);
+    }
+
+    const sorted = [...filtered];
+    sorted.sort((a, b) => {
+      switch (sortKey) {
+        case 'name_asc':
+          return a.name.localeCompare(b.name);
+        case 'name_desc':
+          return b.name.localeCompare(a.name);
+        case 'pending_desc': {
+          const diff = pending(b) - pending(a);
+          return diff !== 0 ? diff : a.name.localeCompare(b.name);
+        }
+        case 'tickets_desc': {
+          const diff = (b.open_ticket_count ?? 0) - (a.open_ticket_count ?? 0);
+          return diff !== 0 ? diff : a.name.localeCompare(b.name);
+        }
+        case 'room_asc': {
+          const ra = a.current_room?.name ?? '';
+          const rb = b.current_room?.name ?? '';
+          const diff = ra.localeCompare(rb);
+          return diff !== 0 ? diff : a.name.localeCompare(b.name);
+        }
+        default:
+          return 0;
+      }
+    });
+    return sorted;
+  }, [cats, tasksByCat, search, statusFilter, roomFilter, sortKey]);
+
+  const hasActiveFilters =
+    search.trim() !== '' || statusFilter !== 'all' || roomFilter !== 'all';
+
+  function clearFilters() {
+    setSearch('');
+    setStatusFilter('all');
+    setRoomFilter('all');
+  }
 
   const confirm = useMutation({
     mutationFn: async (taskId: string) => {
@@ -172,8 +269,122 @@ export function MyCatsClient({ firstName }: { firstName: string }) {
         </Card>
       )}
 
+      {!isLoading && !error && cats.length > 0 && (
+        <div className="sticky top-14 z-10 -mx-4 border-b bg-background/90 px-4 py-2 backdrop-blur sm:static sm:mx-0 sm:rounded-xl sm:border sm:shadow-sm">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            {/* Search */}
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={tf('searchPlaceholder')}
+                className="h-9 pl-9 pr-9"
+                aria-label={tf('searchPlaceholder')}
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch('')}
+                  aria-label={tf('clearSearch')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:bg-muted"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Sort */}
+            <Select value={sortKey} onValueChange={(v) => setSortKey(v as SortKey)}>
+              <SelectTrigger className="h-9 gap-2 sm:w-[180px]">
+                <ArrowUpDown className="h-4 w-4 text-violet-500" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name_asc">{tf('sort.nameAsc')}</SelectItem>
+                <SelectItem value="name_desc">{tf('sort.nameDesc')}</SelectItem>
+                <SelectItem value="pending_desc">{tf('sort.pendingDesc')}</SelectItem>
+                <SelectItem value="tickets_desc">{tf('sort.ticketsDesc')}</SelectItem>
+                <SelectItem value="room_asc">{tf('sort.roomAsc')}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Quick filter chips + room filter */}
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <FilterChip
+              active={statusFilter === 'all'}
+              color="slate"
+              onClick={() => setStatusFilter('all')}
+            >
+              {tf('status.all')}
+            </FilterChip>
+            <FilterChip
+              active={statusFilter === 'pending'}
+              color="violet"
+              onClick={() => setStatusFilter((s) => (s === 'pending' ? 'all' : 'pending'))}
+            >
+              <Timer className="h-3 w-3" /> {tf('status.pending')}
+            </FilterChip>
+            <FilterChip
+              active={statusFilter === 'tickets'}
+              color="rose"
+              onClick={() => setStatusFilter((s) => (s === 'tickets' ? 'all' : 'tickets'))}
+            >
+              <AlertTriangle className="h-3 w-3" /> {tf('status.tickets')}
+            </FilterChip>
+            <FilterChip
+              active={statusFilter === 'clean'}
+              color="emerald"
+              onClick={() => setStatusFilter((s) => (s === 'clean' ? 'all' : 'clean'))}
+            >
+              <Check className="h-3 w-3" /> {tf('status.clean')}
+            </FilterChip>
+
+            {availableRooms.length > 1 && (
+              <Select value={roomFilter} onValueChange={setRoomFilter}>
+                <SelectTrigger className="ml-auto h-8 w-auto gap-2 text-xs">
+                  <Home className="h-3.5 w-3.5 text-teal-500" />
+                  <SelectValue placeholder={tf('room.all')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{tf('room.all')}</SelectItem>
+                  {availableRooms.map((r) => (
+                    <SelectItem key={r.id} value={r.id}>
+                      {r.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="ml-1 inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-3 w-3" /> {tf('clear')}
+              </button>
+            )}
+          </div>
+
+          <div className="mt-1.5 text-[11px] text-muted-foreground">
+            {tf('resultsCount', { shown: visibleCats.length, total: cats.length })}
+          </div>
+        </div>
+      )}
+
+      {!isLoading && !error && cats.length > 0 && visibleCats.length === 0 && (
+        <Card>
+          <CardContent className="p-6 text-center text-sm text-muted-foreground">
+            {tf('noMatches')}
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid gap-3">
-        {cats.map((c, idx) => {
+        {visibleCats.map((c, idx) => {
           const catTasks = tasksByCat.get(c.id) ?? [];
           const needsWeightToday = !c.last_weight_recorded_at || !isToday(c.last_weight_recorded_at);
           const totalTodoCount = catTasks.length + (needsWeightToday ? 1 : 0);
@@ -351,6 +562,54 @@ const CARD_ACCENTS: Array<{ border: string; bg: string }> = [
   { border: 'border-l-rose-400', bg: 'bg-gradient-to-r from-rose-50/70 to-transparent dark:from-rose-950/30' },
   { border: 'border-l-teal-400', bg: 'bg-gradient-to-r from-teal-50/70 to-transparent dark:from-teal-950/30' }
 ];
+
+type FilterChipColor = 'slate' | 'violet' | 'rose' | 'emerald';
+
+const FILTER_CHIP_STYLES: Record<FilterChipColor, { active: string; idle: string }> = {
+  slate: {
+    active: 'bg-slate-900 text-white shadow dark:bg-slate-100 dark:text-slate-900',
+    idle:   'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
+  },
+  violet: {
+    active: 'bg-violet-500 text-white shadow',
+    idle:   'bg-violet-50 text-violet-700 hover:bg-violet-100 dark:bg-violet-950/40 dark:text-violet-300 dark:hover:bg-violet-900/50'
+  },
+  rose: {
+    active: 'bg-rose-500 text-white shadow',
+    idle:   'bg-rose-50 text-rose-700 hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-300 dark:hover:bg-rose-900/50'
+  },
+  emerald: {
+    active: 'bg-emerald-500 text-white shadow',
+    idle:   'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-900/50'
+  }
+};
+
+function FilterChip({
+  active,
+  color,
+  onClick,
+  children
+}: {
+  active: boolean;
+  color: FilterChipColor;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  const styles = FILTER_CHIP_STYLES[color];
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors',
+        active ? styles.active : styles.idle
+      )}
+    >
+      {children}
+    </button>
+  );
+}
 
 function QuickAction({
   icon: Icon,
