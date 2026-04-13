@@ -3,8 +3,20 @@ import * as React from 'react';
 import { Drawer as DrawerPrimitive } from 'vaul';
 import { cn } from '@/lib/utils';
 
-const Drawer = ({ shouldScaleBackground = true, ...props }: React.ComponentProps<typeof DrawerPrimitive.Root>) => (
-  <DrawerPrimitive.Root shouldScaleBackground={shouldScaleBackground} {...props} />
+const Drawer = ({
+  shouldScaleBackground = true,
+  // Vaul, by default, repositions the drawer so the focused input stays
+  // visible when the on-screen keyboard opens. On small forms this reads as
+  // the sheet "jumping" up when the user taps an input. We let the browser
+  // handle scroll-into-view via our own overflow-y container instead.
+  repositionInputs = false,
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Root>) => (
+  <DrawerPrimitive.Root
+    shouldScaleBackground={shouldScaleBackground}
+    repositionInputs={repositionInputs}
+    {...props}
+  />
 );
 Drawer.displayName = 'Drawer';
 

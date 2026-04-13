@@ -76,13 +76,17 @@ export function EatingCard({ catId }: { catId: string }) {
         : 'green';
 
   return (
-    <Card>
+    <Card className="overflow-hidden border-l-4 border-l-amber-400 bg-gradient-to-r from-amber-50/50 to-transparent dark:from-amber-950/20">
       <CardHeader className="flex-row items-center justify-between">
         <CardTitle className="text-base flex items-center gap-2">
-          <Utensils className="h-4 w-4 text-muted-foreground" />
+          <Utensils className="h-4 w-4 text-amber-500" />
           {t('title')}
         </CardTitle>
-        <Button size="sm" variant="outline" onClick={() => setOpen(true)}>
+        <Button
+          size="sm"
+          onClick={() => setOpen(true)}
+          className="bg-amber-500 text-white shadow hover:bg-amber-600"
+        >
           <Plus className="h-4 w-4" /> {t('log')}
         </Button>
       </CardHeader>

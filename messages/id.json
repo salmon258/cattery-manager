@@ -87,6 +87,29 @@
     "weightDue": "Catat berat hari ini",
     "weightDueHint": "Belum ada catatan berat hari ini"
   },
+  "sitterFilters": {
+    "searchPlaceholder": "Cari kucing berdasarkan nama…",
+    "clearSearch": "Hapus pencarian",
+    "clear": "Hapus filter",
+    "noMatches": "Tidak ada kucing yang cocok dengan filter.",
+    "resultsCount": "Menampilkan {shown} dari {total}",
+    "status": {
+      "all": "Semua",
+      "pending": "Tugas tertunda",
+      "tickets": "Tiket terbuka",
+      "clean": "Tidak ada tugas"
+    },
+    "sort": {
+      "nameAsc": "Nama (A–Z)",
+      "nameDesc": "Nama (Z–A)",
+      "pendingDesc": "Tugas terbanyak",
+      "ticketsDesc": "Tiket terbuka terbanyak",
+      "roomAsc": "Ruangan"
+    },
+    "room": {
+      "all": "Semua ruangan"
+    }
+  },
   "weight": {
     "title": "Berat badan",
     "titleFor": "Catat berat — {name}",

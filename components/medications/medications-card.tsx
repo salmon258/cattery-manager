@@ -98,18 +98,27 @@ export function MedicationsCard({ catId, role }: { catId: string; role: UserRole
   });
 
   return (
-    <Card className="md:col-span-2">
+    <Card className="overflow-hidden border-l-4 border-l-violet-400 bg-gradient-to-r from-violet-50/50 to-transparent dark:from-violet-950/20 md:col-span-2">
       <CardHeader className="flex-row items-center justify-between flex-wrap gap-2">
         <CardTitle className="text-base flex items-center gap-2">
-          <Pill className="h-4 w-4 text-muted-foreground" />
+          <Pill className="h-4 w-4 text-violet-500" />
           {t('title')}
         </CardTitle>
         <div className="flex gap-2">
-          <Button size="sm" variant="outline" onClick={() => setAdHocOpen(true)}>
+          <Button
+            size="sm"
+            onClick={() => setAdHocOpen(true)}
+            className="bg-violet-500 text-white shadow hover:bg-violet-600"
+          >
             <Plus className="h-4 w-4" /> {t('adHoc.log')}
           </Button>
           {isAdmin && (
-            <Button size="sm" variant="outline" onClick={() => setNewOpen(true)}>
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-violet-300 text-violet-700 hover:bg-violet-50 dark:border-violet-800 dark:text-violet-300 dark:hover:bg-violet-950/40"
+              onClick={() => setNewOpen(true)}
+            >
               <Plus className="h-4 w-4" /> {t('newSchedule')}
             </Button>
           )}
@@ -147,9 +156,9 @@ export function MedicationsCard({ catId, role }: { catId: string; role: UserRole
                     </div>
                     <Button
                       size="sm"
-                      variant="default"
                       disabled={confirm.isPending}
                       onClick={() => confirm.mutate(task.id)}
+                      className="bg-emerald-500 text-white shadow hover:bg-emerald-600"
                     >
                       <Check className="h-3.5 w-3.5" /> {t('confirm')}
                     </Button>

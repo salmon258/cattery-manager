@@ -87,6 +87,29 @@
     "weightDue": "Log today's weight",
     "weightDueHint": "No weight recorded today"
   },
+  "sitterFilters": {
+    "searchPlaceholder": "Search cats by name…",
+    "clearSearch": "Clear search",
+    "clear": "Clear filters",
+    "noMatches": "No cats match the current filters.",
+    "resultsCount": "Showing {shown} of {total}",
+    "status": {
+      "all": "All",
+      "pending": "Pending tasks",
+      "tickets": "Open tickets",
+      "clean": "All clear"
+    },
+    "sort": {
+      "nameAsc": "Name (A–Z)",
+      "nameDesc": "Name (Z–A)",
+      "pendingDesc": "Most pending tasks",
+      "ticketsDesc": "Most open tickets",
+      "roomAsc": "Room"
+    },
+    "room": {
+      "all": "All rooms"
+    }
+  },
   "weight": {
     "title": "Weight",
     "titleFor": "Log weight — {name}",
