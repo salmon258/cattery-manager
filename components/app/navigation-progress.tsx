@@ -1,40 +1,57 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 
 /**
  * Top-of-page loading bar that reacts to client-side navigation in the
  * App Router. We detect navigation starts by listening to same-origin link
- * clicks and patching `history.pushState` / `history.replaceState` (the
- * primitives used by `useRouter().push/replace`). We end the bar whenever
- * the committed pathname or search params actually change.
+ * clicks in the capture phase (so we run before Next.js calls
+ * `preventDefault()` on the anchor) and by patching `history.pushState` /
+ * `history.replaceState` so programmatic `router.push` also triggers the
+ * bar. We end the bar once the committed pathname or search params change.
  */
 export function NavigationProgress() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
+  // Safety valve: auto-hide after a maximum duration in case a navigation is
+  // cancelled mid-flight and we never see a pathname change.
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // End the bar once the new route has committed.
-  useEffect(() => {
+  function startBar() {
+    setLoading(true);
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    hideTimerRef.current = setTimeout(() => setLoading(false), 8000);
+  }
+  function stopBar() {
     setLoading(false);
-    // `searchParams` is included so query-string-only navigations are caught.
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+  }
+
+  // End the bar once the new route has committed. `searchParams` is included
+  // so query-string-only navigations are caught.
+  useEffect(() => {
+    stopBar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, searchParams]);
 
   useEffect(() => {
-    function startIfNavigation(target: URL) {
-      if (target.origin !== window.location.origin) return;
+    function isInternalNavigation(target: URL): boolean {
+      if (target.origin !== window.location.origin) return false;
       if (
         target.pathname === window.location.pathname &&
         target.search === window.location.search
       ) {
-        return;
+        return false;
       }
-      setLoading(true);
+      return true;
     }
 
     function handleClick(e: MouseEvent) {
-      if (e.defaultPrevented) return;
       if (e.button !== 0) return;
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       const anchor = (e.target as HTMLElement | null)?.closest('a');
@@ -45,22 +62,30 @@ export function NavigationProgress() {
       if (anchor.hasAttribute('download')) return;
       try {
         const url = new URL(href, window.location.href);
-        startIfNavigation(url);
+        if (isInternalNavigation(url)) startBar();
       } catch {
         /* ignore invalid URLs */
       }
     }
 
-    document.addEventListener('click', handleClick);
+    // Capture phase: fires before Next.js's own click handler calls
+    // `preventDefault()` on the anchor, so we can still see the intent even
+    // though the default anchor navigation is suppressed.
+    document.addEventListener('click', handleClick, true);
 
     // Patch history methods so programmatic navigation (router.push/replace)
-    // also starts the bar.
+    // also starts the bar. Next.js internally updates history via these two
+    // after the RSC fetch completes, but we also rely on link-click detection
+    // for the initial signal so we don't miss the whole transition window.
     const origPush = window.history.pushState;
     const origReplace = window.history.replaceState;
     window.history.pushState = function (...args) {
       try {
         const nextUrl = args[2];
-        if (nextUrl) startIfNavigation(new URL(String(nextUrl), window.location.href));
+        if (nextUrl) {
+          const url = new URL(String(nextUrl), window.location.href);
+          if (isInternalNavigation(url)) startBar();
+        }
       } catch {
         /* ignore */
       }
@@ -69,17 +94,28 @@ export function NavigationProgress() {
     window.history.replaceState = function (...args) {
       try {
         const nextUrl = args[2];
-        if (nextUrl) startIfNavigation(new URL(String(nextUrl), window.location.href));
+        if (nextUrl) {
+          const url = new URL(String(nextUrl), window.location.href);
+          if (isInternalNavigation(url)) startBar();
+        }
       } catch {
         /* ignore */
       }
       return origReplace.apply(this, args as Parameters<typeof origReplace>);
     };
 
+    // Back/forward button navigations
+    function onPopState() {
+      startBar();
+    }
+    window.addEventListener('popstate', onPopState);
+
     return () => {
-      document.removeEventListener('click', handleClick);
+      document.removeEventListener('click', handleClick, true);
+      window.removeEventListener('popstate', onPopState);
       window.history.pushState = origPush;
       window.history.replaceState = origReplace;
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     };
   }, []);
 

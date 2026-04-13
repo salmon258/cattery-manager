@@ -30,6 +30,8 @@ type NavItem = {
   label: string;
   icon: LucideIcon;
   badge?: number;
+  /** Tailwind text color used for the icon so the sidebar reads as colorful. */
+  iconColor?: string;
 };
 
 type NavSection = {
@@ -61,28 +63,28 @@ export function AdminSidebar({ profile, brandName, onNavigate }: Props) {
   const sections: NavSection[] = [
     {
       label: ta('sectionOverview'),
-      items: [{ href: '/', label: t('dashboard'), icon: LayoutDashboard }]
+      items: [{ href: '/', label: t('dashboard'), icon: LayoutDashboard, iconColor: 'text-violet-500' }]
     },
     {
       label: ta('sectionManage'),
       items: [
-        { href: '/cats', label: t('cats'), icon: Cat },
-        { href: '/health-tickets', label: t('healthTickets'), icon: HeartPulse, badge: openTicketCount || undefined },
-        { href: '/clinics', label: t('clinics'), icon: Stethoscope },
-        { href: '/breeding', label: t('breeding'), icon: Dna },
-        { href: '/rooms', label: t('rooms'), icon: Home },
-        { href: '/food-items', label: t('food'), icon: Utensils }
+        { href: '/cats', label: t('cats'), icon: Cat, iconColor: 'text-fuchsia-500' },
+        { href: '/health-tickets', label: t('healthTickets'), icon: HeartPulse, iconColor: 'text-rose-500', badge: openTicketCount || undefined },
+        { href: '/clinics', label: t('clinics'), icon: Stethoscope, iconColor: 'text-sky-500' },
+        { href: '/breeding', label: t('breeding'), icon: Dna, iconColor: 'text-pink-500' },
+        { href: '/rooms', label: t('rooms'), icon: Home, iconColor: 'text-teal-500' },
+        { href: '/food-items', label: t('food'), icon: Utensils, iconColor: 'text-amber-500' }
       ]
     },
     {
       label: ta('sectionAccess'),
-      items: [{ href: '/users', label: t('users'), icon: Users }]
+      items: [{ href: '/users', label: t('users'), icon: Users, iconColor: 'text-indigo-500' }]
     },
     {
       label: ta('sectionInsights'),
       items: [
-        { href: '/reports', label: t('reports'), icon: BarChart3 },
-        { href: '/settings', label: t('settings'), icon: Settings }
+        { href: '/reports', label: t('reports'), icon: BarChart3, iconColor: 'text-emerald-500' },
+        { href: '/settings', label: t('settings'), icon: Settings, iconColor: 'text-slate-500' }
       ]
     }
   ];
@@ -91,14 +93,16 @@ export function AdminSidebar({ profile, brandName, onNavigate }: Props) {
     pathname === href || (href !== '/' && pathname.startsWith(href));
 
   return (
-    <aside className="flex h-full w-full flex-col bg-muted/40">
+    <aside className="flex h-full w-full flex-col bg-gradient-to-b from-violet-50/60 via-background to-fuchsia-50/40 dark:from-violet-950/40 dark:via-background dark:to-fuchsia-950/20">
       {/* Brand */}
       <div className="flex h-16 items-center gap-2 border-b px-6">
-        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-sm">
+        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-violet-500 via-fuchsia-500 to-rose-500 text-white shadow-sm">
           <Cat className="h-4 w-4" />
         </div>
         <div className="flex flex-col">
-          <span className="text-sm font-semibold leading-tight">{brandName}</span>
+          <span className="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-600 bg-clip-text text-sm font-semibold leading-tight text-transparent dark:from-violet-300 dark:via-fuchsia-300 dark:to-rose-300">
+            {brandName}
+          </span>
           <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
             {ta('panelLabel')}
           </span>
@@ -124,14 +128,14 @@ export function AdminSidebar({ profile, brandName, onNavigate }: Props) {
                       className={cn(
                         'group flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors',
                         active
-                          ? 'bg-primary text-primary-foreground shadow-sm'
-                          : 'text-foreground/70 hover:bg-accent hover:text-foreground'
+                          ? 'bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow-sm'
+                          : 'text-foreground/70 hover:bg-accent hover:text-accent-foreground'
                       )}
                     >
                       <Icon
                         className={cn(
                           'h-4 w-4 shrink-0',
-                          active ? '' : 'text-muted-foreground group-hover:text-foreground'
+                          active ? 'text-white' : item.iconColor ?? 'text-muted-foreground'
                         )}
                       />
                       <span className="truncate flex-1">{item.label}</span>

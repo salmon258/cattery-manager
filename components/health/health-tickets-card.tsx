@@ -107,10 +107,10 @@ export function HealthTicketsCard({ catId, role }: Props) {
 
   return (
     <>
-      <Card className="md:col-span-2">
+      <Card className="overflow-hidden border-l-4 border-l-rose-400 bg-gradient-to-r from-rose-50/50 to-transparent dark:from-rose-950/20 md:col-span-2">
         <CardHeader className="flex-row items-center justify-between flex-wrap gap-2">
           <CardTitle className="text-base flex items-center gap-2">
-            <HeartPulse className="h-4 w-4 text-muted-foreground" />
+            <HeartPulse className="h-4 w-4 text-rose-500" />
             {t('title')}
             {open.length > 0 && (
               <Badge variant="destructive" className="text-xs">
@@ -118,7 +118,11 @@ export function HealthTicketsCard({ catId, role }: Props) {
               </Badge>
             )}
           </CardTitle>
-          <Button size="sm" variant="outline" onClick={() => setOpenCreate(true)}>
+          <Button
+            size="sm"
+            onClick={() => setOpenCreate(true)}
+            className="bg-rose-500 text-white shadow hover:bg-rose-600"
+          >
             <Plus className="h-4 w-4" /> {t('openTicket')}
           </Button>
         </CardHeader>
