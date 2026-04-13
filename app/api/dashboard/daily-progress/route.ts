@@ -7,8 +7,11 @@ import { getCurrentUser } from '@/lib/auth/current-user';
  * Admin only. Today's care progress for every active cat, grouped by primary
  * sitter. Cats without an assignee end up in the "unassigned" group.
  *
- * Per cat we return (all limited to today's window):
+ * Per cat we return (all limited to today's window unless stated):
  *   - latest_weight:     { weight_kg, recorded_at } | null   (today's reading if any)
+ *   - previous_weight:   { weight_kg, recorded_at } | null   (most recent reading
+ *                        strictly BEFORE today, within the last 30 days — used
+ *                        by the dashboard to show a day-over-day delta)
  *   - meals:             [{ id, meal_time, feeding_method, total_grams, total_kcal, worst_ratio }]
  *   - med_tasks:         [{ id, due_at, confirmed_at, skipped, overdue, medicine_name }]
  *   - open_tickets:      count of open/in_progress tickets
@@ -25,11 +28,18 @@ export async function GET() {
   const startIso = startOfDay.toISOString();
   const endIso   = endOfDay.toISOString();
   const nowIso   = new Date().toISOString();
+  // Lookback for the "previous" comparison weight. 30 days is more than
+  // enough to catch the most recent prior reading for any active cat while
+  // keeping the row count on this query bounded.
+  const previousLookback = new Date(startOfDay);
+  previousLookback.setDate(previousLookback.getDate() - 30);
+  const previousStartIso = previousLookback.toISOString();
 
   const [
     catsRes,
     sittersRes,
     weightsRes,
+    previousWeightsRes,
     mealsRes,
     medsRes,
     ticketsRes
@@ -50,6 +60,12 @@ export async function GET() {
       .select('cat_id, weight_kg, recorded_at')
       .gte('recorded_at', startIso)
       .lte('recorded_at', endIso)
+      .order('recorded_at', { ascending: false }),
+    supabase
+      .from('weight_logs')
+      .select('cat_id, weight_kg, recorded_at')
+      .gte('recorded_at', previousStartIso)
+      .lt('recorded_at', startIso)
       .order('recorded_at', { ascending: false }),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase as any)
@@ -86,6 +102,14 @@ export async function GET() {
   for (const w of weightsRes.data ?? []) {
     if (!latestWeight.has(w.cat_id)) {
       latestWeight.set(w.cat_id, { weight_kg: Number(w.weight_kg), recorded_at: w.recorded_at });
+    }
+  }
+
+  // ─── Previous weight per cat (most recent reading BEFORE today) ──────────
+  const previousWeight = new Map<string, WeightVal>();
+  for (const w of previousWeightsRes.data ?? []) {
+    if (!previousWeight.has(w.cat_id)) {
+      previousWeight.set(w.cat_id, { weight_kg: Number(w.weight_kg), recorded_at: w.recorded_at });
     }
   }
 
@@ -167,7 +191,8 @@ export async function GET() {
       name: c.name,
       profile_photo_url: c.profile_photo_url,
       gender: c.gender,
-      latest_weight: latestWeight.get(c.id) ?? null,
+      latest_weight:   latestWeight.get(c.id)   ?? null,
+      previous_weight: previousWeight.get(c.id) ?? null,
       meals:         mealsByCat.get(c.id)    ?? [],
       med_tasks:     medTasksByCat.get(c.id) ?? [],
       open_tickets:  ticketsByCat.get(c.id)  ?? 0

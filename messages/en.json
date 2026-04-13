@@ -57,6 +57,7 @@
       "unassigned": "Unassigned",
       "weightLogged": "Weight logged today",
       "weightMissing": "Weight not logged yet",
+      "vsPrevious": "vs previous reading:",
       "mealsLogged": "{count} meal(s) logged today",
       "noMeals": "No meals logged yet",
       "medsConfirmed": "{done}/{total} doses confirmed",

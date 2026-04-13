@@ -57,6 +57,7 @@
       "unassigned": "Belum ditugaskan",
       "weightLogged": "Berat sudah dicatat hari ini",
       "weightMissing": "Berat belum dicatat",
+      "vsPrevious": "vs catatan sebelumnya:",
       "mealsLogged": "{count} kali makan dicatat hari ini",
       "noMeals": "Belum ada makan dicatat",
       "medsConfirmed": "{done}/{total} dosis dikonfirmasi",
