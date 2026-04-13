@@ -117,6 +117,7 @@
     "logged": "Berat badan tercatat.",
     "fields": {
       "weightKg": "Berat (kg)",
+      "weightG": "Berat (g)",
       "notes": "Catatan"
     },
     "emptyHint": "Belum ada catatan berat. Catat berat pertama untuk mengaktifkan rekomendasi kalori.",
@@ -175,11 +176,14 @@
     "addFood": "Tambah makanan",
     "selectFood": "Pilih item makanan",
     "totalKcal": "Total estimasi kkal",
+    "eatenHint": "Jumlah dimakan otomatis sama dengan yang diberikan — kurangi hanya jika kucing menyisakan makanan.",
     "fields": {
       "feedingMethod": "Metode pemberian",
       "items": "Item makanan",
       "quantityGivenG": "Jumlah diberikan (g)",
       "quantityEaten": "Jumlah dimakan",
+      "givenG": "Diberikan (g)",
+      "eatenG": "Dimakan (g)",
       "notes": "Catatan"
     },
     "methods": {
