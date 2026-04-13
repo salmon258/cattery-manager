@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
@@ -10,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { Plus, Trash2 } from 'lucide-react';
 
 import type { EatenRatio, FeedingMethod, FoodItem } from '@/lib/supabase/aliases';
-import { eatingLogSchema, type EatingLogInput, EATEN_RATIO_FACTOR } from '@/lib/schemas/eating';
+import { type EatingLogInput } from '@/lib/schemas/eating';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,12 +21,56 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
 
 const METHODS: FeedingMethod[] = ['self', 'assisted', 'force_fed'];
-const RATIOS: EatenRatio[] = ['all', 'most', 'half', 'little', 'none'];
 
 async function fetchFoodItems(): Promise<FoodItem[]> {
   const r = await fetch('/api/food-items', { cache: 'no-store' });
   if (!r.ok) throw new Error('Failed');
   return (await r.json()).items;
+}
+
+/**
+ * Form-local schema: sitters enter the actual grams given AND grams eaten,
+ * which is much clearer than picking "ate most / ate half". `eaten_g`
+ * defaults to whatever `given_g` is so a fully-eaten meal is one tap.
+ * On submit we convert the eaten/given ratio back into the enum value the
+ * DB column expects (the `estimated_kcal_consumed` generated column still
+ * reads the enum), picking the closest available factor.
+ */
+const eatingFormItemSchema = z
+  .object({
+    food_item_id: z.string().uuid({ message: 'Select a food item' }),
+    given_g: z.coerce
+      .number({ invalid_type_error: 'Enter a number' })
+      .min(0, 'Must be ≥ 0')
+      .max(10000, 'Too large'),
+    eaten_g: z.coerce
+      .number({ invalid_type_error: 'Enter a number' })
+      .min(0, 'Must be ≥ 0')
+      .max(10000, 'Too large')
+  })
+  .refine((v) => v.eaten_g <= v.given_g, {
+    message: 'Eaten cannot exceed given',
+    path: ['eaten_g']
+  });
+
+const eatingFormSchema = z.object({
+  feeding_method: z.enum(['self', 'assisted', 'force_fed']).default('self'),
+  notes: z.string().max(2000).nullable().optional(),
+  items: z.array(eatingFormItemSchema).min(1, 'At least one food item is required')
+});
+type EatingFormInput = z.infer<typeof eatingFormSchema>;
+
+// Map an eaten/given ratio to the nearest DB enum. Breakpoints sit at the
+// midpoints between the factors stored in the eating_log_items generated
+// column (1, 0.75, 0.5, 0.2, 0). Eaten == 0 always becomes 'none', and any
+// non-zero sliver becomes at least 'little' to match user intent.
+function ratioToEnum(given: number, eaten: number): EatenRatio {
+  if (given <= 0 || eaten <= 0) return 'none';
+  const r = eaten / given;
+  if (r >= 0.875) return 'all';
+  if (r >= 0.625) return 'most';
+  if (r >= 0.35)  return 'half';
+  return 'little';
 }
 
 interface Props {
@@ -47,35 +92,50 @@ export function LogEatingModal({ open, onClose, catId, catName }: Props) {
     enabled: open
   });
 
-  const form = useForm<EatingLogInput>({
-    resolver: zodResolver(eatingLogSchema),
-    defaultValues: {
-      feeding_method: 'self',
-      notes: '',
-      items: [{ food_item_id: '', quantity_given_g: 50, quantity_eaten: 'all' }]
-    }
+  const emptyItem = { food_item_id: '', given_g: 0, eaten_g: 0 };
+  const emptyDefaults: EatingFormInput = {
+    feeding_method: 'self',
+    notes: '',
+    items: [emptyItem]
+  };
+
+  const form = useForm<EatingFormInput>({
+    resolver: zodResolver(eatingFormSchema),
+    defaultValues: emptyDefaults
   });
   const { fields, append, remove } = useFieldArray({ control: form.control, name: 'items' });
 
   useEffect(() => {
-    if (open) form.reset({ feeding_method: 'self', notes: '', items: [{ food_item_id: '', quantity_given_g: 50, quantity_eaten: 'all' }] });
-  }, [open, form]);
+    if (open) form.reset(emptyDefaults);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
-  // Live total kcal estimate.
+  // Live total kcal estimate based on the raw gram figures (no enum rounding
+  // yet): eaten_g × kcal/g. This keeps the number the sitter sees in sync
+  // with the grams they entered, even if the stored enum will be rounded.
   const watchedItems = form.watch('items');
   const totalKcal = (watchedItems ?? []).reduce((acc, it) => {
     const food = foods.find((f) => f.id === it?.food_item_id);
-    if (!food || !it?.quantity_given_g) return acc;
-    const factor = EATEN_RATIO_FACTOR[it.quantity_eaten ?? 'all'] ?? 0;
-    return acc + Number(it.quantity_given_g) * Number(food.calories_per_gram) * factor;
+    if (!food || !it) return acc;
+    const eaten = Number(it.eaten_g ?? 0);
+    return acc + eaten * Number(food.calories_per_gram);
   }, 0);
 
   const m = useMutation({
-    mutationFn: async (v: EatingLogInput) => {
+    mutationFn: async (v: EatingFormInput) => {
+      const payload: EatingLogInput = {
+        feeding_method: v.feeding_method,
+        notes: v.notes ?? null,
+        items: v.items.map((it) => ({
+          food_item_id: it.food_item_id,
+          quantity_given_g: Number(it.given_g),
+          quantity_eaten: ratioToEnum(Number(it.given_g), Number(it.eaten_g))
+        }))
+      };
       const r = await fetch(`/api/cats/${catId}/eating`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(v)
+        body: JSON.stringify(payload)
       });
       if (!r.ok) throw new Error((await r.json()).error ?? 'Failed');
     },
@@ -83,6 +143,7 @@ export function LogEatingModal({ open, onClose, catId, catName }: Props) {
       toast.success(t('logged'));
       qc.invalidateQueries({ queryKey: ['eating', catId] });
       qc.invalidateQueries({ queryKey: ['calorie-summary', catId] });
+      qc.invalidateQueries({ queryKey: ['me-cats'] });
       onClose();
       router.refresh();
     },
@@ -120,7 +181,7 @@ export function LogEatingModal({ open, onClose, catId, catName }: Props) {
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => append({ food_item_id: '', quantity_given_g: 0, quantity_eaten: 'all' })}
+              onClick={() => append(emptyItem)}
             >
               <Plus className="h-3 w-3" /> {t('addFood')}
             </Button>
@@ -157,30 +218,46 @@ export function LogEatingModal({ open, onClose, catId, catName }: Props) {
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">{t('fields.quantityGivenG')}</Label>
+                    <Label className="text-xs text-muted-foreground">{t('fields.givenG')}</Label>
                     <Input
                       type="number"
-                      inputMode="decimal"
+                      inputMode="numeric"
                       step="1"
                       min="0"
-                      {...form.register(`items.${idx}.quantity_given_g`)}
+                      placeholder="50"
+                      {...form.register(`items.${idx}.given_g`, {
+                        // Mirror the given amount into the eaten field so a
+                        // fully-eaten meal is a single entry. Sitters only
+                        // need to touch "eaten" when it was a partial eat.
+                        onChange: (e) => {
+                          const next = e.target.value;
+                          form.setValue(`items.${idx}.eaten_g`, next as unknown as number, {
+                            shouldDirty: true,
+                            shouldValidate: false
+                          });
+                        }
+                      })}
                     />
+                    {rowError?.given_g?.message && (
+                      <p className="text-xs text-destructive">{rowError.given_g.message}</p>
+                    )}
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">{t('fields.quantityEaten')}</Label>
-                    <Select
-                      value={form.watch(`items.${idx}.quantity_eaten`) ?? 'all'}
-                      onValueChange={(v) => form.setValue(`items.${idx}.quantity_eaten`, v as EatenRatio)}
-                    >
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {RATIOS.map((r) => (
-                          <SelectItem key={r} value={r}>{t(`ratios.${r}`)}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Label className="text-xs text-muted-foreground">{t('fields.eatenG')}</Label>
+                    <Input
+                      type="number"
+                      inputMode="numeric"
+                      step="1"
+                      min="0"
+                      placeholder="50"
+                      {...form.register(`items.${idx}.eaten_g`)}
+                    />
+                    {rowError?.eaten_g?.message && (
+                      <p className="text-xs text-destructive">{rowError.eaten_g.message}</p>
+                    )}
                   </div>
                 </div>
+                <p className="text-[11px] text-muted-foreground">{t('eatenHint')}</p>
               </div>
             );
           })}
