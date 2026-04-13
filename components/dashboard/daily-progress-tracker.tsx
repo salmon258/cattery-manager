@@ -6,7 +6,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import {
   Check, X, Scale, Utensils, Pill, HeartPulse,
-  ChevronDown, ChevronRight, User, AlertTriangle
+  ChevronDown, ChevronRight, User, AlertTriangle,
+  ArrowUp, ArrowDown, Minus
 } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,12 +36,16 @@ type MedTask = {
   medicine_name: string;
 };
 
+type WeightReading = { weight_kg: number; recorded_at: string };
+
 type CatRow = {
   id: string;
   name: string;
   profile_photo_url: string | null;
   gender: 'male' | 'female';
-  latest_weight: { weight_kg: number; recorded_at: string } | null;
+  latest_weight: WeightReading | null;
+  /** Most recent reading BEFORE today, if any (up to 30 days back). */
+  previous_weight: WeightReading | null;
   meals: Meal[];
   med_tasks: MedTask[];
   open_tickets: number;
@@ -68,6 +73,69 @@ function hasFoodWarning(c: CatRow): boolean {
 
 function formatTime(iso: string): string {
   return new Date(iso).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+}
+
+function formatDay(iso: string): string {
+  return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+/**
+ * Compute a day-over-day weight delta chip: absolute difference in grams,
+ * percentage change, and a direction used to pick the icon + colour. Returns
+ * null when either side is missing so the caller can just skip rendering.
+ */
+type WeightDelta = {
+  deltaKg: number;
+  deltaG: number;
+  pct: number;
+  direction: 'up' | 'down' | 'flat';
+};
+
+function computeWeightDelta(
+  latest: WeightReading | null,
+  previous: WeightReading | null
+): WeightDelta | null {
+  if (!latest || !previous || previous.weight_kg <= 0) return null;
+  const deltaKg = latest.weight_kg - previous.weight_kg;
+  const pct = (deltaKg / previous.weight_kg) * 100;
+  // Treat sub-gram noise as flat so tiny scale jitter doesn't draw attention.
+  const direction: WeightDelta['direction'] =
+    Math.abs(deltaKg) < 0.001 ? 'flat' : deltaKg > 0 ? 'up' : 'down';
+  return { deltaKg, deltaG: deltaKg * 1000, pct, direction };
+}
+
+function WeightDeltaChip({ delta }: { delta: WeightDelta }) {
+  const { deltaKg, deltaG, pct, direction } = delta;
+  const Icon = direction === 'up' ? ArrowUp : direction === 'down' ? ArrowDown : Minus;
+  const cls =
+    direction === 'up'
+      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+      : direction === 'down'
+        ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300'
+        : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300';
+  // Show grams when the change is small enough that kg with 2dp would read
+  // as 0.00 or round-trip to ±10g. Otherwise kg with 2 decimals is clearer.
+  const absG = Math.abs(deltaG);
+  const sign = deltaKg > 0 ? '+' : deltaKg < 0 ? '−' : '';
+  const magnitude =
+    absG < 100
+      ? `${sign}${Math.round(absG)} g`
+      : `${sign}${Math.abs(deltaKg).toFixed(2)} kg`;
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-[10px] font-medium',
+        cls
+      )}
+    >
+      <Icon className="h-2.5 w-2.5" />
+      {magnitude}
+      <span className="opacity-80">
+        ({sign}
+        {Math.abs(pct).toFixed(1)}%)
+      </span>
+    </span>
+  );
 }
 
 function groupTasksByMedicine(tasks: MedTask[]): { name: string; tasks: MedTask[] }[] {
@@ -102,6 +170,7 @@ function CatRowItem({ cat }: { cat: CatRow }) {
   const totalGrams = cat.meals.reduce((s, m) => s + m.total_grams, 0);
   const totalKcal  = cat.meals.reduce((s, m) => s + m.total_kcal, 0);
   const foodWarn = hasFoodWarning(cat);
+  const weightDelta = computeWeightDelta(cat.latest_weight, cat.previous_weight);
 
   return (
     <Link
@@ -128,7 +197,7 @@ function CatRowItem({ cat }: { cat: CatRow }) {
       </div>
 
       {/* Weight row */}
-      <div className="flex items-center gap-2 text-xs">
+      <div className="flex items-center gap-2 text-xs flex-wrap">
         <span className={cn(
           'inline-flex h-5 w-5 items-center justify-center rounded',
           cat.latest_weight
@@ -138,10 +207,20 @@ function CatRowItem({ cat }: { cat: CatRow }) {
           <Scale className="h-3 w-3" />
         </span>
         {cat.latest_weight ? (
-          <span className="font-medium">
-            {cat.latest_weight.weight_kg} <span className="text-muted-foreground font-normal">kg</span>
-            <span className="text-muted-foreground ml-1">@ {formatTime(cat.latest_weight.recorded_at)}</span>
-          </span>
+          <>
+            <span className="font-medium">
+              {cat.latest_weight.weight_kg} <span className="text-muted-foreground font-normal">kg</span>
+              <span className="text-muted-foreground ml-1">@ {formatTime(cat.latest_weight.recorded_at)}</span>
+            </span>
+            {weightDelta && (
+              <span
+                className="inline-flex items-center gap-1"
+                title={`${t('vsPrevious')} ${cat.previous_weight!.weight_kg} kg · ${formatDay(cat.previous_weight!.recorded_at)}`}
+              >
+                <WeightDeltaChip delta={weightDelta} />
+              </span>
+            )}
+          </>
         ) : (
           <span className="text-muted-foreground">{t('weightMissing')}</span>
         )}
