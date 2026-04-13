@@ -245,7 +245,7 @@
     "unassigned": "Belum ditugaskan",
     "selectAssignee": "Pilih penjaga",
     "changeTitle": "Ubah penjaga utama",
-    "changeHint": "Hanya Penjaga Kucing aktif yang dapat menjadi penjaga utama. Pengaturan ini bersifat informatif — setiap penjaga tetap dapat mencatat laporan untuk kucing mana pun.",
+    "changeHint": "Hanya Cat Sitter aktif yang dapat menjadi penjaga utama. Pengaturan ini bersifat informatif — setiap penjaga tetap dapat mencatat laporan untuk kucing mana pun.",
     "updated": "Penjaga diperbarui.",
     "reassignTitle": "Alihkan sebelum menonaktifkan",
     "reassignWarning": "{name} saat ini ditugaskan untuk {count} kucing.",
@@ -317,7 +317,7 @@
     },
     "roles": {
       "admin": "Administrator",
-      "cat_sitter": "Penjaga Kucing"
+      "cat_sitter": "Cat Sitter"
     },
     "actions": {
       "deactivate": "Nonaktifkan",
