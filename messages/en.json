@@ -117,6 +117,7 @@
     "logged": "Weight logged.",
     "fields": {
       "weightKg": "Weight (kg)",
+      "weightG": "Weight (g)",
       "notes": "Notes"
     },
     "emptyHint": "No weight recorded yet. Log the first reading to enable kcal recommendations.",
@@ -175,11 +176,14 @@
     "addFood": "Add food",
     "selectFood": "Select food item",
     "totalKcal": "Estimated total kcal",
+    "eatenHint": "Eaten defaults to given — lower it only if the cat left some behind.",
     "fields": {
       "feedingMethod": "Feeding method",
       "items": "Food items",
       "quantityGivenG": "Quantity given (g)",
       "quantityEaten": "Amount eaten",
+      "givenG": "Given (g)",
+      "eatenG": "Eaten (g)",
       "notes": "Notes"
     },
     "methods": {

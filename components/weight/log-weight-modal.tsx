@@ -2,12 +2,13 @@
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
-import { weightLogSchema, type WeightLogInput } from '@/lib/schemas/weight';
+import { type WeightLogInput } from '@/lib/schemas/weight';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,19 +22,32 @@ interface Props {
   catName?: string;
 }
 
+/**
+ * Sitters find it easier to read their scale in grams than in kilograms,
+ * so the form edits a `weight_g` field and we convert to kilograms just
+ * before submitting to the API (which still stores kg in the database).
+ */
+const weightGramsFormSchema = z.object({
+  weight_g: z.coerce
+    .number({ invalid_type_error: 'Enter a number' })
+    .gt(0, 'Weight must be positive')
+    .lt(30000, 'Weight must be below 30,000 g'),
+  notes: z.string().max(2000).nullable().optional()
+});
+type WeightGramsFormInput = z.infer<typeof weightGramsFormSchema>;
+
 export function LogWeightModal({ open, onClose, catId, catName }: Props) {
   const t = useTranslations('weight');
   const tc = useTranslations('common');
   const router = useRouter();
   const qc = useQueryClient();
 
-  // weight_kg starts empty (not 0) so the user can type a number directly
-  // rather than having to delete the zero first. zod.coerce converts the
-  // string on submit. Cast to number to satisfy WeightLogInput's typed shape.
-  const emptyDefaults = { weight_kg: '' as unknown as number, notes: '' };
+  // weight_g starts empty (not 0) so the user can type a number directly
+  // rather than having to delete the zero first.
+  const emptyDefaults = { weight_g: '' as unknown as number, notes: '' };
 
-  const form = useForm<WeightLogInput>({
-    resolver: zodResolver(weightLogSchema),
+  const form = useForm<WeightGramsFormInput>({
+    resolver: zodResolver(weightGramsFormSchema),
     defaultValues: emptyDefaults
   });
 
@@ -67,21 +81,29 @@ export function LogWeightModal({ open, onClose, catId, catName }: Props) {
       onOpenChange={(o) => !o && onClose()}
       title={catName ? t('titleFor', { name: catName }) : t('title')}
     >
-      <form onSubmit={form.handleSubmit((v) => m.mutate(v))} className="space-y-3 py-2">
+      <form
+        onSubmit={form.handleSubmit((v) => {
+          m.mutate({
+            weight_kg: Number(v.weight_g) / 1000,
+            notes: v.notes ?? null
+          });
+        })}
+        className="space-y-3 py-2"
+      >
         <div className="space-y-2">
-          <Label>{t('fields.weightKg')}</Label>
+          <Label>{t('fields.weightG')}</Label>
           <Input
             type="number"
-            inputMode="decimal"
-            step="0.01"
-            min="0.1"
-            max="29.9"
-            placeholder="0.00"
+            inputMode="numeric"
+            step="1"
+            min="1"
+            max="29999"
+            placeholder="4500"
             autoFocus
-            {...form.register('weight_kg')}
+            {...form.register('weight_g')}
           />
-          {errors.weight_kg?.message && (
-            <p className="text-xs text-destructive">{errors.weight_kg.message}</p>
+          {errors.weight_g?.message && (
+            <p className="text-xs text-destructive">{errors.weight_g.message}</p>
           )}
         </div>
         <div className="space-y-2">
