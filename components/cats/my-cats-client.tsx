@@ -8,9 +8,11 @@ import { toast } from 'sonner';
 import {
   AlertTriangle,
   Check,
+  ChevronDown,
   FlaskConical,
   Home,
   ListChecks,
+  Pill,
   Scale,
   Timer,
   Utensils
@@ -27,11 +29,43 @@ import { LogEatingModal } from '@/components/eating/log-eating-modal';
 import { LogAdHocMedModal } from '@/components/medications/log-ad-hoc-med-modal';
 import { OpenTicketModal } from '@/components/health/open-ticket-modal';
 
+type TodayWeight = { id: string; weight_kg: number; recorded_at: string };
+type TodayMeal = {
+  id: string;
+  meal_time: string;
+  feeding_method: 'self' | 'assisted' | 'force_fed';
+  total_grams: number;
+  total_kcal: number;
+  food_names: string[];
+};
+type TodayAdHoc = {
+  id: string;
+  medicine_name: string;
+  dose: string | null;
+  unit: string | null;
+  route: string | null;
+  given_at: string;
+};
+type TodayConfirmedMed = {
+  id: string;
+  medicine_name: string;
+  dose: string | null;
+  due_at: string;
+  confirmed_at: string;
+};
+type TodaySummary = {
+  weights: TodayWeight[];
+  meals: TodayMeal[];
+  ad_hoc_meds: TodayAdHoc[];
+  confirmed_med_tasks: TodayConfirmedMed[];
+};
+
 type MyCat = Cat & {
   current_room?: { id: string; name: string } | null;
   assignee?: { id: string; full_name: string } | null;
   last_weight_recorded_at?: string | null;
   open_ticket_count?: number;
+  today_summary?: TodaySummary;
 };
 
 function isToday(dateStr: string): boolean {
@@ -109,9 +143,9 @@ export function MyCatsClient({ firstName }: { firstName: string }) {
 
   return (
     <div className="space-y-4">
-      <header>
-        <h1 className="text-xl font-semibold">{ts('title', { name: firstName })}</h1>
-        <p className="text-sm text-muted-foreground">{ts('subtitle')}</p>
+      <header className="overflow-hidden rounded-2xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-rose-500 p-5 text-white shadow-md">
+        <h1 className="text-xl font-semibold drop-shadow-sm">{ts('title', { name: firstName })}</h1>
+        <p className="text-sm text-white/90">{ts('subtitle')}</p>
       </header>
 
       {isLoading && (
@@ -139,13 +173,21 @@ export function MyCatsClient({ firstName }: { firstName: string }) {
       )}
 
       <div className="grid gap-3">
-        {cats.map((c) => {
+        {cats.map((c, idx) => {
           const catTasks = tasksByCat.get(c.id) ?? [];
           const needsWeightToday = !c.last_weight_recorded_at || !isToday(c.last_weight_recorded_at);
           const totalTodoCount = catTasks.length + (needsWeightToday ? 1 : 0);
           const openTickets = c.open_ticket_count ?? 0;
+          const accent = CARD_ACCENTS[idx % CARD_ACCENTS.length];
           return (
-            <Card key={c.id}>
+            <Card
+              key={c.id}
+              className={cn(
+                'overflow-hidden border-l-4 shadow-sm transition-shadow hover:shadow-md',
+                accent.border,
+                accent.bg
+              )}
+            >
               <CardContent className="p-4 space-y-3">
                 <Link href={`/cats/${c.id}`} className="flex items-center gap-3">
                   <Avatar className="h-12 w-12">
@@ -187,8 +229,8 @@ export function MyCatsClient({ firstName }: { firstName: string }) {
                         </div>
                         <Button
                           size="sm"
-                          variant="outline"
                           onClick={() => setWeightTarget({ id: c.id, name: c.name })}
+                          className="bg-amber-500 text-white shadow hover:bg-amber-600"
                         >
                           <Scale className="h-3.5 w-3.5" /> {tq('logWeight')}
                         </Button>
@@ -218,6 +260,7 @@ export function MyCatsClient({ firstName }: { firstName: string }) {
                             size="sm"
                             disabled={confirm.isPending}
                             onClick={() => confirm.mutate(task.id)}
+                            className="bg-emerald-500 text-white shadow hover:bg-emerald-600"
                           >
                             <Check className="h-3.5 w-3.5" /> {tm('confirm')}
                           </Button>
@@ -231,24 +274,30 @@ export function MyCatsClient({ firstName }: { firstName: string }) {
                   <QuickAction
                     icon={Scale}
                     label={tq('logWeight')}
+                    color="sky"
                     onClick={() => setWeightTarget({ id: c.id, name: c.name })}
                   />
                   <QuickAction
                     icon={Utensils}
                     label={tq('logMeal')}
+                    color="amber"
                     onClick={() => setMealTarget({ id: c.id, name: c.name })}
                   />
                   <QuickAction
                     icon={FlaskConical}
                     label={tq('logMed')}
+                    color="violet"
                     onClick={() => setMedTarget({ id: c.id, name: c.name })}
                   />
                   <QuickAction
                     icon={AlertTriangle}
                     label={tq('reportIssue')}
+                    color="rose"
                     onClick={() => setReportTarget({ id: c.id, name: c.name })}
                   />
                 </div>
+
+                {c.today_summary && <TodayDetails summary={c.today_summary} />}
               </CardContent>
             </Card>
           );
@@ -283,25 +332,199 @@ export function MyCatsClient({ firstName }: { firstName: string }) {
   );
 }
 
+type QuickActionColor = 'sky' | 'amber' | 'violet' | 'rose';
+
+const QUICK_ACTION_STYLES: Record<QuickActionColor, string> = {
+  sky: 'border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 hover:text-sky-800 dark:border-sky-900/60 dark:bg-sky-950/40 dark:text-sky-300 dark:hover:bg-sky-900/50',
+  amber:
+    'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 hover:text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-300 dark:hover:bg-amber-900/50',
+  violet:
+    'border-violet-200 bg-violet-50 text-violet-700 hover:bg-violet-100 hover:text-violet-800 dark:border-violet-900/60 dark:bg-violet-950/40 dark:text-violet-300 dark:hover:bg-violet-900/50',
+  rose: 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300 dark:hover:bg-rose-900/50'
+};
+
+const CARD_ACCENTS: Array<{ border: string; bg: string }> = [
+  { border: 'border-l-sky-400', bg: 'bg-gradient-to-r from-sky-50/70 to-transparent dark:from-sky-950/30' },
+  { border: 'border-l-emerald-400', bg: 'bg-gradient-to-r from-emerald-50/70 to-transparent dark:from-emerald-950/30' },
+  { border: 'border-l-amber-400', bg: 'bg-gradient-to-r from-amber-50/70 to-transparent dark:from-amber-950/30' },
+  { border: 'border-l-violet-400', bg: 'bg-gradient-to-r from-violet-50/70 to-transparent dark:from-violet-950/30' },
+  { border: 'border-l-rose-400', bg: 'bg-gradient-to-r from-rose-50/70 to-transparent dark:from-rose-950/30' },
+  { border: 'border-l-teal-400', bg: 'bg-gradient-to-r from-teal-50/70 to-transparent dark:from-teal-950/30' }
+];
+
 function QuickAction({
   icon: Icon,
   label,
+  color,
   onClick
 }: {
   icon: typeof Scale;
   label: string;
+  color: QuickActionColor;
   onClick: () => void;
 }) {
   return (
     <Button
       type="button"
-      variant="outline"
       size="sm"
-      className="h-auto flex-col gap-1 py-2"
+      className={cn(
+        'h-auto flex-col gap-1 border py-2 shadow-sm transition-transform active:scale-95',
+        QUICK_ACTION_STYLES[color]
+      )}
       onClick={onClick}
     >
       <Icon className="h-4 w-4" />
-      <span className="text-[11px]">{label}</span>
+      <span className="text-[11px] font-medium">{label}</span>
     </Button>
+  );
+}
+
+function formatTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function TodayDetails({ summary }: { summary: TodaySummary }) {
+  const ts = useTranslations('sitterHome');
+  const [open, setOpen] = useState(false);
+  const total =
+    summary.weights.length +
+    summary.meals.length +
+    summary.ad_hoc_meds.length +
+    summary.confirmed_med_tasks.length;
+
+  if (total === 0) {
+    return (
+      <div className="rounded-lg border border-dashed border-muted-foreground/20 bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground">
+        {ts('todayEmpty')}
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-hidden rounded-lg border border-slate-200 bg-white/60 dark:border-slate-800 dark:bg-slate-900/40">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800/60"
+      >
+        <span className="flex items-center gap-2">
+          <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 text-[10px] font-semibold text-white">
+            {total}
+          </span>
+          <span>{ts('todayTitle')}</span>
+          <span className="hidden items-center gap-1.5 text-muted-foreground sm:flex">
+            {summary.weights.length > 0 && (
+              <span className="flex items-center gap-0.5">
+                <Scale className="h-3 w-3 text-sky-500" />
+                {summary.weights.length}
+              </span>
+            )}
+            {summary.meals.length > 0 && (
+              <span className="flex items-center gap-0.5">
+                <Utensils className="h-3 w-3 text-amber-500" />
+                {summary.meals.length}
+              </span>
+            )}
+            {(summary.ad_hoc_meds.length > 0 || summary.confirmed_med_tasks.length > 0) && (
+              <span className="flex items-center gap-0.5">
+                <Pill className="h-3 w-3 text-violet-500" />
+                {summary.ad_hoc_meds.length + summary.confirmed_med_tasks.length}
+              </span>
+            )}
+          </span>
+        </span>
+        <ChevronDown
+          className={cn('h-4 w-4 text-muted-foreground transition-transform', open && 'rotate-180')}
+        />
+      </button>
+
+      {open && (
+        <div className="divide-y divide-slate-100 dark:divide-slate-800">
+          {summary.weights.length > 0 && (
+            <div className="space-y-1 bg-sky-50/50 px-3 py-2 dark:bg-sky-950/20">
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-sky-700 dark:text-sky-300">
+                <Scale className="h-3 w-3" /> {ts('todayWeights')}
+              </div>
+              <ul className="space-y-0.5">
+                {summary.weights.map((w) => (
+                  <li key={w.id} className="flex items-center justify-between text-xs">
+                    <span className="font-medium">{Number(w.weight_kg).toFixed(2)} kg</span>
+                    <span className="text-muted-foreground">{formatTime(w.recorded_at)}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {summary.meals.length > 0 && (
+            <div className="space-y-1 bg-amber-50/50 px-3 py-2 dark:bg-amber-950/20">
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">
+                <Utensils className="h-3 w-3" /> {ts('todayMeals')}
+              </div>
+              <ul className="space-y-1">
+                {summary.meals.map((m) => (
+                  <li key={m.id} className="text-xs">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="min-w-0 truncate font-medium">
+                        {m.food_names.length > 0 ? m.food_names.join(', ') : ts('todayMealFallback')}
+                      </span>
+                      <span className="shrink-0 text-muted-foreground">{formatTime(m.meal_time)}</span>
+                    </div>
+                    <div className="text-[11px] text-muted-foreground">
+                      {m.total_grams.toFixed(0)} g · {m.total_kcal.toFixed(0)} kcal · {m.feeding_method}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {summary.confirmed_med_tasks.length > 0 && (
+            <div className="space-y-1 bg-emerald-50/50 px-3 py-2 dark:bg-emerald-950/20">
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
+                <Check className="h-3 w-3" /> {ts('todayConfirmedMeds')}
+              </div>
+              <ul className="space-y-0.5">
+                {summary.confirmed_med_tasks.map((t) => (
+                  <li key={t.id} className="flex items-center justify-between text-xs">
+                    <span className="min-w-0 truncate">
+                      <span className="font-medium">{t.medicine_name}</span>
+                      {t.dose && <span className="text-muted-foreground"> · {t.dose}</span>}
+                    </span>
+                    <span className="shrink-0 text-muted-foreground">{formatTime(t.confirmed_at)}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {summary.ad_hoc_meds.length > 0 && (
+            <div className="space-y-1 bg-violet-50/50 px-3 py-2 dark:bg-violet-950/20">
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-300">
+                <Pill className="h-3 w-3" /> {ts('todayAdHocMeds')}
+              </div>
+              <ul className="space-y-0.5">
+                {summary.ad_hoc_meds.map((m) => (
+                  <li key={m.id} className="flex items-center justify-between text-xs">
+                    <span className="min-w-0 truncate">
+                      <span className="font-medium">{m.medicine_name}</span>
+                      {m.dose && (
+                        <span className="text-muted-foreground">
+                          {' '}
+                          · {m.dose}
+                          {m.unit ?? ''}
+                        </span>
+                      )}
+                    </span>
+                    <span className="shrink-0 text-muted-foreground">{formatTime(m.given_at)}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

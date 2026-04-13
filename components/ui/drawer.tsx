@@ -29,7 +29,13 @@ const DrawerContent = React.forwardRef<
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        'fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto max-h-[90vh] flex-col rounded-t-[10px] border bg-background',
+        // Using a fixed min-height avoids the "jumping" effect that vaul
+        // exhibits when opening small forms: without it the drawer measures
+        // content after the open animation starts and then re-positions,
+        // which reads visually as a bounce. `min-h-[50vh]` reserves space
+        // up-front so the position is stable from frame one. `contain:layout`
+        // isolates subsequent content reflows from the drawer geometry.
+        'fixed inset-x-0 bottom-0 z-50 mt-24 flex min-h-[50vh] max-h-[90vh] flex-col rounded-t-[10px] border bg-background [contain:layout]',
         className
       )}
       {...props}

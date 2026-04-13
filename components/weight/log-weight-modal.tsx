@@ -27,9 +27,14 @@ export function LogWeightModal({ open, onClose, catId, catName }: Props) {
   const router = useRouter();
   const qc = useQueryClient();
 
+  // weight_kg starts empty (not 0) so the user can type a number directly
+  // rather than having to delete the zero first. zod.coerce converts the
+  // string on submit. Cast to number to satisfy WeightLogInput's typed shape.
+  const emptyDefaults = { weight_kg: '' as unknown as number, notes: '' };
+
   const form = useForm<WeightLogInput>({
     resolver: zodResolver(weightLogSchema),
-    defaultValues: { weight_kg: 0, notes: '' }
+    defaultValues: emptyDefaults
   });
 
   const m = useMutation({
@@ -47,7 +52,7 @@ export function LogWeightModal({ open, onClose, catId, catName }: Props) {
       qc.invalidateQueries({ queryKey: ['calorie-summary', catId] });
       qc.invalidateQueries({ queryKey: ['cat', catId] });
       qc.invalidateQueries({ queryKey: ['me-cats'] });
-      form.reset({ weight_kg: 0, notes: '' });
+      form.reset(emptyDefaults);
       onClose();
       router.refresh();
     },
@@ -71,6 +76,7 @@ export function LogWeightModal({ open, onClose, catId, catName }: Props) {
             step="0.01"
             min="0.1"
             max="29.9"
+            placeholder="0.00"
             autoFocus
             {...form.register('weight_kg')}
           />
