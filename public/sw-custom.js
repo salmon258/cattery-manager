@@ -3,58 +3,63 @@
 
 // ── Push notifications ──────────────────────────────────────────────────────
 
-self.addEventListener('push', (event) => {
+self.addEventListener("push", (event) => {
   if (!event.data) return;
   let data;
   try {
     data = event.data.json();
   } catch {
-    data = { title: 'Onatuchi', body: event.data.text(), url: '/' };
+    data = { title: "Onatuchi", body: event.data.text(), url: "/" };
   }
 
-  const title = data.title ?? 'Onatuchi Cattery Manager';
+  const title = data.title ?? "Onatuchi Cattery Manager";
   const options = {
-    body: data.body ?? '',
-    icon: '/icons/icon-192.png',
-    badge: '/icons/icon-192.png',
-    data: { url: data.url ?? '/' },
-    tag: data.tag ?? 'general',
-    renotify: true
+    body: data.body ?? "",
+    icon: "/icons/icon@1x.png",
+    badge: "/icons/icon@1x.png",
+    data: { url: data.url ?? "/" },
+    tag: data.tag ?? "general",
+    renotify: true,
   };
 
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
-self.addEventListener('notificationclick', (event) => {
+self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = event.notification.data?.url ?? '/';
+  const url = event.notification.data?.url ?? "/";
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      for (const client of clientList) {
-        if (client.url.includes(self.location.origin) && 'focus' in client) {
-          client.focus();
-          client.navigate(url);
-          return;
+    clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((clientList) => {
+        for (const client of clientList) {
+          if (client.url.includes(self.location.origin) && "focus" in client) {
+            client.focus();
+            client.navigate(url);
+            return;
+          }
         }
-      }
-      if (clients.openWindow) return clients.openWindow(url);
-    })
+        if (clients.openWindow) return clients.openWindow(url);
+      }),
   );
 });
 
 // ── Background Sync for offline task confirmations ─────────────────────────
 
-const SYNC_TAG = 'task-confirms';
+const SYNC_TAG = "task-confirms";
 
 // Store pending confirms in IndexedDB
-const DB_NAME = 'cattery-sync';
-const STORE = 'pending-actions';
+const DB_NAME = "cattery-sync";
+const STORE = "pending-actions";
 
 function openDb() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, 1);
     req.onupgradeneeded = (e) => {
-      e.target.result.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
+      e.target.result.createObjectStore(STORE, {
+        keyPath: "id",
+        autoIncrement: true,
+      });
     };
     req.onsuccess = (e) => resolve(e.target.result);
     req.onerror = (e) => reject(e.target.error);
@@ -63,7 +68,7 @@ function openDb() {
 
 async function getPendingActions(db) {
   return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE, 'readonly');
+    const tx = db.transaction(STORE, "readonly");
     const req = tx.objectStore(STORE).getAll();
     req.onsuccess = (e) => resolve(e.target.result);
     req.onerror = (e) => reject(e.target.error);
@@ -72,7 +77,7 @@ async function getPendingActions(db) {
 
 async function clearActions(db, ids) {
   return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE, 'readwrite');
+    const tx = db.transaction(STORE, "readwrite");
     const store = tx.objectStore(STORE);
     ids.forEach((id) => store.delete(id));
     tx.oncomplete = resolve;
@@ -80,7 +85,7 @@ async function clearActions(db, ids) {
   });
 }
 
-self.addEventListener('sync', (event) => {
+self.addEventListener("sync", (event) => {
   if (event.tag === SYNC_TAG) {
     event.waitUntil(flushPendingActions());
   }
@@ -91,13 +96,16 @@ async function flushPendingActions() {
   const actions = await getPendingActions(db);
   if (!actions.length) return;
 
-  const res = await fetch('/api/sync/flush', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ actions: actions.map(({ id, ...rest }) => rest) })
+  const res = await fetch("/api/sync/flush", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ actions: actions.map(({ id, ...rest }) => rest) }),
   });
 
   if (res.ok) {
-    await clearActions(db, actions.map((a) => a.id));
+    await clearActions(
+      db,
+      actions.map((a) => a.id),
+    );
   }
 }

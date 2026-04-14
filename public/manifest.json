@@ -28,14 +28,14 @@
       "short_name": "My Cats",
       "description": "View assigned cats and today's tasks",
       "url": "/my-cats",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icons/icon@1x.png", "sizes": "192x192" }]
     },
     {
       "name": "All Cats",
       "short_name": "Cats",
       "description": "Browse all cat profiles",
       "url": "/cats",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icons/icon@1x.png", "sizes": "192x192" }]
     }
   ],
   "categories": ["health", "productivity", "utilities"],
