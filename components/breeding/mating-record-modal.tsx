@@ -14,36 +14,53 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from '@/components/ui/select';
 
-interface CatOption { id: string; name: string; breed: string | null }
+interface CatOption { id: string; name: string; breed: string | null; gender: 'male' | 'female' }
+
+type MatingMethod = 'natural' | 'ai';
+
+export interface EditingMatingRecord {
+  id: string;
+  female_cat_id: string;
+  male_cat_id: string;
+  mating_date: string;
+  mating_method: MatingMethod;
+  notes: string | null;
+}
 
 interface Props {
   open: boolean;
   onClose: () => void;
   /** Pre-fill: the cat whose detail page this was opened from */
   prefilledCat?: { id: string; name: string; gender: 'male' | 'female' };
+  /** When provided, the modal runs in "edit" mode against this record. */
+  editing?: EditingMatingRecord | null;
 }
 
-export function MatingRecordModal({ open, onClose, prefilledCat }: Props) {
+export function MatingRecordModal({ open, onClose, prefilledCat, editing }: Props) {
   const t  = useTranslations('breeding');
   const tc = useTranslations('common');
   const qc = useQueryClient();
 
-  const today = new Date().toISOString().split('T')[0];
+  const isEdit = !!editing;
+  const today  = new Date().toISOString().split('T')[0];
 
   const [submitting, setSubmitting]     = useState(false);
-  const [femaleCatId, setFemaleCatId]   = useState(
-    prefilledCat?.gender === 'female' ? prefilledCat.id : ''
-  );
-  const [maleCatId, setMaleCatId]       = useState(
-    prefilledCat?.gender === 'male' ? prefilledCat.id : ''
-  );
+  const [femaleCatId, setFemaleCatId]   = useState('');
+  const [maleCatId, setMaleCatId]       = useState('');
   const [matingDate, setMatingDate]     = useState(today);
-  const [method, setMethod]             = useState<'natural' | 'ai'>('natural');
+  const [method, setMethod]             = useState<MatingMethod>('natural');
   const [notes, setNotes]               = useState('');
 
-  // Reset when reopened with a different prefilled cat
+  // Reset/prefill whenever the modal opens or the editing target changes.
   useEffect(() => {
-    if (open) {
+    if (!open) return;
+    if (editing) {
+      setFemaleCatId(editing.female_cat_id);
+      setMaleCatId(editing.male_cat_id);
+      setMatingDate(editing.mating_date);
+      setMethod(editing.mating_method);
+      setNotes(editing.notes ?? '');
+    } else {
       setFemaleCatId(prefilledCat?.gender === 'female' ? prefilledCat.id : '');
       setMaleCatId(prefilledCat?.gender === 'male' ? prefilledCat.id : '');
       setMatingDate(today);
@@ -51,31 +68,28 @@ export function MatingRecordModal({ open, onClose, prefilledCat }: Props) {
       setNotes('');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, editing?.id]);
 
-  // Fetch female cats (for selector when prefilled is male or no prefill)
-  const { data: femaleCats = [] } = useQuery<CatOption[]>({
-    queryKey: ['cats-female'],
+  // Fetch all active cats once; split into male/female below. In edit mode we
+  // always want both dropdowns populated (since both may be swapped), and the
+  // list is short enough that filtering client-side is fine.
+  const { data: allCats = [] } = useQuery<CatOption[]>({
+    queryKey: ['cats-by-gender'],
     queryFn: async () => {
       const r = await fetch('/api/cats?status=active', { cache: 'no-store' });
       if (!r.ok) return [];
       const { cats } = await r.json();
-      return cats.filter((c: { gender: string }) => c.gender === 'female');
+      return (cats as CatOption[]).filter((c) => c.gender === 'male' || c.gender === 'female');
     },
-    enabled: open && prefilledCat?.gender !== 'female'
+    enabled: open
   });
+  const femaleCats = allCats.filter((c) => c.gender === 'female');
+  const maleCats   = allCats.filter((c) => c.gender === 'male');
 
-  // Fetch male cats (for selector when prefilled is female or no prefill)
-  const { data: maleCats = [] } = useQuery<CatOption[]>({
-    queryKey: ['cats-male'],
-    queryFn: async () => {
-      const r = await fetch('/api/cats?status=active', { cache: 'no-store' });
-      if (!r.ok) return [];
-      const { cats } = await r.json();
-      return cats.filter((c: { gender: string }) => c.gender === 'male');
-    },
-    enabled: open && prefilledCat?.gender !== 'male'
-  });
+  // In edit mode we show both selectors freely. In create mode we keep the
+  // original behavior of locking the prefilled cat to a plain label.
+  const lockFemale = !isEdit && prefilledCat?.gender === 'female';
+  const lockMale   = !isEdit && prefilledCat?.gender === 'male';
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -83,10 +97,16 @@ export function MatingRecordModal({ open, onClose, prefilledCat }: Props) {
       toast.error(t('errors.selectBothCats'));
       return;
     }
+    if (femaleCatId === maleCatId) {
+      toast.error(t('errors.selectBothCats'));
+      return;
+    }
     setSubmitting(true);
     try {
-      const r = await fetch('/api/mating-records', {
-        method: 'POST',
+      const url    = isEdit ? `/api/mating-records/${editing!.id}` : '/api/mating-records';
+      const method_ = isEdit ? 'PATCH' : 'POST';
+      const r = await fetch(url, {
+        method: method_,
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
           female_cat_id: femaleCatId,
@@ -97,9 +117,13 @@ export function MatingRecordModal({ open, onClose, prefilledCat }: Props) {
         })
       });
       if (!r.ok) throw new Error((await r.json()).error ?? 'Failed');
-      toast.success(t('matingCreated'));
+      toast.success(isEdit ? t('matingUpdated') : t('matingCreated'));
       qc.invalidateQueries({ queryKey: ['mating-records'] });
       if (prefilledCat) qc.invalidateQueries({ queryKey: ['mating-records', prefilledCat.id] });
+      // Invalidate the detail pages of both sides of the mating so their
+      // cards refresh even when we're not opened from their page.
+      qc.invalidateQueries({ queryKey: ['mating-records', femaleCatId] });
+      qc.invalidateQueries({ queryKey: ['mating-records', maleCatId] });
       onClose();
     } catch (e) {
       toast.error((e as Error).message);
@@ -112,14 +136,14 @@ export function MatingRecordModal({ open, onClose, prefilledCat }: Props) {
     <ResponsiveModal
       open={open}
       onOpenChange={(v) => { if (!v) onClose(); }}
-      title={t('newMating')}
+      title={isEdit ? t('editMating') : t('newMating')}
     >
       <form onSubmit={onSubmit} className="space-y-4 py-2">
         {/* Female cat */}
         <div className="space-y-1.5">
           <Label>{t('fields.femaleCat')}</Label>
-          {prefilledCat?.gender === 'female' ? (
-            <p className="text-sm font-medium">{prefilledCat.name}</p>
+          {lockFemale ? (
+            <p className="text-sm font-medium">{prefilledCat!.name}</p>
           ) : (
             <Select value={femaleCatId} onValueChange={setFemaleCatId}>
               <SelectTrigger><SelectValue placeholder={t('placeholders.selectFemale')} /></SelectTrigger>
@@ -135,8 +159,8 @@ export function MatingRecordModal({ open, onClose, prefilledCat }: Props) {
         {/* Male cat */}
         <div className="space-y-1.5">
           <Label>{t('fields.maleCat')}</Label>
-          {prefilledCat?.gender === 'male' ? (
-            <p className="text-sm font-medium">{prefilledCat.name}</p>
+          {lockMale ? (
+            <p className="text-sm font-medium">{prefilledCat!.name}</p>
           ) : (
             <Select value={maleCatId} onValueChange={setMaleCatId}>
               <SelectTrigger><SelectValue placeholder={t('placeholders.selectMale')} /></SelectTrigger>
@@ -158,7 +182,7 @@ export function MatingRecordModal({ open, onClose, prefilledCat }: Props) {
         {/* Method */}
         <div className="space-y-1.5">
           <Label htmlFor="mr-method">{t('fields.method')}</Label>
-          <Select value={method} onValueChange={(v) => setMethod(v as 'natural' | 'ai')}>
+          <Select value={method} onValueChange={(v) => setMethod(v as MatingMethod)}>
             <SelectTrigger id="mr-method"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="natural">{t('methods.natural')}</SelectItem>
@@ -175,10 +199,11 @@ export function MatingRecordModal({ open, onClose, prefilledCat }: Props) {
 
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="outline" onClick={onClose}>{tc('cancel')}</Button>
-          <Button type="submit" disabled={submitting}>{submitting ? tc('saving') : tc('create')}</Button>
+          <Button type="submit" disabled={submitting}>
+            {submitting ? tc('saving') : (isEdit ? tc('save') : tc('create'))}
+          </Button>
         </div>
       </form>
     </ResponsiveModal>
   );
 }
-
