@@ -4,13 +4,13 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Plus } from 'lucide-react';
+import { Plus, Pencil } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDate } from '@/lib/utils';
-import { MatingRecordModal } from './mating-record-modal';
+import { MatingRecordModal, type EditingMatingRecord } from './mating-record-modal';
 import { UpdateStatusModal } from './update-status-modal';
 import { LitterModal } from './litter-modal';
 
@@ -42,6 +42,17 @@ type MatingRecord = {
   litters: LitterRow[];
 };
 
+function toEditingRecord(rec: MatingRecord): EditingMatingRecord {
+  return {
+    id:             rec.id,
+    female_cat_id:  rec.female_cat.id,
+    male_cat_id:    rec.male_cat.id,
+    mating_date:    rec.mating_date,
+    mating_method:  rec.mating_method,
+    notes:          rec.notes
+  };
+}
+
 function statusBadgeClass(s: MatingStatus) {
   return {
     planned:   'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
@@ -61,6 +72,7 @@ export function BreedingClient() {
   const [showNew, setShowNew]           = useState(false);
   const [statusRecord, setStatusRecord] = useState<MatingRecord | null>(null);
   const [litterRecord, setLitterRecord] = useState<MatingRecord | null>(null);
+  const [editingRecord, setEditingRecord] = useState<MatingRecord | null>(null);
   const [showFailed, setShowFailed]     = useState(false);
 
   const { data: records = [], isLoading, error, refetch } = useQuery<MatingRecord[]>({
@@ -135,7 +147,7 @@ export function BreedingClient() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className={`rounded px-2 py-0.5 text-xs font-medium ${statusBadgeClass(rec.status)}`}>
                     {t(`statuses.${rec.status}`)}
                   </span>
@@ -149,6 +161,16 @@ export function BreedingClient() {
                       {t('registerLitter')}
                     </Button>
                   )}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 w-7 p-0"
+                    onClick={() => setEditingRecord(rec)}
+                    aria-label={t('editMating')}
+                    title={t('editMating')}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
                 </div>
               </div>
 
@@ -206,6 +228,16 @@ export function BreedingClient() {
                         {t('statuses.failed')}
                       </span>
                       <span className="text-xs text-muted-foreground">{formatDate(rec.mating_date)}</span>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 w-7 p-0 ml-auto"
+                        onClick={() => setEditingRecord(rec)}
+                        aria-label={t('editMating')}
+                        title={t('editMating')}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -217,6 +249,14 @@ export function BreedingClient() {
 
       {/* Modals */}
       <MatingRecordModal open={showNew} onClose={() => setShowNew(false)} />
+
+      {editingRecord && (
+        <MatingRecordModal
+          open={!!editingRecord}
+          onClose={() => setEditingRecord(null)}
+          editing={toEditingRecord(editingRecord)}
+        />
+      )}
 
       {statusRecord && (
         <UpdateStatusModal
@@ -236,6 +276,8 @@ export function BreedingClient() {
           catId=""
           femaleName={litterRecord.female_cat.name}
           maleName={litterRecord.male_cat.name}
+          femaleCatId={litterRecord.female_cat.id}
+          maleCatId={litterRecord.male_cat.id}
         />
       )}
     </div>

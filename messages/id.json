@@ -568,10 +568,18 @@
   "breeding": {
     "title": "Perkawinan",
     "newMating": "Perkawinan baru",
+    "editMating": "Ubah perkawinan",
     "logHeat": "Catat birahi",
     "registerLitter": "Daftarkan litter",
     "updateStatus": "Perbarui status",
+    "assignParents": "Tetapkan induk",
+    "editParents": "Ubah induk",
+    "assignParentsHint": "Pilih induk betina dan/atau jantan untuk {name}. Gunakan ini untuk kucing yang diimpor sebelum aplikasi digunakan.",
+    "parentsAssigned": "Induk diperbarui.",
+    "noParents": "Belum ada induk yang ditetapkan.",
+    "noParentOption": "— Tidak ada —",
     "matingCreated": "Catatan perkawinan dibuat.",
+    "matingUpdated": "Catatan perkawinan diperbarui.",
     "statusUpdated": "Status diperbarui.",
     "litterRegistered": "Litter didaftarkan.",
     "heatLogged": "Birahi dicatat.",
@@ -584,6 +592,8 @@
     "offspring": "Keturunan",
     "kittens": "Anak kucing",
     "addKitten": "Tambah anak kucing",
+    "attachExistingKitten": "Pilih kucing yang sudah ada",
+    "selectExistingCat": "Pilih kucing yang sudah ada",
     "kittensOptional": "Belum ada anak kucing. Bisa didaftarkan nanti.",
     "male": "Jantan",
     "female": "Betina",
@@ -629,7 +639,8 @@
     "errors": {
       "selectBothCats": "Harap pilih kucing betina dan jantan.",
       "litterSizeRequired": "Harap masukkan jumlah anak kucing yang lahir.",
-      "kittenNameRequired": "Setiap anak kucing yang ditambahkan harus memiliki nama."
+      "kittenNameRequired": "Setiap anak kucing yang ditambahkan harus memiliki nama.",
+      "kittenCatRequired": "Harap pilih kucing untuk setiap baris anak yang ditambahkan."
     }
   },
   "vet": {

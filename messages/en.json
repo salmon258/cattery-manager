@@ -568,10 +568,18 @@
   "breeding": {
     "title": "Breeding",
     "newMating": "New mating",
+    "editMating": "Edit mating",
     "logHeat": "Log heat",
     "registerLitter": "Register litter",
     "updateStatus": "Update status",
+    "assignParents": "Assign parents",
+    "editParents": "Edit parents",
+    "assignParentsHint": "Pick the mother and/or father for {name}. Use this for cats imported from before the app was adopted.",
+    "parentsAssigned": "Parents updated.",
+    "noParents": "No parents assigned yet.",
+    "noParentOption": "— None —",
     "matingCreated": "Mating record created.",
+    "matingUpdated": "Mating record updated.",
     "statusUpdated": "Status updated.",
     "litterRegistered": "Litter registered.",
     "heatLogged": "Heat event logged.",
@@ -584,6 +592,8 @@
     "offspring": "Offspring",
     "kittens": "Kittens",
     "addKitten": "Add kitten",
+    "attachExistingKitten": "Attach existing cat",
+    "selectExistingCat": "Select existing cat",
     "kittensOptional": "No kittens added. You can register them later.",
     "male": "Male",
     "female": "Female",
@@ -629,7 +639,8 @@
     "errors": {
       "selectBothCats": "Please select both female and male cat.",
       "litterSizeRequired": "Please enter the number of kittens born.",
-      "kittenNameRequired": "Each added kitten must have a name."
+      "kittenNameRequired": "Each added kitten must have a name.",
+      "kittenCatRequired": "Please pick a cat for each attached kitten row."
     }
   },
   "vet": {

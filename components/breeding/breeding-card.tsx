@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, ChevronUp, Pencil } from 'lucide-react';
 
 import type { UserRole } from '@/lib/supabase/aliases';
 import { Button } from '@/components/ui/button';
@@ -13,10 +13,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDate } from '@/lib/utils';
-import { MatingRecordModal } from './mating-record-modal';
+import { MatingRecordModal, type EditingMatingRecord } from './mating-record-modal';
 import { UpdateStatusModal } from './update-status-modal';
 import { LitterModal } from './litter-modal';
 import { HeatLogModal } from './heat-log-modal';
+import { AssignParentsModal } from './assign-parents-modal';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type MatingStatus = 'planned' | 'confirmed' | 'pregnant' | 'delivered' | 'failed';
@@ -111,6 +112,8 @@ export function BreedingCard({ catId, catName, catGender, role }: Props) {
   const [showHeatLog, setShowHeatLog]           = useState(false);
   const [statusRecord, setStatusRecord]         = useState<MatingRecord | null>(null);
   const [litterRecord, setLitterRecord]         = useState<MatingRecord | null>(null);
+  const [editingRecord, setEditingRecord]       = useState<MatingRecord | null>(null);
+  const [showAssignParents, setShowAssignParents] = useState(false);
   const [showAllHeat, setShowAllHeat]           = useState(false);
 
   // ── Mating records ──────────────────────────────────────────────────────────
@@ -182,10 +185,25 @@ export function BreedingCard({ catId, catName, catGender, role }: Props) {
 
         <CardContent className="space-y-6">
           {/* ─── Lineage ─────────────────────────────────────────────────── */}
-          {(lineage?.parents || (lineage?.litter_siblings ?? []).length > 0) && (
+          {(lineage?.parents || (lineage?.litter_siblings ?? []).length > 0 || isAdmin) && (
             <div className="space-y-2">
-              <h4 className="text-sm font-medium text-muted-foreground">{t('lineage')}</h4>
-              {lineage?.parents && (
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <h4 className="text-sm font-medium text-muted-foreground">{t('lineage')}</h4>
+                {isAdmin && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-6 text-xs px-2"
+                    onClick={() => setShowAssignParents(true)}
+                  >
+                    <Pencil className="h-3 w-3" />
+                    {lineage?.parents?.mother || lineage?.parents?.father
+                      ? t('editParents')
+                      : t('assignParents')}
+                  </Button>
+                )}
+              </div>
+              {lineage?.parents && (lineage.parents.mother || lineage.parents.father) ? (
                 <div className="flex flex-wrap gap-4 text-sm">
                   {lineage.parents.mother && (
                     <div className="flex items-center gap-1.5">
@@ -200,6 +218,10 @@ export function BreedingCard({ catId, catName, catGender, role }: Props) {
                     </div>
                   )}
                 </div>
+              ) : (
+                isAdmin && (
+                  <p className="text-xs text-muted-foreground">{t('noParents')}</p>
+                )
               )}
               {(lineage?.litter_siblings ?? []).length > 0 && (
                 <div className="flex flex-wrap gap-2">
@@ -228,6 +250,7 @@ export function BreedingCard({ catId, catName, catGender, role }: Props) {
                 tc={tc}
                 onUpdateStatus={() => setStatusRecord(rec)}
                 onRegisterLitter={() => setLitterRecord(rec)}
+                onEdit={() => setEditingRecord(rec)}
               />
             ))}
             {failedRecords.length > 0 && (
@@ -247,6 +270,7 @@ export function BreedingCard({ catId, catName, catGender, role }: Props) {
                       tc={tc}
                       onUpdateStatus={() => setStatusRecord(rec)}
                       onRegisterLitter={() => setLitterRecord(rec)}
+                      onEdit={() => setEditingRecord(rec)}
                     />
                   ))}
                 </div>
@@ -324,6 +348,14 @@ export function BreedingCard({ catId, catName, catGender, role }: Props) {
         prefilledCat={{ id: catId, name: catName, gender: catGender }}
       />
 
+      {editingRecord && (
+        <MatingRecordModal
+          open={!!editingRecord}
+          onClose={() => setEditingRecord(null)}
+          editing={toEditingRecord(editingRecord)}
+        />
+      )}
+
       <HeatLogModal
         open={showHeatLog}
         onClose={() => setShowHeatLog(false)}
@@ -349,15 +381,37 @@ export function BreedingCard({ catId, catName, catGender, role }: Props) {
           catId={catId}
           femaleName={litterRecord.female_cat.name}
           maleName={litterRecord.male_cat.name}
+          femaleCatId={litterRecord.female_cat.id}
+          maleCatId={litterRecord.male_cat.id}
         />
       )}
+
+      <AssignParentsModal
+        open={showAssignParents}
+        onClose={() => setShowAssignParents(false)}
+        catId={catId}
+        catName={catName}
+        currentMotherId={lineage?.parents?.mother?.id ?? null}
+        currentFatherId={lineage?.parents?.father?.id ?? null}
+      />
     </>
   );
 }
 
+function toEditingRecord(rec: MatingRecord): EditingMatingRecord {
+  return {
+    id:             rec.id,
+    female_cat_id:  rec.female_cat.id,
+    male_cat_id:    rec.male_cat.id,
+    mating_date:    rec.mating_date,
+    mating_method:  rec.mating_method,
+    notes:          rec.notes
+  };
+}
+
 // ─── Mating row sub-component ─────────────────────────────────────────────────
 function MatingRow({
-  rec, catId, catGender, isAdmin, t, tc, onUpdateStatus, onRegisterLitter
+  rec, catId, catGender, isAdmin, t, tc, onUpdateStatus, onRegisterLitter, onEdit
 }: {
   rec: MatingRecord;
   catId: string;
@@ -369,6 +423,7 @@ function MatingRow({
   tc: any;
   onUpdateStatus: () => void;
   onRegisterLitter: () => void;
+  onEdit: () => void;
 }) {
   const partner = catGender === 'female' ? rec.male_cat : rec.female_cat;
 
@@ -384,17 +439,29 @@ function MatingRow({
             {t(`methods.${rec.mating_method}`)}
           </span>
         </div>
-        {isAdmin && rec.status !== 'failed' && rec.status !== 'delivered' && (
-          <div className="flex gap-1.5">
-            <Button size="sm" variant="outline" className="h-6 text-xs px-2" onClick={onUpdateStatus}>
-              {t('updateStatus')}
+        {isAdmin && (
+          <div className="flex gap-1.5 flex-wrap">
+            {rec.status !== 'failed' && rec.status !== 'delivered' && (
+              <Button size="sm" variant="outline" className="h-6 text-xs px-2" onClick={onUpdateStatus}>
+                {t('updateStatus')}
+              </Button>
+            )}
+            {rec.status === 'delivered' && rec.litters.length === 0 && (
+              <Button size="sm" variant="outline" className="h-6 text-xs px-2" onClick={onRegisterLitter}>
+                {t('registerLitter')}
+              </Button>
+            )}
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-6 w-6 p-0"
+              onClick={onEdit}
+              aria-label={t('editMating')}
+              title={t('editMating')}
+            >
+              <Pencil className="h-3 w-3" />
             </Button>
           </div>
-        )}
-        {isAdmin && rec.status === 'delivered' && rec.litters.length === 0 && (
-          <Button size="sm" variant="outline" className="h-6 text-xs px-2" onClick={onRegisterLitter}>
-            {t('registerLitter')}
-          </Button>
         )}
       </div>
 
