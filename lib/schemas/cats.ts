@@ -13,7 +13,6 @@ export const catSchema = z.object({
   color_pattern: z.string().max(100).nullable().optional(),
   status: catStatusSchema.default('active'),
   assignee_id: z.string().uuid().nullable().optional(),
-  life_stage_multiplier: z.coerce.number().min(0.5).max(3).default(1.2),
   notes: z.string().max(5000).nullable().optional()
 });
 export type CatInput = z.infer<typeof catSchema>;

@@ -304,7 +304,6 @@ export type Database = {
           date_of_birth: string
           gender: Database["public"]["Enums"]["cat_gender"]
           id: string
-          life_stage_multiplier: number
           microchip_number: string | null
           name: string
           notes: string | null
@@ -325,7 +324,6 @@ export type Database = {
           date_of_birth: string
           gender: Database["public"]["Enums"]["cat_gender"]
           id?: string
-          life_stage_multiplier?: number
           microchip_number?: string | null
           name: string
           notes?: string | null
@@ -346,7 +344,6 @@ export type Database = {
           date_of_birth?: string
           gender?: Database["public"]["Enums"]["cat_gender"]
           id?: string
-          life_stage_multiplier?: number
           microchip_number?: string | null
           name?: string
           notes?: string | null
@@ -1835,7 +1832,6 @@ export type Database = {
           date_of_birth: string
           gender: Database["public"]["Enums"]["cat_gender"]
           id: string
-          life_stage_multiplier: number
           microchip_number: string | null
           name: string
           notes: string | null
@@ -1853,6 +1849,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      cat_derived_life_stage_multiplier: { Args: { p_cat_id: string }; Returns: number }
       recommended_daily_kcal: { Args: { p_cat_id: string }; Returns: number }
     }
     Enums: {
