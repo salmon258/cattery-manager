@@ -6,13 +6,20 @@ export type MedRouteInput = z.infer<typeof medRouteSchema>;
 // Matches "HH:MM" — we store a text[] of these on medications.time_slots.
 const timeSlotRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
 
+// end_date is optional: leaving it null means "indefinite — stop manually".
+// Empty strings from form inputs are coerced to null so the API can store NULL.
+const optionalEndDate = z
+  .union([z.string(), z.null()])
+  .optional()
+  .transform((v) => (v === '' || v === undefined ? null : v));
+
 export const medicationSchema = z
   .object({
     medicine_name: z.string().min(1, 'Name is required').max(120),
     dose: z.string().min(1, 'Dose is required').max(60),
     route: medRouteSchema.default('oral'),
     start_date: z.string().min(1, 'Required'),
-    end_date: z.string().min(1, 'Required'),
+    end_date: optionalEndDate,
     interval_days: z.coerce.number().int().min(1).max(365).default(1),
     time_slots: z
       .array(z.string().regex(timeSlotRegex, 'Use HH:MM'))
@@ -20,7 +27,7 @@ export const medicationSchema = z
     notes: z.string().max(2000).nullable().optional(),
     is_active: z.boolean().optional()
   })
-  .refine((v) => v.end_date >= v.start_date, {
+  .refine((v) => !v.end_date || v.end_date >= v.start_date, {
     message: 'End date must be on or after start date',
     path: ['end_date']
   });

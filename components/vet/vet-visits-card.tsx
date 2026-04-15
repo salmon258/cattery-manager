@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Plus, Stethoscope, Paperclip, Trash2, FileText, Image as ImageIcon, AlertCircle } from 'lucide-react';
+import { Plus, Stethoscope, Paperclip, Pencil, Trash2, FileText, Image as ImageIcon, AlertCircle } from 'lucide-react';
 
 import type { UserRole } from '@/lib/supabase/aliases';
 import { Button } from '@/components/ui/button';
@@ -79,6 +79,7 @@ export function VetVisitsCard({ catId, catName, role }: Props) {
   const isAdmin = role === 'admin';
 
   const [modalOpen, setModalOpen]   = useState(false);
+  const [editingId, setEditingId]   = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const { data: visits = [], isLoading } = useQuery<VisitRow[]>({
@@ -87,7 +88,9 @@ export function VetVisitsCard({ catId, catName, role }: Props) {
       const r = await fetch(`/api/cats/${catId}/vet-visits`, { cache: 'no-store' });
       if (!r.ok) return [];
       return (await r.json()).visits;
-    }
+    },
+    // Cat sitters never see this section — don't even fetch.
+    enabled: isAdmin
   });
 
   const deleteVisit = useMutation({
@@ -109,19 +112,22 @@ export function VetVisitsCard({ catId, catName, role }: Props) {
     && !visits.some((v2) => v2.visit_type === 'follow_up' && v2.visit_date >= v.follow_up_date!)
   );
 
+  // Vet history is an admin-only feature — cat sitters should not see it.
+  if (!isAdmin) return null;
+
   return (
     <>
-      <Card className="md:col-span-2">
+      <Card className="md:col-span-2 min-w-0 overflow-hidden">
         <CardHeader className="flex-row items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
             <Stethoscope className="h-4 w-4 text-muted-foreground" />
             {t('vetHistory')}
           </CardTitle>
-          <Button size="sm" variant="outline" onClick={() => setModalOpen(true)}>
+          <Button size="sm" variant="outline" onClick={() => { setEditingId(null); setModalOpen(true); }}>
             <Plus className="h-4 w-4" /> {t('newVisit')}
           </Button>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-3 min-w-0">
           {isLoading && <p className="text-sm text-muted-foreground">{tc('loading')}</p>}
           {!isLoading && visits.length === 0 && (
             <p className="text-sm text-muted-foreground">{t('noVisits')}</p>
@@ -145,19 +151,19 @@ export function VetVisitsCard({ catId, catName, role }: Props) {
               const overdue  = overdueFollowUps.some((o) => o.id === v.id);
 
               return (
-                <li key={v.id} className="rounded-md border">
+                <li key={v.id} className="rounded-md border min-w-0 overflow-hidden">
                   <button
                     type="button"
-                    className="w-full text-left p-3 hover:bg-accent/40 transition-colors"
+                    className="w-full text-left p-3 hover:bg-accent/40 transition-colors min-w-0"
                     onClick={() => setExpandedId(expanded ? null : v.id)}
                   >
-                    <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-sm font-medium">{formatDate(v.visit_date)}</span>
-                        <Badge className={cn('border-0 text-xs capitalize', typeClass(v.visit_type))}>
+                    <div className="flex items-center justify-between gap-2 flex-wrap min-w-0">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <span className="text-sm font-medium shrink-0">{formatDate(v.visit_date)}</span>
+                        <Badge className={cn('border-0 text-xs capitalize shrink-0', typeClass(v.visit_type))}>
                           {t(`visitTypes.${v.visit_type}`)}
                         </Badge>
-                        {v.clinic && <span className="text-xs text-muted-foreground truncate">{v.clinic.name}</span>}
+                        {v.clinic && <span className="text-xs text-muted-foreground truncate min-w-0">{v.clinic.name}</span>}
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         {labCount + recCount > 0 && (
@@ -179,41 +185,42 @@ export function VetVisitsCard({ catId, catName, role }: Props) {
                     </div>
 
                     {v.diagnosis && !expanded && (
-                      <p className="text-xs text-muted-foreground mt-1 truncate">{v.diagnosis}</p>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2 break-words">{v.diagnosis}</p>
                     )}
 
                     {v.health_ticket && (
-                      <div className="text-xs text-amber-700 dark:text-amber-400 mt-1 flex items-center gap-1">
-                        🎫 {t('linkedToTicket')}: {v.health_ticket.title}
+                      <div className="text-xs text-amber-700 dark:text-amber-400 mt-1 flex items-center gap-1 min-w-0">
+                        <span className="shrink-0">🎫 {t('linkedToTicket')}:</span>
+                        <span className="truncate">{v.health_ticket.title}</span>
                       </div>
                     )}
                   </button>
 
                   {expanded && (
-                    <div className="border-t p-3 space-y-3 text-sm bg-muted/20">
+                    <div className="border-t p-3 space-y-3 text-sm bg-muted/20 min-w-0">
                       {v.doctor && (
-                        <div className="text-xs">
+                        <div className="text-xs break-words">
                           <span className="text-muted-foreground">{t('fields.doctor')}: </span>
                           <span className="font-medium">{v.doctor.full_name}</span>
                           <span className="text-muted-foreground"> · {t(`specialisations.${v.doctor.specialisation}`)}</span>
                         </div>
                       )}
                       {v.chief_complaint && (
-                        <div>
+                        <div className="min-w-0">
                           <div className="text-xs font-medium text-muted-foreground">{t('fields.chiefComplaint')}</div>
-                          <p className="whitespace-pre-wrap">{v.chief_complaint}</p>
+                          <p className="whitespace-pre-wrap break-words">{v.chief_complaint}</p>
                         </div>
                       )}
                       {v.diagnosis && (
-                        <div>
+                        <div className="min-w-0">
                           <div className="text-xs font-medium text-muted-foreground">{t('fields.diagnosis')}</div>
-                          <p className="whitespace-pre-wrap">{v.diagnosis}</p>
+                          <p className="whitespace-pre-wrap break-words">{v.diagnosis}</p>
                         </div>
                       )}
                       {v.treatment_performed && (
-                        <div>
+                        <div className="min-w-0">
                           <div className="text-xs font-medium text-muted-foreground">{t('fields.treatment')}</div>
-                          <p className="whitespace-pre-wrap">{v.treatment_performed}</p>
+                          <p className="whitespace-pre-wrap break-words">{v.treatment_performed}</p>
                         </div>
                       )}
 
@@ -285,11 +292,23 @@ export function VetVisitsCard({ catId, catName, role }: Props) {
                       )}
 
                       {v.notes && (
-                        <p className="text-xs text-muted-foreground italic">{v.notes}</p>
+                        <p className="text-xs text-muted-foreground italic whitespace-pre-wrap break-words">{v.notes}</p>
                       )}
 
                       {isAdmin && (
-                        <div className="flex justify-end">
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 text-xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingId(v.id);
+                              setModalOpen(true);
+                            }}
+                          >
+                            <Pencil className="h-3 w-3" /> {tc('edit')}
+                          </Button>
                           <Button
                             size="sm"
                             variant="ghost"
@@ -314,10 +333,11 @@ export function VetVisitsCard({ catId, catName, role }: Props) {
 
       <VetVisitModal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => { setModalOpen(false); setEditingId(null); }}
         catId={catId}
         catName={catName}
         role={role}
+        editVisitId={editingId ?? undefined}
       />
     </>
   );

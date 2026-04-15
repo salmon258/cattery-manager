@@ -35,7 +35,8 @@ export async function POST(request: Request, { params }: { params: { id: string 
   }
 
   const supabase = createClient();
-  const { data, error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
     .from('medications')
     .insert({
       cat_id: params.id,
@@ -43,7 +44,9 @@ export async function POST(request: Request, { params }: { params: { id: string 
       dose: parsed.data.dose,
       route: parsed.data.route,
       start_date: parsed.data.start_date,
-      end_date: parsed.data.end_date,
+      // end_date is nullable in the DB (indefinite schedules). The generated
+      // Supabase types haven't been regenerated yet so we cast the client.
+      end_date: parsed.data.end_date ?? null,
       interval_days: parsed.data.interval_days,
       time_slots: parsed.data.time_slots,
       notes: parsed.data.notes ?? null,

@@ -188,7 +188,7 @@ export function MedicationsCard({ catId, role }: { catId: string; role: UserRole
                       <span className="text-xs text-muted-foreground"> · {m.dose}</span>
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {formatDate(m.start_date)} → {formatDate(m.end_date)} ·{' '}
+                      {formatDate(m.start_date)} → {m.end_date ? formatDate(m.end_date) : t('ongoing')} ·{' '}
                       {t(`routes.${m.route}`)} · {t('intervalLabel', { n: m.interval_days })} ·{' '}
                       {m.time_slots.join(', ')}
                     </div>

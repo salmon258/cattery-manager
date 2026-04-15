@@ -45,6 +45,8 @@ export const vetVisitMedicineSchema = z.object({
   notes:         z.string().max(1000).nullable().optional(),
   // Optional structured scheduling — when true, the API auto-creates a
   // medications row + daily tasks alongside this vet_visit_medicines record.
+  // schedule_end_date may be null/omitted to represent an indefinite plan
+  // (stopped manually).
   schedule_enabled:       z.boolean().default(false),
   schedule_start_date:    z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
   schedule_end_date:      z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
@@ -54,11 +56,13 @@ export const vetVisitMedicineSchema = z.object({
 }).refine(
   (v) => {
     if (!v.schedule_enabled) return true;
-    return !!v.schedule_start_date && !!v.schedule_end_date
-      && !!v.schedule_time_slots && v.schedule_time_slots.length > 0
-      && v.schedule_end_date >= v.schedule_start_date;
+    if (!v.schedule_start_date) return false;
+    if (!v.schedule_time_slots || v.schedule_time_slots.length === 0) return false;
+    // end date is optional (indefinite). If given, must be ≥ start.
+    if (v.schedule_end_date && v.schedule_end_date < v.schedule_start_date) return false;
+    return true;
   },
-  { message: 'Schedule requires start, end (≥ start) and at least one time slot.' }
+  { message: 'Schedule requires a start date and at least one time slot (end date may be left blank for an indefinite plan).' }
 );
 export type VetVisitMedicineInput = z.infer<typeof vetVisitMedicineSchema>;
 
@@ -79,6 +83,28 @@ export const vetVisitSchema = z.object({
   medicines:           z.array(vetVisitMedicineSchema).default([])
 });
 export type VetVisitInput = z.infer<typeof vetVisitSchema>;
+
+// PATCH /api/vet-visits/[id] — updates the visit fields + replaces the
+// medicines list (simpler than diff-ing individual rows). Lab results &
+// receipts are managed via their own endpoint and are not touched here.
+export const vetVisitUpdateSchema = z.object({
+  clinic_id:           z.string().uuid().nullable().optional(),
+  doctor_id:           z.string().uuid().nullable().optional(),
+  health_ticket_id:    z.string().uuid().nullable().optional(),
+  visit_date:          z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  visit_type:          vetVisitTypeEnum.optional(),
+  status:              vetVisitStatusEnum.optional(),
+  chief_complaint:     z.string().max(1000).nullable().optional(),
+  diagnosis:           z.string().max(5000).nullable().optional(),
+  treatment_performed: z.string().max(5000).nullable().optional(),
+  follow_up_date:      z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional().or(z.literal('')),
+  visit_cost:          z.number().nonnegative().nullable().optional(),
+  transport_cost:      z.number().nonnegative().nullable().optional(),
+  notes:               z.string().max(5000).nullable().optional(),
+  // When provided, fully replaces the visit's medicine list.
+  medicines:           z.array(vetVisitMedicineSchema).optional()
+});
+export type VetVisitUpdateInput = z.infer<typeof vetVisitUpdateSchema>;
 
 // ─── Lab Result / Receipt ────────────────────────────────────────────────────
 export const labResultSchema = z.object({
