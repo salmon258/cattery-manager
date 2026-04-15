@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Plus, Search, UserPlus, X } from 'lucide-react';
+import { Pill, Plus, Search, UserPlus, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,7 @@ import type { Cat, UserRole } from '@/lib/supabase/aliases';
 import { Home, User } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { BatchAssignModal } from '@/components/assignees/batch-assign-modal';
+import { BatchMedicationModal } from '@/components/medications/batch-medication-modal';
 
 type CatRow = Cat & {
   current_room?: { id: string; name: string } | null;
@@ -34,10 +35,12 @@ export function CatsClient({ role }: { role: UserRole }) {
   const tc = useTranslations('common');
   const ts = useTranslations('cats.status');
   const ta = useTranslations('assignees');
+  const tm = useTranslations('medications');
   const [q, setQ] = useState('');
   const [selectMode, setSelectMode]     = useState(false);
   const [selectedIds, setSelectedIds]   = useState<Set<string>>(new Set());
   const [batchModalOpen, setBatchModalOpen] = useState(false);
+  const [batchMedModalOpen, setBatchMedModalOpen] = useState(false);
   const isAdmin = role === 'admin';
 
   const { data: cats = [], isLoading, error, refetch } = useQuery({
@@ -93,6 +96,13 @@ export function CatsClient({ role }: { role: UserRole }) {
                 onClick={() => setBatchModalOpen(true)}
               >
                 <UserPlus className="h-4 w-4" /> {ta('assignSelected')}
+              </Button>
+              <Button
+                variant="outline"
+                disabled={selectedIds.size === 0}
+                onClick={() => setBatchMedModalOpen(true)}
+              >
+                <Pill className="h-4 w-4" /> {tm('batchSchedule')}
               </Button>
               <Button variant="outline" size="icon" onClick={exitSelectMode} aria-label={tc('cancel')}>
                 <X className="h-4 w-4" />
@@ -202,6 +212,13 @@ export function CatsClient({ role }: { role: UserRole }) {
       <BatchAssignModal
         open={batchModalOpen}
         onClose={() => setBatchModalOpen(false)}
+        catIds={Array.from(selectedIds)}
+        onSuccess={() => { exitSelectMode(); }}
+      />
+
+      <BatchMedicationModal
+        open={batchMedModalOpen}
+        onClose={() => setBatchMedModalOpen(false)}
         catIds={Array.from(selectedIds)}
         onSuccess={() => { exitSelectMode(); }}
       />

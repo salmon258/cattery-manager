@@ -35,6 +35,15 @@ export const medicationUpdateSchema = medicationSchema
   );
 export type MedicationUpdateInput = z.infer<typeof medicationUpdateSchema>;
 
+// Batch-create the same schedule for many cats at once. We deliberately reuse
+// medicationSchema unchanged so validation stays identical to the single-cat
+// endpoint — the only extra field is the list of target cats.
+export const batchCreateMedicationsSchema = z.object({
+  cat_ids: z.array(z.string().uuid()).min(1).max(200),
+  medication: medicationSchema
+});
+export type BatchCreateMedicationsInput = z.infer<typeof batchCreateMedicationsSchema>;
+
 export const adHocMedicineSchema = z.object({
   medicine_name: z.string().min(1, 'Required').max(120),
   dose: z.string().max(60).nullable().optional(),

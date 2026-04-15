@@ -284,6 +284,10 @@
     "addSlot": "Add time",
     "slotsHint": "Each time slot creates one dose per dose-day. Use `interval_days > 1` for every-other-day schedules.",
     "intervalLabel": "every {n} day(s)",
+    "batchSchedule": "Schedule for selected",
+    "batchScheduleTitle": "Schedule for {count} cats",
+    "batchScheduleDesc": "The same medication plan will be created for every selected cat.",
+    "batchCreated": "Scheduled for {count} cats.",
     "fields": {
       "name": "Medicine name",
       "dose": "Dose",
