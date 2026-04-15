@@ -259,22 +259,19 @@ Calculated automatically from the cat's **latest weight submission**:
 ```
 RER (kcal/day) = 70 × (weight_kg ^ 0.75)
 ```
-**Maintenance Energy Requirement (MER)** applies a multiplier based on life stage / condition (admin-configurable per cat):
+**Maintenance Energy Requirement (MER)** applies a multiplier **automatically derived** from the cat's age and breeding state. Admins no longer set this by hand.
 
-| Life Stage / Condition | Multiplier |
-|---|---|
-| Neutered adult | 1.2 |
-| Intact adult | 1.4 |
-| Kitten (< 6 months) | 2.5 |
-| Kitten (6–12 months) | 2.0 |
-| Pregnant | 1.6 |
-| Lactating | 2.0 |
-| Overweight (target loss) | 0.8 |
-| Underweight (target gain) | 1.4 |
+| Life Stage / Condition | Multiplier | Derivation |
+|---|---|---|
+| Kitten (< 6 months) | 2.5 | `date_of_birth` |
+| Lactating | 2.0 | has a litter with `birth_date` within the last 6 weeks |
+| Pregnant | 1.6 | has a mating record with status `confirmed` or `pregnant` |
+| Kitten (6–12 months) | 2.0 | `date_of_birth` |
+| Adult (default) | 1.4 | fallback for intact breeding adults |
 
-- **`life_stage_multiplier`** stored on the `cats` table; Admin sets it per cat; defaults to 1.2 (neutered adult)
-- **Recommended daily kcal** = RER × multiplier
-- Recalculated automatically whenever a new weight log is submitted
+- Derived by `public.cat_derived_life_stage_multiplier(p_cat_id uuid)` — no column stored on `cats`
+- **Recommended daily kcal** = RER × derived multiplier
+- Recalculated automatically whenever a new weight log is submitted, a mating record changes status, or a litter is registered
 - Displayed prominently on cat profile Overview tab and at the top of the eating log form
 
 #### 3.4.3 Submitting an Eating Report
@@ -1018,7 +1015,7 @@ All reports support:
 
 ```
 profiles              — user roles, assignee link, preferred_language, theme_preference
-cats                  — cat profiles (assignee_id, current_room_id, pedigree_photo_url, life_stage_multiplier)
+cats                  — cat profiles (assignee_id, current_room_id, pedigree_photo_url)
 cat_photos            — cat image gallery (many-to-one cats)
 cat_lineage           — parent-child relationships
 mating_records        — breeding pairs + status

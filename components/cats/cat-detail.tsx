@@ -188,7 +188,6 @@ export function CatDetail({ cat, initialPhotos, currentRoom, assignee, role, cur
             <InfoRow label={t('fields.microchip')} value={cat.microchip_number} />
             <InfoRow label={t('fields.registration')} value={cat.registration_number} />
             <InfoRow label={t('fields.colorPattern')} value={cat.color_pattern} />
-            <InfoRow label="Life stage multiplier" value={String(cat.life_stage_multiplier)} />
             {cat.notes && (
               <div className="pt-2 border-t">
                 <div className="text-muted-foreground text-xs mb-1">{t('fields.notes')}</div>

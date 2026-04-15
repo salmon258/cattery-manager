@@ -41,15 +41,13 @@ export function CatForm({ mode, cat }: Props) {
           color_pattern: cat.color_pattern ?? '',
           status: cat.status,
           assignee_id: cat.assignee_id ?? null,
-          life_stage_multiplier: cat.life_stage_multiplier,
           notes: cat.notes ?? ''
         }
       : {
           name: '',
           date_of_birth: '',
           gender: 'female',
-          status: 'active',
-          life_stage_multiplier: 1.2
+          status: 'active'
         }
   });
 
@@ -109,9 +107,6 @@ export function CatForm({ mode, cat }: Props) {
         <Field label={t('fields.colorPattern')}><Input {...form.register('color_pattern')} /></Field>
         <Field label={t('fields.microchip')}><Input {...form.register('microchip_number')} /></Field>
         <Field label={t('fields.registration')}><Input {...form.register('registration_number')} /></Field>
-        <Field label="Life stage multiplier">
-          <Input type="number" step="0.1" min={0.5} max={3} {...form.register('life_stage_multiplier')} />
-        </Field>
       </div>
 
       <Field label={t('fields.notes')}>
