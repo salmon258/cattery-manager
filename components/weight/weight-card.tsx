@@ -46,7 +46,10 @@ export function WeightCard({ catId, role, currentUserId }: Props) {
   const latest = logs[0];
   const ascending = [...logs].reverse();
   const prev = logs[1];
-  const delta = latest && prev ? latest.weight_kg - prev.weight_kg : null;
+  // Sitters read scales in grams, so the card renders every weight value in
+  // grams even though the database column is still kg. Convert once here.
+  const toGrams = (kg: number) => Math.round(kg * 1000);
+  const deltaG = latest && prev ? toGrams(latest.weight_kg) - toGrams(prev.weight_kg) : null;
   const deltaPct = latest && prev && prev.weight_kg > 0
     ? ((latest.weight_kg - prev.weight_kg) / prev.weight_kg) * 100
     : null;
@@ -89,17 +92,17 @@ export function WeightCard({ catId, role, currentUserId }: Props) {
 
   function startEdit(log: WeightLogRow) {
     setEditingId(log.id);
-    setEditValue(String(log.weight_kg));
+    setEditValue(String(toGrams(log.weight_kg)));
   }
 
   function saveEdit() {
     if (!editingId) return;
-    const parsed = Number(editValue);
-    if (isNaN(parsed) || parsed <= 0) {
+    const parsedG = Number(editValue);
+    if (isNaN(parsedG) || parsedG <= 0) {
       toast.error(t('errors.invalidWeight'));
       return;
     }
-    updateLog.mutate({ id: editingId, weight_kg: parsed });
+    updateLog.mutate({ id: editingId, weight_kg: parsedG / 1000 });
   }
 
   return (
@@ -126,23 +129,23 @@ export function WeightCard({ catId, role, currentUserId }: Props) {
           <>
             <div className="flex items-baseline gap-3">
               <div className="text-3xl font-semibold tracking-tight">
-                {Number(latest!.weight_kg).toFixed(3)} <span className="text-base font-normal text-muted-foreground">kg</span>
+                {toGrams(Number(latest!.weight_kg))} <span className="text-base font-normal text-muted-foreground">g</span>
               </div>
-              {delta !== null && (
+              {deltaG !== null && (
                 <span
                   className={
                     'text-xs ' +
                     (Math.abs(deltaPct ?? 0) >= 10
                       ? 'text-destructive'
-                      : delta > 0
+                      : deltaG > 0
                         ? 'text-emerald-600'
-                        : delta < 0
+                        : deltaG < 0
                           ? 'text-amber-600'
                           : 'text-muted-foreground')
                   }
                 >
-                  {delta > 0 ? '+' : ''}
-                  {delta.toFixed(3)} kg
+                  {deltaG > 0 ? '+' : ''}
+                  {deltaG} g
                   {deltaPct !== null && ` (${deltaPct > 0 ? '+' : ''}${deltaPct.toFixed(1)}%)`}
                 </span>
               )}
@@ -154,11 +157,11 @@ export function WeightCard({ catId, role, currentUserId }: Props) {
               <div className="rounded-md border bg-muted/20 p-2">
                 <LineChart
                   data={[{
-                    name: 'kg',
-                    points: ascending.map((p) => ({ x: p.recorded_at, y: Number(p.weight_kg) }))
+                    name: 'g',
+                    points: ascending.map((p) => ({ x: p.recorded_at, y: toGrams(Number(p.weight_kg)) }))
                   }]}
                   height={180}
-                  yLabel="kg"
+                  yLabel="g"
                 />
               </div>
             )}
@@ -172,8 +175,10 @@ export function WeightCard({ catId, role, currentUserId }: Props) {
                       <>
                         <Input
                           type="number"
-                          step="0.001"
-                          min="0.1"
+                          inputMode="numeric"
+                          step="1"
+                          min="1"
+                          max="29999"
                           value={editValue}
                           onChange={(e) => setEditValue(e.target.value)}
                           className="h-7 w-24 text-sm"
@@ -190,7 +195,7 @@ export function WeightCard({ catId, role, currentUserId }: Props) {
                       </>
                     ) : (
                       <>
-                        <span className="font-medium shrink-0">{Number(l.weight_kg).toFixed(3)} kg</span>
+                        <span className="font-medium shrink-0">{toGrams(Number(l.weight_kg))} g</span>
                         <span className="text-xs text-muted-foreground truncate flex-1 text-right">
                           {formatDate(l.recorded_at)} · {l.submitter?.full_name ?? '—'}
                         </span>

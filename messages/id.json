@@ -127,7 +127,7 @@
     "deleted": "Catatan berat dihapus.",
     "confirmDelete": "Hapus catatan berat ini?",
     "errors": {
-      "invalidWeight": "Masukkan berat dalam kg yang valid."
+      "invalidWeight": "Masukkan berat dalam g yang valid."
     }
   },
   "food": {

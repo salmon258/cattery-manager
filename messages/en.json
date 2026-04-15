@@ -127,7 +127,7 @@
     "deleted": "Weight log deleted.",
     "confirmDelete": "Delete this weight log?",
     "errors": {
-      "invalidWeight": "Enter a valid weight in kg."
+      "invalidWeight": "Enter a valid weight in g."
     }
   },
   "food": {
