@@ -168,8 +168,12 @@
   "eating": {
     "title": "Pemberian makan",
     "titleFor": "Catat makan — {name}",
+    "editTitle": "Edit makan",
     "log": "Catat makan",
     "logged": "Makanan tercatat.",
+    "updated": "Catatan makan diperbarui.",
+    "deleted": "Catatan makan dihapus.",
+    "confirmDelete": "Hapus catatan makan ini? Tindakan ini tidak dapat dibatalkan.",
     "dailyTarget": "Asupan hari ini",
     "needWeight": "Catat berat badan dulu untuk menghitung rekomendasi kalori harian.",
     "recent": "Makanan terbaru",

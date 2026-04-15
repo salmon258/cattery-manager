@@ -242,7 +242,7 @@ export function CatDetail({ cat, initialPhotos, currentRoom, assignee, role, cur
         </Card>
 
         <WeightCard catId={cat.id} role={role} currentUserId={currentUserId} />
-        <EatingCard catId={cat.id} />
+        <EatingCard catId={cat.id} role={role} currentUserId={currentUserId} />
 
         <VaccinationsCard catId={cat.id} />
         <PreventiveCard catId={cat.id} />

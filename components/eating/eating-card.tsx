@@ -1,15 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Plus, Utensils } from 'lucide-react';
+import { toast } from 'sonner';
+import { Pencil, Plus, Trash2, Utensils } from 'lucide-react';
 
+import type { EatenRatio, FeedingMethod, UserRole } from '@/lib/supabase/aliases';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { LogEatingModal } from '@/components/eating/log-eating-modal';
+import { LogEatingModal, type EditableEatingLog } from '@/components/eating/log-eating-modal';
 
 type CalorieSummary = {
   recommended_kcal: number | null;
@@ -28,12 +30,16 @@ async function fetchSummary(catId: string): Promise<CalorieSummary> {
 type EatingLogRow = {
   id: string;
   meal_time: string;
-  feeding_method: 'self' | 'assisted' | 'force_fed';
+  feeding_method: FeedingMethod;
+  notes: string | null;
+  submitted_by: string;
   submitter?: { full_name: string } | null;
   items: {
+    id: string;
+    food_item_id: string;
     estimated_kcal_consumed: number | null;
     quantity_given_g: number;
-    quantity_eaten: string;
+    quantity_eaten: EatenRatio;
     food?: { name: string } | null;
   }[];
 };
@@ -44,9 +50,20 @@ async function fetchMeals(catId: string): Promise<EatingLogRow[]> {
   return (await r.json()).logs;
 }
 
-export function EatingCard({ catId }: { catId: string }) {
+interface Props {
+  catId: string;
+  role: UserRole;
+  currentUserId: string;
+}
+
+export function EatingCard({ catId, role, currentUserId }: Props) {
   const t = useTranslations('eating');
+  const tc = useTranslations('common');
+  const qc = useQueryClient();
+  const isAdmin = role === 'admin';
+
   const [open, setOpen] = useState(false);
+  const [editingLog, setEditingLog] = useState<EditableEatingLog | null>(null);
 
   const { data: summary } = useQuery({
     queryKey: ['calorie-summary', catId],
@@ -56,6 +73,42 @@ export function EatingCard({ catId }: { catId: string }) {
     queryKey: ['eating', catId],
     queryFn: () => fetchMeals(catId)
   });
+
+  const deleteMeal = useMutation({
+    mutationFn: async (id: string) => {
+      const r = await fetch(`/api/eating-logs/${id}`, { method: 'DELETE' });
+      if (!r.ok && r.status !== 204) {
+        throw new Error((await r.json().catch(() => ({}))).error ?? 'Failed');
+      }
+    },
+    onSuccess: () => {
+      toast.success(t('deleted'));
+      // Same invalidation set the log-meal mutation uses — keeps the card,
+      // banner, and dashboard tracker in sync without a hard refresh.
+      qc.invalidateQueries({ queryKey: ['eating', catId] });
+      qc.invalidateQueries({ queryKey: ['calorie-summary', catId] });
+      qc.invalidateQueries({ queryKey: ['me-cats'] });
+      qc.invalidateQueries({ queryKey: ['daily-progress'] });
+    },
+    onError: (e: Error) => toast.error(e.message)
+  });
+
+  function canEdit(log: EatingLogRow) {
+    return isAdmin || log.submitted_by === currentUserId;
+  }
+
+  function startEdit(log: EatingLogRow) {
+    setEditingLog({
+      id: log.id,
+      feeding_method: log.feeding_method,
+      notes: log.notes,
+      items: log.items.map((it) => ({
+        food_item_id: it.food_item_id,
+        quantity_given_g: it.quantity_given_g,
+        quantity_eaten: it.quantity_eaten
+      }))
+    });
+  }
 
   const today = summary?.today_kcal ?? 0;
   const target = summary?.recommended_kcal ?? null;
@@ -130,12 +183,13 @@ export function EatingCard({ catId }: { catId: string }) {
                   (acc, it) => acc + (Number(it.estimated_kcal_consumed) || 0),
                   0
                 );
+                const editable = canEdit(m);
                 return (
                   <li
                     key={m.id}
-                    className="flex items-center justify-between border-b py-1 last:border-0"
+                    className="group flex items-center justify-between gap-2 border-b py-1 last:border-0"
                   >
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <div className="truncate">
                         {m.items.map((it) => it.food?.name).filter(Boolean).join(', ') || '—'}
                       </div>
@@ -144,6 +198,29 @@ export function EatingCard({ catId }: { catId: string }) {
                       </div>
                     </div>
                     <span className="ml-2 whitespace-nowrap text-xs font-medium">{Math.round(total)} kcal</span>
+                    {editable && (
+                      <div className="flex items-center gap-0.5 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+                        <button
+                          type="button"
+                          onClick={() => startEdit(m)}
+                          className="p-0.5 text-muted-foreground hover:text-foreground"
+                          aria-label={tc('edit')}
+                        >
+                          <Pencil className="h-3 w-3" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (window.confirm(t('confirmDelete'))) deleteMeal.mutate(m.id);
+                          }}
+                          className="p-0.5 text-muted-foreground hover:text-destructive"
+                          aria-label={tc('delete')}
+                          disabled={deleteMeal.isPending}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                    )}
                   </li>
                 );
               })}
@@ -153,6 +230,12 @@ export function EatingCard({ catId }: { catId: string }) {
       </CardContent>
 
       <LogEatingModal open={open} onClose={() => setOpen(false)} catId={catId} />
+      <LogEatingModal
+        open={!!editingLog}
+        onClose={() => setEditingLog(null)}
+        catId={catId}
+        editLog={editingLog}
+      />
     </Card>
   );
 }

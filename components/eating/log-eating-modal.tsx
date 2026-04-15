@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { Plus, Trash2 } from 'lucide-react';
 
 import type { EatenRatio, FeedingMethod, FoodItem, FoodType } from '@/lib/supabase/aliases';
-import { type EatingLogInput } from '@/lib/schemas/eating';
+import { EATEN_RATIO_FACTOR, type EatingLogInput } from '@/lib/schemas/eating';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -95,18 +95,35 @@ function ratioToEnum(given: number, eaten: number): EatenRatio {
   return 'little';
 }
 
+export type EditableEatingLog = {
+  id: string;
+  feeding_method: FeedingMethod;
+  notes: string | null;
+  items: Array<{
+    food_item_id: string;
+    quantity_given_g: number | string;
+    quantity_eaten: EatenRatio;
+  }>;
+};
+
 interface Props {
   open: boolean;
   onClose: () => void;
   catId: string;
   catName?: string;
+  /**
+   * When provided, the modal renders in edit mode: it PATCHes the existing
+   * log instead of creating a new one and pre-fills the form from the log.
+   */
+  editLog?: EditableEatingLog | null;
 }
 
-export function LogEatingModal({ open, onClose, catId, catName }: Props) {
+export function LogEatingModal({ open, onClose, catId, catName, editLog }: Props) {
   const t = useTranslations('eating');
   const tc = useTranslations('common');
   const tf = useTranslations('food');
   const qc = useQueryClient();
+  const isEdit = !!editLog;
 
   const { data: foods = [] } = useQuery({
     queryKey: ['food-items', false],
@@ -134,6 +151,28 @@ export function LogEatingModal({ open, onClose, catId, catName }: Props) {
     items: [emptyItem]
   };
 
+  // Translate an existing log back into form state. `given_g` comes directly
+  // from the stored column; `eaten_g` is reconstructed from the eaten-ratio
+  // enum × given so the edit view mirrors what the sitter originally entered.
+  // There's inherent precision loss here (the ratio is bucketed), but that's
+  // intentional — sitters rarely care about the exact pre-edit gram value.
+  function editDefaults(log: EditableEatingLog): EatingFormInput {
+    return {
+      feeding_method: log.feeding_method,
+      notes: log.notes ?? '',
+      items: log.items.length
+        ? log.items.map((it) => {
+            const given = Number(it.quantity_given_g ?? 0);
+            return {
+              food_item_id: it.food_item_id,
+              given_g: given,
+              eaten_g: given * (EATEN_RATIO_FACTOR[it.quantity_eaten] ?? 1)
+            };
+          })
+        : [emptyItem]
+    };
+  }
+
   const form = useForm<EatingFormInput>({
     resolver: zodResolver(eatingFormSchema),
     defaultValues: emptyDefaults
@@ -141,9 +180,9 @@ export function LogEatingModal({ open, onClose, catId, catName }: Props) {
   const { fields, append, remove } = useFieldArray({ control: form.control, name: 'items' });
 
   useEffect(() => {
-    if (open) form.reset(emptyDefaults);
+    if (open) form.reset(editLog ? editDefaults(editLog) : emptyDefaults);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, editLog]);
 
   // Live total kcal estimate based on the raw gram figures (no enum rounding
   // yet): eaten_g × kcal/g. This keeps the number the sitter sees in sync
@@ -167,15 +206,16 @@ export function LogEatingModal({ open, onClose, catId, catName }: Props) {
           quantity_eaten: ratioToEnum(Number(it.given_g), Number(it.eaten_g))
         }))
       };
-      const r = await fetch(`/api/cats/${catId}/eating`, {
-        method: 'POST',
+      const url = isEdit ? `/api/eating-logs/${editLog!.id}` : `/api/cats/${catId}/eating`;
+      const r = await fetch(url, {
+        method: isEdit ? 'PATCH' : 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(payload)
       });
       if (!r.ok) throw new Error((await r.json()).error ?? 'Failed');
     },
     onSuccess: () => {
-      toast.success(t('logged'));
+      toast.success(isEdit ? t('updated') : t('logged'));
       // Skip router.refresh() so the sitter's scroll position on /my-cats
       // isn't reset after every quick action. The cat-detail cards all read
       // through these React Query keys, so invalidation is enough.
@@ -194,7 +234,13 @@ export function LogEatingModal({ open, onClose, catId, catName }: Props) {
     <ResponsiveModal
       open={open}
       onOpenChange={(o) => !o && onClose()}
-      title={catName ? t('titleFor', { name: catName }) : t('title')}
+      title={
+        isEdit
+          ? t('editTitle')
+          : catName
+            ? t('titleFor', { name: catName })
+            : t('title')
+      }
     >
       <form onSubmit={form.handleSubmit((v) => m.mutate(v))} className="space-y-3 py-2">
         <div className="space-y-2">
