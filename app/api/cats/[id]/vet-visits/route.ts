@@ -97,7 +97,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
           dose,
           route:         m.schedule_route ?? 'oral',
           start_date:    m.schedule_start_date,
-          end_date:      m.schedule_end_date,
+          end_date:      m.schedule_end_date ?? null,
           interval_days: m.schedule_interval_days ?? 1,
           time_slots:    m.schedule_time_slots,
           notes:         m.notes ?? null,

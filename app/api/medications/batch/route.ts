@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     dose: medication.dose,
     route: medication.route,
     start_date: medication.start_date,
-    end_date: medication.end_date,
+    end_date: medication.end_date ?? null,
     interval_days: medication.interval_days,
     time_slots: medication.time_slots,
     notes: medication.notes ?? null,
@@ -57,7 +57,8 @@ export async function POST(request: Request) {
     created_by: user.authId
   }));
 
-  const { data, error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
     .from('medications')
     .insert(rows)
     .select('id, cat_id');

@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Plus, Trash2, Receipt, X } from 'lucide-react';
+import { Plus, Trash2, Receipt, X, FileText, Image as ImageIcon } from 'lucide-react';
 
 import { uploadImage } from '@/lib/storage/upload';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
@@ -35,7 +35,8 @@ type MedicineRow = {
   frequency: string;
   duration: string;
   notes: string;
-  // Optional structured scheduling — fills the medications.* table
+  // Optional structured scheduling — fills the medications.* table.
+  // schedule_end_date is "" when the plan is indefinite (stop manually).
   schedule_enabled: boolean;
   schedule_start_date: string;
   schedule_end_date: string;
@@ -46,6 +47,19 @@ type MedicineRow = {
 
 type LabFile = { file: File; notes: string };
 
+// An existing lab result / receipt already uploaded to the server. Stored
+// separately from the draft `labFiles` list because it's not re-uploaded on
+// save — only its delete flag is honoured.
+type ExistingLabResult = {
+  id: string;
+  file_url: string;
+  file_name: string;
+  file_type: 'pdf' | 'image';
+  kind: 'lab_result' | 'receipt';
+  notes: string | null;
+  _pendingDelete?: boolean;
+};
+
 interface Props {
   open: boolean;
   onClose: () => void;
@@ -54,17 +68,27 @@ interface Props {
   role?: 'admin' | 'cat_sitter';
   /** Optional — pre-link to a specific ticket (e.g. from within ticket modal) */
   prefilledTicketId?: string;
+  /** Optional — when set, open the modal in edit mode for this existing visit. */
+  editVisitId?: string;
 }
 
 const VISIT_TYPES: VisitType[]    = ['routine_checkup', 'emergency', 'follow_up', 'vaccination', 'surgery', 'dental', 'other'];
 const VISIT_STATUSES: VisitStatus[] = ['scheduled', 'in_progress', 'completed', 'cancelled'];
 
-export function VetVisitModal({ open, onClose, catId, catName, role, prefilledTicketId }: Props) {
+export function VetVisitModal({ open, onClose, catId, catName, role, prefilledTicketId, editVisitId }: Props) {
   const isAdmin = role !== 'cat_sitter';
+  const isEdit  = !!editVisitId;
   const ROUTES: MedRoute[] = ['oral', 'topical', 'injection', 'other'];
   const t  = useTranslations('vet');
   const tc = useTranslations('common');
   const qc = useQueryClient();
+
+  // Hidden file inputs — clicking the "Add file" buttons triggers these via
+  // a ref. We avoid `<Button asChild><label>...</label></Button>` because
+  // Radix Slot + label nesting has been flaky and prevented the click from
+  // reaching the file input on some browsers.
+  const labInputRef     = useRef<HTMLInputElement>(null);
+  const receiptInputRef = useRef<HTMLInputElement>(null);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -86,6 +110,7 @@ export function VetVisitModal({ open, onClose, catId, catName, role, prefilledTi
   const [medicines, setMedicines]             = useState<MedicineRow[]>([]);
   const [labFiles, setLabFiles]               = useState<LabFile[]>([]);
   const [receiptFiles, setReceiptFiles]       = useState<LabFile[]>([]);
+  const [existingLabResults, setExistingLabResults] = useState<ExistingLabResult[]>([]);
 
   function resetForm() {
     setVisitDate(today); setVisitType('routine_checkup'); setStatus('completed');
@@ -93,9 +118,10 @@ export function VetVisitModal({ open, onClose, catId, catName, role, prefilledTi
     setChiefComplaint(''); setDiagnosis(''); setTreatment('');
     setFollowUpDate(''); setVisitCost(''); setTransportCost(''); setNotes('');
     setMedicines([]); setLabFiles([]); setReceiptFiles([]);
+    setExistingLabResults([]);
   }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (open) resetForm(); }, [open]);
+  useEffect(() => { if (open && !isEdit) resetForm(); }, [open, isEdit]);
 
   // ─── data queries ────────────────────────────────────────────────────────
   const { data: clinics = [] } = useQuery<ClinicOption[]>({
@@ -107,6 +133,80 @@ export function VetVisitModal({ open, onClose, catId, catName, role, prefilledTi
     },
     enabled: open
   });
+
+  // Load the existing visit when the modal is opened in edit mode so the
+  // form can be pre-populated with the current values.
+  const { data: existingVisit } = useQuery({
+    queryKey: ['vet-visit', editVisitId],
+    queryFn: async () => {
+      const r = await fetch(`/api/vet-visits/${editVisitId}`, { cache: 'no-store' });
+      if (!r.ok) return null;
+      return (await r.json()).visit as {
+        visit_date: string;
+        visit_type: VisitType;
+        status: VisitStatus;
+        clinic_id: string | null;
+        doctor_id: string | null;
+        health_ticket_id: string | null;
+        chief_complaint: string | null;
+        diagnosis: string | null;
+        treatment_performed: string | null;
+        follow_up_date: string | null;
+        visit_cost: number | null;
+        transport_cost: number | null;
+        notes: string | null;
+        medicines: Array<{
+          id: string;
+          medicine_name: string;
+          dose: string | null;
+          frequency: string | null;
+          duration: string | null;
+          notes: string | null;
+        }>;
+        lab_results: ExistingLabResult[];
+      };
+    },
+    enabled: open && isEdit
+  });
+
+  // Populate the form state when the visit loads (or the modal is reopened).
+  useEffect(() => {
+    if (!open || !isEdit || !existingVisit) return;
+    setVisitDate(existingVisit.visit_date);
+    setVisitType(existingVisit.visit_type);
+    setStatus(existingVisit.status);
+    setClinicId(existingVisit.clinic_id ?? '');
+    setDoctorId(existingVisit.doctor_id ?? '');
+    setTicketId(existingVisit.health_ticket_id ?? '');
+    setChiefComplaint(existingVisit.chief_complaint ?? '');
+    setDiagnosis(existingVisit.diagnosis ?? '');
+    setTreatment(existingVisit.treatment_performed ?? '');
+    setFollowUpDate(existingVisit.follow_up_date ?? '');
+    setVisitCost(existingVisit.visit_cost != null ? String(existingVisit.visit_cost) : '');
+    setTransportCost(existingVisit.transport_cost != null ? String(existingVisit.transport_cost) : '');
+    setNotes(existingVisit.notes ?? '');
+    setMedicines(
+      existingVisit.medicines.map((m) => ({
+        medicine_name: m.medicine_name,
+        dose:          m.dose      ?? '',
+        frequency:     m.frequency ?? '',
+        duration:      m.duration  ?? '',
+        notes:         m.notes     ?? '',
+        // The detail GET doesn't include the schedule columns today, so we
+        // default to disabled. Re-enabling from the edit modal will create a
+        // brand-new schedule on save.
+        schedule_enabled:       false,
+        schedule_start_date:    today,
+        schedule_end_date:      '',
+        schedule_interval_days: 1,
+        schedule_time_slots:    ['08:00', '20:00'],
+        schedule_route:         'oral'
+      }))
+    );
+    setExistingLabResults(existingVisit.lab_results ?? []);
+    setLabFiles([]);
+    setReceiptFiles([]);
+  }, [open, isEdit, existingVisit, today]);
 
   // Open tickets for this cat (filter to non-resolved client-side)
   const { data: tickets = [] } = useQuery<TicketOption[]>({
@@ -209,7 +309,8 @@ export function VetVisitModal({ open, onClose, catId, catName, role, prefilledTi
           schedule_enabled: m.schedule_enabled,
           ...(m.schedule_enabled && {
             schedule_start_date:    m.schedule_start_date,
-            schedule_end_date:      m.schedule_end_date,
+            // Empty end date → null (indefinite, stop manually).
+            schedule_end_date:      m.schedule_end_date || null,
             schedule_interval_days: m.schedule_interval_days,
             schedule_time_slots:    m.schedule_time_slots,
             schedule_route:         m.schedule_route
@@ -220,8 +321,8 @@ export function VetVisitModal({ open, onClose, catId, catName, role, prefilledTi
       for (const m of cleanMedicines) {
         if (m.schedule_enabled) {
           if (!m.dose) throw new Error(`"${m.medicine_name}" needs a dose to be scheduled.`);
-          if (!m.schedule_start_date || !m.schedule_end_date) {
-            throw new Error(`"${m.medicine_name}" needs a start + end date.`);
+          if (!m.schedule_start_date) {
+            throw new Error(`"${m.medicine_name}" needs a start date.`);
           }
           if ((m.schedule_time_slots?.length ?? 0) === 0) {
             throw new Error(`"${m.medicine_name}" needs at least one time slot.`);
@@ -246,20 +347,30 @@ export function VetVisitModal({ open, onClose, catId, catName, role, prefilledTi
         medicines:           cleanMedicines
       };
 
-      const r = await fetch(`/api/cats/${catId}/vet-visits`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      // POST (create) vs PATCH (edit) — both accept the same payload shape.
+      const r = await fetch(
+        isEdit ? `/api/vet-visits/${editVisitId}` : `/api/cats/${catId}/vet-visits`,
+        {
+          method: isEdit ? 'PATCH' : 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(payload)
+        }
+      );
       if (!r.ok) throw new Error((await r.json()).error ?? 'Failed');
-      const { visit } = await r.json();
+      const visitId = isEdit ? editVisitId! : (await r.json()).visit.id;
+
+      // Delete any existing lab results marked for removal (edit mode).
+      for (const lr of existingLabResults) {
+        if (!lr._pendingDelete) continue;
+        await fetch(`/api/vet-visits/${visitId}/lab-results/${lr.id}`, { method: 'DELETE' });
+      }
 
       // Upload lab files + receipt files. Same endpoint, different `kind`.
       async function uploadAndAttach(files: LabFile[], kind: 'lab_result' | 'receipt') {
         for (const f of files) {
           const isPdf = f.file.type === 'application/pdf';
-          const { url, path } = await uploadImage('lab-results', f.file, `visits/${visit.id}/${kind}`);
-          await fetch(`/api/vet-visits/${visit.id}/lab-results`, {
+          const { url, path } = await uploadImage('lab-results', f.file, `visits/${visitId}/${kind}`);
+          await fetch(`/api/vet-visits/${visitId}/lab-results`, {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({
@@ -284,8 +395,9 @@ export function VetVisitModal({ open, onClose, catId, catName, role, prefilledTi
         qc.invalidateQueries({ queryKey: ['daily-progress'] });
       }
 
-      toast.success(t('visitCreated'));
+      toast.success(isEdit ? t('visitUpdated') : t('visitCreated'));
       qc.invalidateQueries({ queryKey: ['vet-visits', catId] });
+      if (isEdit) qc.invalidateQueries({ queryKey: ['vet-visit', editVisitId] });
       if (ticketId) {
         qc.invalidateQueries({ queryKey: ['health-ticket', ticketId] });
         qc.invalidateQueries({ queryKey: ['health-tickets', catId] });
@@ -302,7 +414,7 @@ export function VetVisitModal({ open, onClose, catId, catName, role, prefilledTi
     <ResponsiveModal
       open={open}
       onOpenChange={(v) => { if (!v) onClose(); }}
-      title={`${t('newVisit')} — ${catName}`}
+      title={`${isEdit ? t('editVisit') : t('newVisit')} — ${catName}`}
       className="max-w-2xl"
     >
       <form onSubmit={onSubmit} className="space-y-4 py-2">
@@ -470,8 +582,25 @@ export function VetVisitModal({ open, onClose, catId, catName, role, prefilledTi
                             type="date"
                             value={med.schedule_end_date}
                             onChange={(e) => updateMedicine(i, 'schedule_end_date', e.target.value)}
+                            disabled={med.schedule_end_date === ''}
                             className="h-8 text-xs"
                           />
+                          <label className="flex items-center gap-1 text-[10px] cursor-pointer mt-0.5 whitespace-nowrap">
+                            <input
+                              type="checkbox"
+                              checked={med.schedule_end_date === ''}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  updateMedicine(i, 'schedule_end_date', '');
+                                } else {
+                                  const d = new Date(); d.setDate(d.getDate() + 6);
+                                  updateMedicine(i, 'schedule_end_date', d.toISOString().slice(0, 10));
+                                }
+                              }}
+                              className="h-3 w-3"
+                            />
+                            <span>{t('indefinite')}</span>
+                          </label>
                         </div>
                         <div>
                           <Label className="text-[10px] uppercase text-muted-foreground">{t('fields.intervalDays')}</Label>
@@ -534,13 +663,35 @@ export function VetVisitModal({ open, onClose, catId, catName, role, prefilledTi
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label>{t('labResults')}</Label>
-            <Button type="button" variant="outline" size="sm" asChild>
-              <label className="cursor-pointer">
-                <Plus className="h-3 w-3" /> {t('addLabResult')}
-                <input type="file" accept="image/*,application/pdf" multiple className="hidden" onChange={handleFileSelect(setLabFiles)} />
-              </label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => labInputRef.current?.click()}
+            >
+              <Plus className="h-3 w-3" /> {t('addLabResult')}
             </Button>
+            <input
+              ref={labInputRef}
+              type="file"
+              accept="image/*,application/pdf"
+              multiple
+              className="hidden"
+              onChange={handleFileSelect(setLabFiles)}
+            />
           </div>
+          {/* Already-uploaded files (edit mode) */}
+          {existingLabResults.filter((lr) => lr.kind !== 'receipt').map((lr) => (
+            <ExistingFileRow
+              key={lr.id}
+              lr={lr}
+              onToggleDelete={() =>
+                setExistingLabResults((prev) => prev.map((r) =>
+                  r.id === lr.id ? { ...r, _pendingDelete: !r._pendingDelete } : r
+                ))
+              }
+            />
+          ))}
           {labFiles.map((lab, i) => (
             <div key={i} className="rounded-md border p-2 space-y-1.5">
               <div className="flex items-center justify-between gap-2">
@@ -566,13 +717,35 @@ export function VetVisitModal({ open, onClose, catId, catName, role, prefilledTi
               <Receipt className="h-3.5 w-3.5 text-muted-foreground" />
               {t('receipts')}
             </Label>
-            <Button type="button" variant="outline" size="sm" asChild>
-              <label className="cursor-pointer">
-                <Plus className="h-3 w-3" /> {t('addReceipt')}
-                <input type="file" accept="image/*,application/pdf" multiple className="hidden" onChange={handleFileSelect(setReceiptFiles)} />
-              </label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => receiptInputRef.current?.click()}
+            >
+              <Plus className="h-3 w-3" /> {t('addReceipt')}
             </Button>
+            <input
+              ref={receiptInputRef}
+              type="file"
+              accept="image/*,application/pdf"
+              multiple
+              className="hidden"
+              onChange={handleFileSelect(setReceiptFiles)}
+            />
           </div>
+          {/* Already-uploaded receipts (edit mode) */}
+          {existingLabResults.filter((lr) => lr.kind === 'receipt').map((lr) => (
+            <ExistingFileRow
+              key={lr.id}
+              lr={lr}
+              onToggleDelete={() =>
+                setExistingLabResults((prev) => prev.map((r) =>
+                  r.id === lr.id ? { ...r, _pendingDelete: !r._pendingDelete } : r
+                ))
+              }
+            />
+          ))}
           {receiptFiles.map((rec, i) => (
             <div key={i} className="rounded-md border p-2 space-y-1.5">
               <div className="flex items-center justify-between gap-2">
@@ -605,5 +778,48 @@ export function VetVisitModal({ open, onClose, catId, catName, role, prefilledTi
         </div>
       </form>
     </ResponsiveModal>
+  );
+}
+
+// Row for a lab result / receipt that already exists on the server. Clicking
+// the trash icon toggles a pending-delete flag; the delete actually happens
+// on save so users can undo before confirming.
+function ExistingFileRow({
+  lr,
+  onToggleDelete
+}: {
+  lr: ExistingLabResult;
+  onToggleDelete: () => void;
+}) {
+  const pending = lr._pendingDelete === true;
+  return (
+    <div
+      className={`rounded-md border p-2 flex items-center justify-between gap-2 ${
+        pending ? 'opacity-50 line-through bg-destructive/5' : ''
+      }`}
+    >
+      <a
+        href={lr.file_url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-1.5 text-sm min-w-0"
+      >
+        {lr.file_type === 'pdf'
+          ? <FileText className="h-3.5 w-3.5 text-red-500 shrink-0" />
+          : <ImageIcon className="h-3.5 w-3.5 text-blue-500 shrink-0" />}
+        <span className="truncate">{lr.file_name}</span>
+      </a>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="h-6 w-6 shrink-0"
+        onClick={onToggleDelete}
+      >
+        {pending
+          ? <X className="h-3.5 w-3.5" />
+          : <Trash2 className="h-3.5 w-3.5 text-destructive" />}
+      </Button>
+    </div>
   );
 }

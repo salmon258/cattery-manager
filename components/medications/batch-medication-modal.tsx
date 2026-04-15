@@ -68,6 +68,8 @@ export function BatchMedicationModal({ open, onClose, catIds, onSuccess }: Props
   }, [open]);
 
   const slots = form.watch('time_slots') ?? [];
+  const endDate = form.watch('end_date');
+  const indefinite = endDate == null || endDate === '';
 
   const m = useMutation({
     mutationFn: async (v: MedicationInput) => {
@@ -140,7 +142,26 @@ export function BatchMedicationModal({ open, onClose, catIds, onSuccess }: Props
             <Input type="date" {...form.register('start_date')} />
           </Field>
           <Field label={t('fields.endDate')} error={errors.end_date?.message}>
-            <Input type="date" {...form.register('end_date')} />
+            <Input
+              type="date"
+              value={endDate ?? ''}
+              onChange={(e) =>
+                form.setValue('end_date', e.target.value || null, { shouldValidate: true })
+              }
+              disabled={indefinite}
+            />
+            <label className="flex items-center gap-1.5 text-xs cursor-pointer mt-1">
+              <input
+                type="checkbox"
+                checked={indefinite}
+                onChange={(e) =>
+                  form.setValue('end_date', e.target.checked ? null : endDefault, { shouldValidate: true })
+                }
+                className="h-3.5 w-3.5"
+              />
+              <span>{t('indefinite')}</span>
+              <span className="text-muted-foreground">— {t('indefiniteHint')}</span>
+            </label>
           </Field>
         </div>
 
