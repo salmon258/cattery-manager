@@ -284,6 +284,10 @@
     "addSlot": "Tambah waktu",
     "slotsHint": "Setiap slot waktu menghasilkan satu dosis per hari pemberian. Gunakan interval > 1 untuk jadwal tiap beberapa hari.",
     "intervalLabel": "tiap {n} hari",
+    "batchSchedule": "Jadwalkan untuk terpilih",
+    "batchScheduleTitle": "Jadwal untuk {count} kucing",
+    "batchScheduleDesc": "Rencana obat yang sama akan dibuat untuk setiap kucing terpilih.",
+    "batchCreated": "Dijadwalkan untuk {count} kucing.",
     "fields": {
       "name": "Nama obat",
       "dose": "Dosis",
