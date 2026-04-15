@@ -4,7 +4,14 @@ import { getCurrentUser } from '@/lib/auth/current-user';
 
 type ActivityRow = {
   id: string;
-  kind: 'assignee_change' | 'room_move' | 'weight_log' | 'ticket_opened' | 'vet_visit';
+  kind:
+    | 'assignee_change'
+    | 'room_move'
+    | 'weight_log'
+    | 'ticket_opened'
+    | 'vet_visit'
+    | 'eating_log'
+    | 'medication_log';
   at: string;
   actor: string | null;
   cat: { id: string; name: string } | null;
@@ -183,6 +190,114 @@ export async function GET(req: Request) {
       actor: v.creator?.full_name ?? null,
       cat: v.cat,
       summary: `Vet visit (${v.visit_type}) at ${v.clinic?.name ?? '—'}`
+    });
+  }
+
+  // ─── eating logs ──────────────────────────────────────────────────────────
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: meals } = await applyRange(
+    (supabase as any)
+      .from('eating_logs')
+      .select(`
+        id, meal_time, feeding_method,
+        cat:cats(id, name),
+        submitter:profiles!eating_logs_submitted_by_fkey(id, full_name),
+        items:eating_log_items(
+          quantity_given_g, quantity_eaten,
+          food:food_items(name)
+        )
+      `)
+      .order('meal_time', { ascending: false })
+      .limit(limit),
+    'meal_time',
+    true
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ) as any;
+
+  for (const ml of meals ?? []) {
+    const items = (ml.items ?? []) as Array<{
+      quantity_given_g: number;
+      quantity_eaten: string;
+      food: { name: string } | null;
+    }>;
+    const totalG = items.reduce((sum, i) => sum + (Number(i.quantity_given_g) || 0), 0);
+    const foodNames = items
+      .map((i) => i.food?.name)
+      .filter((n): n is string => Boolean(n));
+    const foodPart = foodNames.length > 0 ? foodNames.join(', ') : 'meal';
+    const eatenLabels = Array.from(new Set(items.map((i) => i.quantity_eaten).filter(Boolean)));
+    const eatenPart = eatenLabels.length > 0 ? ` (ate ${eatenLabels.join('/')})` : '';
+    rows.push({
+      id: `meal-${ml.id}`,
+      kind: 'eating_log',
+      at: ml.meal_time,
+      actor: ml.submitter?.full_name ?? null,
+      cat: ml.cat,
+      summary: `Logged ${ml.feeding_method} feeding: ${foodPart} — ${totalG} g${eatenPart}`
+    });
+  }
+
+  // ─── medication doses (confirmed scheduled tasks) ─────────────────────────
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: medTasks } = await applyRange(
+    (supabase as any)
+      .from('medication_tasks')
+      .select(`
+        id, confirmed_at,
+        cat:cats(id, name),
+        confirmer:profiles!medication_tasks_confirmed_by_fkey(id, full_name),
+        medication:medications(id, medicine_name, dose, route)
+      `)
+      .not('confirmed_at', 'is', null)
+      .order('confirmed_at', { ascending: false })
+      .limit(limit),
+    'confirmed_at',
+    true
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ) as any;
+
+  for (const mt of medTasks ?? []) {
+    const med = mt.medication;
+    const name = med?.medicine_name ?? 'medication';
+    const dosePart = med?.dose ? ` ${med.dose}` : '';
+    const routePart = med?.route ? ` (${med.route})` : '';
+    rows.push({
+      id: `medtask-${mt.id}`,
+      kind: 'medication_log',
+      at: mt.confirmed_at,
+      actor: mt.confirmer?.full_name ?? null,
+      cat: mt.cat,
+      summary: `Gave ${name}${dosePart}${routePart}`
+    });
+  }
+
+  // ─── ad-hoc medications ───────────────────────────────────────────────────
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: adHoc } = await applyRange(
+    (supabase as any)
+      .from('ad_hoc_medicines')
+      .select(`
+        id, given_at, medicine_name, dose, unit, route,
+        cat:cats(id, name),
+        submitter:profiles!ad_hoc_medicines_submitted_by_fkey(id, full_name)
+      `)
+      .order('given_at', { ascending: false })
+      .limit(limit),
+    'given_at',
+    true
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ) as any;
+
+  for (const ah of adHoc ?? []) {
+    const dosePart = ah.dose ? ` ${ah.dose}${ah.unit ?? ''}` : '';
+    const routePart = ah.route ? ` (${ah.route})` : '';
+    rows.push({
+      id: `adhoc-${ah.id}`,
+      kind: 'medication_log',
+      at: ah.given_at,
+      actor: ah.submitter?.full_name ?? null,
+      cat: ah.cat,
+      summary: `Gave ${ah.medicine_name}${dosePart}${routePart} (ad-hoc)`
     });
   }
 

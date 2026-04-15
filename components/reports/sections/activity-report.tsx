@@ -8,7 +8,14 @@ import { Badge } from '@/components/ui/badge';
 
 type Row = {
   id: string;
-  kind: 'assignee_change' | 'room_move' | 'weight_log' | 'ticket_opened' | 'vet_visit';
+  kind:
+    | 'assignee_change'
+    | 'room_move'
+    | 'weight_log'
+    | 'ticket_opened'
+    | 'vet_visit'
+    | 'eating_log'
+    | 'medication_log';
   at: string;
   actor: string | null;
   cat: { id: string; name: string } | null;
@@ -26,7 +33,9 @@ const KIND_CLASS: Record<Row['kind'], string> = {
   room_move:       'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
   weight_log:      'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
   ticket_opened:   'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-  vet_visit:       'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300'
+  vet_visit:       'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300',
+  eating_log:      'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
+  medication_log:  'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300'
 };
 
 const KIND_LABEL: Record<Row['kind'], string> = {
@@ -34,7 +43,9 @@ const KIND_LABEL: Record<Row['kind'], string> = {
   room_move:       'room',
   weight_log:      'weight',
   ticket_opened:   'ticket',
-  vet_visit:       'vet'
+  vet_visit:       'vet',
+  eating_log:      'eating',
+  medication_log:  'meds'
 };
 
 export function ActivityReport() {
