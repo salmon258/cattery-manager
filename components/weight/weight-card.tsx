@@ -172,7 +172,7 @@ export function WeightCard({ catId, role, currentUserId }: Props) {
                       <>
                         <Input
                           type="number"
-                          step="0.01"
+                          step="0.001"
                           min="0.1"
                           value={editValue}
                           onChange={(e) => setEditValue(e.target.value)}
