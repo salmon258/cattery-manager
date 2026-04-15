@@ -592,6 +592,8 @@
     "offspring": "Keturunan",
     "kittens": "Anak kucing",
     "addKitten": "Tambah anak kucing",
+    "attachExistingKitten": "Pilih kucing yang sudah ada",
+    "selectExistingCat": "Pilih kucing yang sudah ada",
     "kittensOptional": "Belum ada anak kucing. Bisa didaftarkan nanti.",
     "male": "Jantan",
     "female": "Betina",
@@ -637,7 +639,8 @@
     "errors": {
       "selectBothCats": "Harap pilih kucing betina dan jantan.",
       "litterSizeRequired": "Harap masukkan jumlah anak kucing yang lahir.",
-      "kittenNameRequired": "Setiap anak kucing yang ditambahkan harus memiliki nama."
+      "kittenNameRequired": "Setiap anak kucing yang ditambahkan harus memiliki nama.",
+      "kittenCatRequired": "Harap pilih kucing untuk setiap baris anak yang ditambahkan."
     }
   },
   "vet": {

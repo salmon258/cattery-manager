@@ -40,10 +40,29 @@ export const assignParentsSchema = z.object({
   father_id: z.string().uuid().nullable()
 });
 
-export const kittenInputSchema = z.object({
-  name:   z.string().min(1).max(100),
-  gender: z.enum(['male', 'female'])
-});
+/**
+ * A kitten entry on the litter form. Admins can either:
+ *
+ *   - create a brand new cat profile ({ kind: 'new', name, gender })
+ *   - attach an existing cat already in the system as a child of this
+ *     mating ({ kind: 'existing', cat_id })
+ *
+ * The "existing" branch is how users back-fill lineage for cats that were
+ * imported from before the app was adopted: they create a (past) mating
+ * record, register the litter with a past birth_date, and check off the
+ * already-imported kittens instead of re-entering names.
+ */
+export const kittenInputSchema = z.discriminatedUnion('kind', [
+  z.object({
+    kind:   z.literal('new'),
+    name:   z.string().min(1).max(100),
+    gender: z.enum(['male', 'female'])
+  }),
+  z.object({
+    kind:   z.literal('existing'),
+    cat_id: z.string().uuid()
+  })
+]);
 
 export const litterSchema = z.object({
   birth_date:           z.string().regex(/^\d{4}-\d{2}-\d{2}$/),

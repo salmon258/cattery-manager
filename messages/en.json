@@ -592,6 +592,8 @@
     "offspring": "Offspring",
     "kittens": "Kittens",
     "addKitten": "Add kitten",
+    "attachExistingKitten": "Attach existing cat",
+    "selectExistingCat": "Select existing cat",
     "kittensOptional": "No kittens added. You can register them later.",
     "male": "Male",
     "female": "Female",
@@ -637,7 +639,8 @@
     "errors": {
       "selectBothCats": "Please select both female and male cat.",
       "litterSizeRequired": "Please enter the number of kittens born.",
-      "kittenNameRequired": "Each added kitten must have a name."
+      "kittenNameRequired": "Each added kitten must have a name.",
+      "kittenCatRequired": "Please pick a cat for each attached kitten row."
     }
   },
   "vet": {

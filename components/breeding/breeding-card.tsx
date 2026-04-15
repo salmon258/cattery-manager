@@ -381,6 +381,8 @@ export function BreedingCard({ catId, catName, catGender, role }: Props) {
           catId={catId}
           femaleName={litterRecord.female_cat.name}
           maleName={litterRecord.male_cat.name}
+          femaleCatId={litterRecord.female_cat.id}
+          maleCatId={litterRecord.male_cat.id}
         />
       )}
 
