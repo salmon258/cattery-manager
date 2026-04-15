@@ -168,8 +168,12 @@
   "eating": {
     "title": "Eating",
     "titleFor": "Log meal — {name}",
+    "editTitle": "Edit meal",
     "log": "Log meal",
     "logged": "Meal logged.",
+    "updated": "Meal updated.",
+    "deleted": "Meal deleted.",
+    "confirmDelete": "Delete this meal log? This cannot be undone.",
     "dailyTarget": "Today's intake",
     "needWeight": "Log a weight reading to compute the recommended daily kcal.",
     "recent": "Recent meals",

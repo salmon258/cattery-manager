@@ -4,6 +4,10 @@ import { persistAuthCookieOptions } from '@/lib/supabase/cookie-options';
 
 const PUBLIC_PATHS = ['/login', '/auth/callback', '/auth/signout'];
 
+// Matches every chunk of the Supabase auth cookie (`sb-<ref>-auth-token` plus
+// `sb-<ref>-auth-token.0`, `.1`, … when the JWT is large enough to chunk).
+const SESSION_COOKIE_RE = /^sb-.*-auth-token(\.\d+)?$/;
+
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
 
@@ -25,11 +29,27 @@ export async function middleware(request: NextRequest) {
   );
 
   const {
-    data: { user }
+    data: { user },
+    error: authError
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
   const isPublic = PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'));
+
+  // If getUser() failed but the session cookies are still sitting on the
+  // request, it's almost always a refresh-token rotation race from parallel
+  // requests (another concurrent request just rotated the refresh token out
+  // from under this one). Bouncing the sitter to /login here wipes them out
+  // mid-action. Letting the request through is safe — the route handler
+  // will revalidate on its own, and the browser client's auto-refresh will
+  // heal the state on the next tick.
+  const hasSessionCookie = request.cookies
+    .getAll()
+    .some((c) => SESSION_COOKIE_RE.test(c.name));
+
+  if (!user && authError && hasSessionCookie && !isPublic) {
+    return response;
+  }
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();
