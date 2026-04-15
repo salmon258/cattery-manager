@@ -113,14 +113,14 @@ function WeightDeltaChip({ delta }: { delta: WeightDelta }) {
       : direction === 'down'
         ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300'
         : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300';
-  // Show grams when the change is small enough that kg with 2dp would read
-  // as 0.00 or round-trip to ±10g. Otherwise kg with 2 decimals is clearer.
+  // Show grams for sub-100g changes (more readable than "0.001 kg"), otherwise
+  // display the delta in kg with 3-decimal precision to match the main reading.
   const absG = Math.abs(deltaG);
   const sign = deltaKg > 0 ? '+' : deltaKg < 0 ? '−' : '';
   const magnitude =
     absG < 100
       ? `${sign}${Math.round(absG)} g`
-      : `${sign}${Math.abs(deltaKg).toFixed(2)} kg`;
+      : `${sign}${Math.abs(deltaKg).toFixed(3)} kg`;
   return (
     <span
       className={cn(
@@ -209,13 +209,13 @@ function CatRowItem({ cat }: { cat: CatRow }) {
         {cat.latest_weight ? (
           <>
             <span className="font-medium">
-              {cat.latest_weight.weight_kg} <span className="text-muted-foreground font-normal">kg</span>
+              {Number(cat.latest_weight.weight_kg).toFixed(3)} <span className="text-muted-foreground font-normal">kg</span>
               <span className="text-muted-foreground ml-1">@ {formatTime(cat.latest_weight.recorded_at)}</span>
             </span>
             {weightDelta && (
               <span
                 className="inline-flex items-center gap-1"
-                title={`${t('vsPrevious')} ${cat.previous_weight!.weight_kg} kg · ${formatDay(cat.previous_weight!.recorded_at)}`}
+                title={`${t('vsPrevious')} ${Number(cat.previous_weight!.weight_kg).toFixed(3)} kg · ${formatDay(cat.previous_weight!.recorded_at)}`}
               >
                 <WeightDeltaChip delta={weightDelta} />
               </span>

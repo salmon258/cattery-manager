@@ -708,7 +708,7 @@ function TodayDetails({ summary }: { summary: TodaySummary }) {
               <ul className="space-y-0.5">
                 {summary.weights.map((w) => (
                   <li key={w.id} className="flex items-center justify-between text-xs">
-                    <span className="font-medium">{Number(w.weight_kg).toFixed(2)} kg</span>
+                    <span className="font-medium">{Number(w.weight_kg).toFixed(3)} kg</span>
                     <span className="text-muted-foreground">{formatTime(w.recorded_at)}</span>
                   </li>
                 ))}

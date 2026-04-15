@@ -92,7 +92,7 @@ export function WeightReport() {
                   <tr key={r.id} className="border-b last:border-0">
                     <td className="py-2 pr-3">{formatDate(r.recorded_at)}</td>
                     <td className="py-2 pr-3">{r.cat?.name ?? '—'}</td>
-                    <td className="py-2 pr-3 text-right font-medium">{r.weight_kg}</td>
+                    <td className="py-2 pr-3 text-right font-medium">{Number(r.weight_kg).toFixed(3)}</td>
                     <td className="py-2 pr-3 text-muted-foreground">{r.submitter?.full_name ?? '—'}</td>
                   </tr>
                 ))}

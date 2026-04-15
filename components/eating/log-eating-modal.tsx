@@ -7,7 +7,6 @@ import { z } from 'zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
 import { Plus, Trash2 } from 'lucide-react';
 
 import type { EatenRatio, FeedingMethod, FoodItem } from '@/lib/supabase/aliases';
@@ -83,7 +82,6 @@ interface Props {
 export function LogEatingModal({ open, onClose, catId, catName }: Props) {
   const t = useTranslations('eating');
   const tc = useTranslations('common');
-  const router = useRouter();
   const qc = useQueryClient();
 
   const { data: foods = [] } = useQuery({
@@ -141,11 +139,14 @@ export function LogEatingModal({ open, onClose, catId, catName }: Props) {
     },
     onSuccess: () => {
       toast.success(t('logged'));
+      // Skip router.refresh() so the sitter's scroll position on /my-cats
+      // isn't reset after every quick action. The cat-detail cards all read
+      // through these React Query keys, so invalidation is enough.
       qc.invalidateQueries({ queryKey: ['eating', catId] });
       qc.invalidateQueries({ queryKey: ['calorie-summary', catId] });
       qc.invalidateQueries({ queryKey: ['me-cats'] });
+      qc.invalidateQueries({ queryKey: ['daily-progress'] });
       onClose();
-      router.refresh();
     },
     onError: (e: Error) => toast.error(e.message)
   });

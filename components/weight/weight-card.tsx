@@ -126,7 +126,7 @@ export function WeightCard({ catId, role, currentUserId }: Props) {
           <>
             <div className="flex items-baseline gap-3">
               <div className="text-3xl font-semibold tracking-tight">
-                {latest!.weight_kg} <span className="text-base font-normal text-muted-foreground">kg</span>
+                {Number(latest!.weight_kg).toFixed(3)} <span className="text-base font-normal text-muted-foreground">kg</span>
               </div>
               {delta !== null && (
                 <span
@@ -142,7 +142,7 @@ export function WeightCard({ catId, role, currentUserId }: Props) {
                   }
                 >
                   {delta > 0 ? '+' : ''}
-                  {delta.toFixed(2)} kg
+                  {delta.toFixed(3)} kg
                   {deltaPct !== null && ` (${deltaPct > 0 ? '+' : ''}${deltaPct.toFixed(1)}%)`}
                 </span>
               )}
@@ -190,7 +190,7 @@ export function WeightCard({ catId, role, currentUserId }: Props) {
                       </>
                     ) : (
                       <>
-                        <span className="font-medium shrink-0">{l.weight_kg} kg</span>
+                        <span className="font-medium shrink-0">{Number(l.weight_kg).toFixed(3)} kg</span>
                         <span className="text-xs text-muted-foreground truncate flex-1 text-right">
                           {formatDate(l.recorded_at)} · {l.submitter?.full_name ?? '—'}
                         </span>

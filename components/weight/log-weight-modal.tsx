@@ -6,7 +6,6 @@ import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
 
 import { type WeightLogInput } from '@/lib/schemas/weight';
 import { Button } from '@/components/ui/button';
@@ -39,7 +38,6 @@ type WeightGramsFormInput = z.infer<typeof weightGramsFormSchema>;
 export function LogWeightModal({ open, onClose, catId, catName }: Props) {
   const t = useTranslations('weight');
   const tc = useTranslations('common');
-  const router = useRouter();
   const qc = useQueryClient();
 
   // weight_g starts empty (not 0) so the user can type a number directly
@@ -62,13 +60,17 @@ export function LogWeightModal({ open, onClose, catId, catName }: Props) {
     },
     onSuccess: () => {
       toast.success(t('logged'));
+      // Invalidate every cache that renders weight/weight-related data. We
+      // deliberately do NOT call router.refresh() — it re-renders the server
+      // tree, resets client component state, and (on the sitter's my-cats
+      // page) jumps the scroll back to the top after each quick action.
       qc.invalidateQueries({ queryKey: ['weight', catId] });
       qc.invalidateQueries({ queryKey: ['calorie-summary', catId] });
       qc.invalidateQueries({ queryKey: ['cat', catId] });
       qc.invalidateQueries({ queryKey: ['me-cats'] });
+      qc.invalidateQueries({ queryKey: ['daily-progress'] });
       form.reset(emptyDefaults);
       onClose();
-      router.refresh();
     },
     onError: (e: Error) => toast.error(e.message)
   });
