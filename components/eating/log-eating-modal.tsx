@@ -9,17 +9,40 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Plus, Trash2 } from 'lucide-react';
 
-import type { EatenRatio, FeedingMethod, FoodItem } from '@/lib/supabase/aliases';
+import type { EatenRatio, FeedingMethod, FoodItem, FoodType } from '@/lib/supabase/aliases';
 import { type EatingLogInput } from '@/lib/schemas/eating';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
+import { cn } from '@/lib/utils';
 
 const METHODS: FeedingMethod[] = ['self', 'assisted', 'force_fed'];
+
+// Order in which categories appear in the grouped food dropdown. Wet/dry sit
+// at the top because they account for the majority of meal logs; `other`
+// stays last as a catch-all. Tailwind classes are written as full literals
+// so the JIT picks them up instead of building them at runtime.
+const FOOD_TYPE_ORDER: FoodType[] = ['wet', 'dry', 'raw', 'treat', 'supplement', 'other'];
+const FOOD_TYPE_STYLES: Record<FoodType, { label: string; dot: string; item: string }> = {
+  wet:        { label: 'text-sky-700 dark:text-sky-300',       dot: 'bg-sky-500',    item: 'border-l-4 border-l-sky-500' },
+  dry:        { label: 'text-amber-700 dark:text-amber-300',   dot: 'bg-amber-500',  item: 'border-l-4 border-l-amber-500' },
+  raw:        { label: 'text-rose-700 dark:text-rose-300',     dot: 'bg-rose-500',   item: 'border-l-4 border-l-rose-500' },
+  treat:      { label: 'text-pink-700 dark:text-pink-300',     dot: 'bg-pink-500',   item: 'border-l-4 border-l-pink-500' },
+  supplement: { label: 'text-violet-700 dark:text-violet-300', dot: 'bg-violet-500', item: 'border-l-4 border-l-violet-500' },
+  other:      { label: 'text-slate-600 dark:text-slate-300',   dot: 'bg-slate-400',  item: 'border-l-4 border-l-slate-400' }
+};
 
 async function fetchFoodItems(): Promise<FoodItem[]> {
   const r = await fetch('/api/food-items', { cache: 'no-store' });
@@ -82,6 +105,7 @@ interface Props {
 export function LogEatingModal({ open, onClose, catId, catName }: Props) {
   const t = useTranslations('eating');
   const tc = useTranslations('common');
+  const tf = useTranslations('food');
   const qc = useQueryClient();
 
   const { data: foods = [] } = useQuery({
@@ -89,6 +113,19 @@ export function LogEatingModal({ open, onClose, catId, catName }: Props) {
     queryFn: fetchFoodItems,
     enabled: open
   });
+
+  // Pre-group the food list by type so the dropdown renders one
+  // `SelectGroup` per category. Unknown types fall through into `other` so
+  // the dropdown stays complete even if the DB adds a new enum value ahead
+  // of the client build.
+  const groupedFoods = FOOD_TYPE_ORDER.map((type) => ({
+    type,
+    items: foods.filter((f) =>
+      type === 'other'
+        ? !FOOD_TYPE_ORDER.slice(0, -1).includes(f.type)
+        : f.type === type
+    )
+  })).filter((g) => g.items.length > 0);
 
   const emptyItem = { food_item_id: '', given_g: 0, eaten_g: 0 };
   const emptyDefaults: EatingFormInput = {
@@ -200,11 +237,27 @@ export function LogEatingModal({ open, onClose, catId, catName }: Props) {
                     >
                       <SelectTrigger><SelectValue placeholder={t('selectFood')} /></SelectTrigger>
                       <SelectContent>
-                        {foods.map((f) => (
-                          <SelectItem key={f.id} value={f.id}>
-                            {f.name} {f.brand ? `(${f.brand})` : ''} — {f.calories_per_gram} kcal/g
-                          </SelectItem>
-                        ))}
+                        {groupedFoods.map((group) => {
+                          const style = FOOD_TYPE_STYLES[group.type];
+                          return (
+                            <SelectGroup key={group.type}>
+                              <SelectLabel className={cn('flex items-center gap-2', style.label)}>
+                                <span className={cn('inline-block h-2 w-2 rounded-full', style.dot)} />
+                                {tf(`types.${group.type}`)}
+                              </SelectLabel>
+                              {group.items.map((f) => (
+                                <SelectItem
+                                  key={f.id}
+                                  value={f.id}
+                                  className={cn(style.item, style.label)}
+                                  textValue={`${f.name}${f.brand ? ` (${f.brand})` : ''}`}
+                                >
+                                  {f.name} {f.brand ? `(${f.brand})` : ''} — {f.calories_per_gram} kcal/g
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                     {rowError?.food_item_id?.message && (
