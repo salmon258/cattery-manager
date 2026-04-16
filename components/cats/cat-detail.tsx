@@ -26,6 +26,7 @@ import { CatKcalBanner } from '@/components/cats/cat-kcal-banner';
 import { VaccinationsCard } from '@/components/health/vaccinations-card';
 import { PreventiveCard } from '@/components/health/preventive-card';
 import { MedicationsCard } from '@/components/medications/medications-card';
+import { MedicationHistoryCard } from '@/components/medications/medication-history-card';
 import { HealthTicketsCard } from '@/components/health/health-tickets-card';
 import { BreedingCard } from '@/components/breeding/breeding-card';
 import { VetVisitsCard } from '@/components/vet/vet-visits-card';
@@ -247,6 +248,8 @@ export function CatDetail({ cat, initialPhotos, currentRoom, assignee, role, cur
         <PreventiveCard catId={cat.id} />
 
         <MedicationsCard catId={cat.id} role={role} />
+
+        <MedicationHistoryCard catId={cat.id} />
 
         <HealthTicketsCard catId={cat.id} role={role} />
 
