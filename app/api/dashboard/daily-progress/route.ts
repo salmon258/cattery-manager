@@ -12,7 +12,7 @@ import { getCurrentUser } from '@/lib/auth/current-user';
  *   - previous_weight:   { weight_kg, recorded_at } | null   (most recent reading
  *                        strictly BEFORE today, within the last 30 days — used
  *                        by the dashboard to show a day-over-day delta)
- *   - meals:             [{ id, meal_time, feeding_method, total_grams, total_kcal, worst_ratio }]
+ *   - meals:             [{ id, meal_time, feeding_method, total_grams, total_kcal, worst_ratio, food_names }]
  *   - med_tasks:         [{ id, due_at, confirmed_at, skipped, overdue, medicine_name }]
  *   - open_tickets:      count of open/in_progress tickets
  */
@@ -72,7 +72,10 @@ export async function GET() {
       .from('eating_logs')
       .select(`
         id, cat_id, meal_time, feeding_method,
-        items:eating_log_items(quantity_given_g, quantity_eaten, estimated_kcal_consumed)
+        items:eating_log_items(
+          quantity_given_g, quantity_eaten, estimated_kcal_consumed,
+          food:food_items(name)
+        )
       `)
       .gte('meal_time', startIso)
       .lte('meal_time', endIso)
@@ -121,6 +124,7 @@ export async function GET() {
     total_grams: number;
     total_kcal: number;
     worst_ratio: 'all' | 'most' | 'half' | 'little' | 'none';
+    food_names: string[];
   };
 
   const RATIO_RANK: Record<MealSummary['worst_ratio'], number> = {
@@ -133,11 +137,13 @@ export async function GET() {
     let totalG = 0;
     let totalK = 0;
     let worst: MealSummary['worst_ratio'] = 'all';
+    const foodNames: string[] = [];
     for (const it of m.items ?? []) {
       totalG += Number(it.quantity_given_g ?? 0);
       totalK += Number(it.estimated_kcal_consumed ?? 0);
       const r = it.quantity_eaten as MealSummary['worst_ratio'];
       if (r && RATIO_RANK[r] < RATIO_RANK[worst]) worst = r;
+      if (it.food?.name) foodNames.push(it.food.name);
     }
     const summary: MealSummary = {
       id: m.id,
@@ -145,7 +151,8 @@ export async function GET() {
       feeding_method: m.feeding_method,
       total_grams: totalG,
       total_kcal: totalK,
-      worst_ratio: worst
+      worst_ratio: worst,
+      food_names: foodNames
     };
     if (!mealsByCat.has(m.cat_id)) mealsByCat.set(m.cat_id, []);
     mealsByCat.get(m.cat_id)!.push(summary);

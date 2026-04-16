@@ -62,7 +62,9 @@
       "noMeals": "No meals logged yet",
       "medsConfirmed": "{done}/{total} doses confirmed",
       "dosesConfirmedShort": "doses",
-      "allCaughtUp": "All caught up ✓"
+      "allCaughtUp": "All caught up ✓",
+      "foodDetails": "Food details",
+      "mealFallback": "Meal"
     }
   },
   "sitterHome": {
