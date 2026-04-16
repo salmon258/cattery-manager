@@ -8,6 +8,7 @@ import { Drawer, DrawerContent, DrawerPortal, DrawerOverlay } from '@/components
 import { DrawerTitle } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { AdminSidebar } from '@/components/app/admin-sidebar';
+import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import type { Profile } from '@/lib/supabase/aliases';
 
 interface Props {
@@ -71,7 +72,9 @@ export function AdminShell({ profile, brandName, children }: Props) {
 
       {/* Content */}
       <main className="md:pl-60">
-        <div className="mx-auto max-w-6xl px-4 py-6 md:px-8 md:py-8">{children}</div>
+        <PullToRefresh>
+          <div className="mx-auto max-w-6xl px-4 py-6 md:px-8 md:py-8">{children}</div>
+        </PullToRefresh>
       </main>
     </div>
   );

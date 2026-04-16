@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import type { Profile } from '@/lib/supabase/aliases';
 import { UserMenu } from '@/components/app/user-menu';
 import { PushOptIn } from '@/components/pwa/push-opt-in';
+import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 
 interface Props {
   profile: Profile;
@@ -65,7 +66,9 @@ export function SitterShell({ profile, brandName, children }: Props) {
 
       {/* Content */}
       <main className="flex-1">
-        <div className="mx-auto max-w-3xl px-4 py-4 pb-24">{children}</div>
+        <PullToRefresh>
+          <div className="mx-auto max-w-3xl px-4 py-4 pb-24">{children}</div>
+        </PullToRefresh>
       </main>
 
       {/* PWA: push opt-in banner shown once at top of content area */}
