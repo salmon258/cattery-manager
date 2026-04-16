@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Plus, Scale, Pencil, Trash2 } from 'lucide-react';
 
@@ -31,8 +31,16 @@ interface Props {
 export function WeightCard({ catId, role, currentUserId }: Props) {
   const t = useTranslations('weight');
   const tc = useTranslations('common');
+  const locale = useLocale();
   const qc = useQueryClient();
   const isAdmin = role === 'admin';
+  // Locale-aware grouping (thousand separator follows the user's language —
+  // comma in en-US, dot in id-ID, etc.). The grams reading is always an
+  // integer so we never want fractional digits here.
+  const gramsFormatter = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
+  const formatGrams = (g: number) => gramsFormatter.format(g);
+  const formatDeltaGrams = (g: number) =>
+    `${g > 0 ? '+' : g < 0 ? '−' : ''}${gramsFormatter.format(Math.abs(g))}`;
 
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -129,7 +137,7 @@ export function WeightCard({ catId, role, currentUserId }: Props) {
           <>
             <div className="flex items-baseline gap-3">
               <div className="text-3xl font-semibold tracking-tight">
-                {toGrams(Number(latest!.weight_kg))} <span className="text-base font-normal text-muted-foreground">g</span>
+                {formatGrams(toGrams(Number(latest!.weight_kg)))} <span className="text-base font-normal text-muted-foreground">g</span>
               </div>
               {deltaG !== null && (
                 <span
@@ -144,8 +152,7 @@ export function WeightCard({ catId, role, currentUserId }: Props) {
                           : 'text-muted-foreground')
                   }
                 >
-                  {deltaG > 0 ? '+' : ''}
-                  {deltaG} g
+                  {formatDeltaGrams(deltaG)} g
                   {deltaPct !== null && ` (${deltaPct > 0 ? '+' : ''}${deltaPct.toFixed(1)}%)`}
                 </span>
               )}
@@ -195,7 +202,7 @@ export function WeightCard({ catId, role, currentUserId }: Props) {
                       </>
                     ) : (
                       <>
-                        <span className="font-medium shrink-0">{toGrams(Number(l.weight_kg))} g</span>
+                        <span className="font-medium shrink-0">{formatGrams(toGrams(Number(l.weight_kg)))} g</span>
                         <span className="text-xs text-muted-foreground truncate flex-1 text-right">
                           {formatDate(l.recorded_at)} · {l.submitter?.full_name ?? '—'}
                         </span>

@@ -18,6 +18,13 @@ import { cn } from '@/lib/utils';
 type FeedingMethod = 'self' | 'assisted' | 'force_fed';
 type EatenRatio    = 'all' | 'most' | 'half' | 'little' | 'none';
 
+type MealItem = {
+  name: string;
+  grams: number;
+  kcal: number;
+  ratio: EatenRatio;
+};
+
 type Meal = {
   id: string;
   meal_time: string;
@@ -26,6 +33,7 @@ type Meal = {
   total_kcal: number;
   worst_ratio: EatenRatio;
   food_names: string[];
+  items: MealItem[];
 };
 
 type MedTask = {
@@ -189,20 +197,48 @@ function MealDetails({ meals }: { meals: Meal[] }) {
         />
       </button>
       {open && (
-        <ul className="space-y-1 bg-amber-50/50 px-2 py-1.5 dark:bg-amber-950/20">
-          {meals.map((m) => (
-            <li key={m.id} className="text-[11px]">
-              <div className="flex items-center justify-between gap-2">
-                <span className="min-w-0 truncate font-medium">
-                  {m.food_names.length > 0 ? m.food_names.join(', ') : t('mealFallback')}
-                </span>
-                <span className="shrink-0 text-muted-foreground">{formatTime(m.meal_time)}</span>
-              </div>
-              <div className="text-[10px] text-muted-foreground">
-                {Math.round(m.total_grams)} g · {Math.round(m.total_kcal)} kcal · {m.feeding_method}
-              </div>
-            </li>
-          ))}
+        <ul className="divide-y divide-amber-100 bg-amber-50/50 px-2 py-1.5 dark:divide-amber-900/40 dark:bg-amber-950/20">
+          {meals.map((m) => {
+            // A single eating session can include multiple foods; render each
+            // food as its own line so admins see per-food grams / kcal /
+            // eaten ratio rather than just the meal totals.
+            const items = m.items && m.items.length > 0
+              ? m.items
+              : [{ name: '', grams: m.total_grams, kcal: m.total_kcal, ratio: m.worst_ratio }];
+            const showTotals = items.length > 1;
+            return (
+              <li key={m.id} className="py-1 text-[11px] first:pt-0 last:pb-0">
+                <div className="flex items-center justify-between gap-2 text-muted-foreground">
+                  <span className="text-[10px] font-medium uppercase tracking-wide">
+                    {formatTime(m.meal_time)} · {m.feeding_method}
+                  </span>
+                  {showTotals && (
+                    <span className="shrink-0 text-[10px]">
+                      {Math.round(m.total_grams)} g · {Math.round(m.total_kcal)} kcal
+                    </span>
+                  )}
+                </div>
+                <ul className="mt-0.5 space-y-0.5">
+                  {items.map((it, idx) => {
+                    const disp = ratioDisplay(it.ratio);
+                    return (
+                      <li key={idx} className="flex items-center justify-between gap-2">
+                        <span className="min-w-0 truncate font-medium">
+                          {it.name || t('mealFallback')}
+                        </span>
+                        <span className="flex shrink-0 items-center gap-1 text-[10px] text-muted-foreground">
+                          <span>{Math.round(it.grams)} g · {Math.round(it.kcal)} kcal</span>
+                          <span className={cn('rounded px-1 py-0.5 font-medium', disp.cls)}>
+                            {disp.label}
+                          </span>
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

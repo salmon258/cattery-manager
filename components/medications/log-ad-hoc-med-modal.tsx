@@ -46,7 +46,12 @@ export function LogAdHocMedModal({
   });
 
   useEffect(() => {
-    if (open) form.reset({ medicine_name: '', dose: '', unit: '', route: 'oral', notes: '' });
+    if (!open) return;
+    form.reset({ medicine_name: '', dose: '', unit: '', route: 'oral', notes: '' });
+    // Focus after the drawer / dialog open animation so the vaul/Radix
+    // focus trap (and iOS keyboard heuristics) don't steal focus back.
+    const t = setTimeout(() => form.setFocus('medicine_name'), 120);
+    return () => clearTimeout(t);
   }, [open, form]);
 
   const m = useMutation({
@@ -76,7 +81,7 @@ export function LogAdHocMedModal({
     >
       <form onSubmit={form.handleSubmit((v) => m.mutate(v))} className="space-y-3 py-2">
         <Field label={t('fields.medicineName')} error={errors.medicine_name?.message}>
-          <Input autoFocus {...form.register('medicine_name')} />
+          <Input {...form.register('medicine_name')} />
         </Field>
 
         <div className="grid gap-3 sm:grid-cols-2">
