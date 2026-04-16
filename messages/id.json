@@ -180,6 +180,8 @@
     "needWeight": "Catat berat badan dulu untuk menghitung rekomendasi kalori harian.",
     "recent": "Makanan terbaru",
     "noMeals": "Belum ada makanan dicatat.",
+    "showMore": "Lihat lebih banyak",
+    "showLess": "Lihat lebih sedikit",
     "addFood": "Tambah makanan",
     "selectFood": "Pilih item makanan",
     "totalKcal": "Total estimasi kkal",
@@ -323,6 +325,17 @@
         "dose": "Dosis",
         "unit": "Satuan",
         "notes": "Catatan"
+      }
+    },
+    "history": {
+      "title": "Riwayat obat & vitamin",
+      "empty": "Belum ada obat atau vitamin yang diberikan.",
+      "by": "oleh {name}",
+      "showAll": "Lihat semua ({count})",
+      "showLess": "Lihat lebih sedikit",
+      "source": {
+        "scheduled": "Terjadwal",
+        "ad_hoc": "Sekali pakai"
       }
     }
   },

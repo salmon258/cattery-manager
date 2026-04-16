@@ -180,6 +180,8 @@
     "needWeight": "Log a weight reading to compute the recommended daily kcal.",
     "recent": "Recent meals",
     "noMeals": "No meals logged yet.",
+    "showMore": "Show more meals",
+    "showLess": "Show fewer meals",
     "addFood": "Add food",
     "selectFood": "Select food item",
     "totalKcal": "Estimated total kcal",
@@ -323,6 +325,17 @@
         "dose": "Dose",
         "unit": "Unit",
         "notes": "Notes"
+      }
+    },
+    "history": {
+      "title": "Medicine & vitamin history",
+      "empty": "No medicines or vitamins have been administered yet.",
+      "by": "by {name}",
+      "showAll": "Show all ({count})",
+      "showLess": "Show less",
+      "source": {
+        "scheduled": "Scheduled",
+        "ad_hoc": "Ad hoc"
       }
     }
   },
