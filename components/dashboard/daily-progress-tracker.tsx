@@ -25,6 +25,7 @@ type Meal = {
   total_grams: number;
   total_kcal: number;
   worst_ratio: EatenRatio;
+  food_names: string[];
 };
 
 type MedTask = {
@@ -160,6 +161,54 @@ function ratioDisplay(r: EatenRatio): { label: string; cls: string } {
   }
 }
 
+// ─── Collapsible per-meal food breakdown ─────────────────────────────────
+// Mirrors the "Today's activity" box on the sitter's "My cats" page so admins
+// can see what each cat actually ate, not just the totals.
+function MealDetails({ meals }: { meals: Meal[] }) {
+  const t = useTranslations('adminDashboard.tracker');
+  const [open, setOpen] = useState(false);
+
+  if (meals.length === 0) return null;
+
+  return (
+    <div className="mt-1 overflow-hidden rounded-md border border-slate-200 bg-white/60 dark:border-slate-800 dark:bg-slate-900/40">
+      <button
+        type="button"
+        onClick={(e) => {
+          // Cat row is a Link; don't navigate when toggling details.
+          e.preventDefault();
+          e.stopPropagation();
+          setOpen((v) => !v);
+        }}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-2 px-2 py-1 text-left text-[11px] font-medium hover:bg-slate-50 dark:hover:bg-slate-800/60"
+      >
+        <span className="text-muted-foreground">{t('foodDetails')}</span>
+        <ChevronDown
+          className={cn('h-3 w-3 text-muted-foreground transition-transform', open && 'rotate-180')}
+        />
+      </button>
+      {open && (
+        <ul className="space-y-1 bg-amber-50/50 px-2 py-1.5 dark:bg-amber-950/20">
+          {meals.map((m) => (
+            <li key={m.id} className="text-[11px]">
+              <div className="flex items-center justify-between gap-2">
+                <span className="min-w-0 truncate font-medium">
+                  {m.food_names.length > 0 ? m.food_names.join(', ') : t('mealFallback')}
+                </span>
+                <span className="shrink-0 text-muted-foreground">{formatTime(m.meal_time)}</span>
+              </div>
+              <div className="text-[10px] text-muted-foreground">
+                {Math.round(m.total_grams)} g · {Math.round(m.total_kcal)} kcal · {m.feeding_method}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 // ─── Cat row (rich) ───────────────────────────────────────────────────────
 function CatRowItem({ cat }: { cat: CatRow }) {
   const t = useTranslations('adminDashboard.tracker');
@@ -262,6 +311,7 @@ function CatRowItem({ cat }: { cat: CatRow }) {
                 );
               })}
             </div>
+            <MealDetails meals={cat.meals} />
           </div>
         )}
       </div>
