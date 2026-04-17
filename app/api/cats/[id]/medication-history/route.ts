@@ -17,32 +17,39 @@ export async function GET(request: Request, { params }: { params: { id: string }
   if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
 
   const url = new URL(request.url);
-  const limit = Math.min(Number(url.searchParams.get('limit') ?? 100) || 100, 200);
+  const limit = Math.min(Number(url.searchParams.get('limit') ?? 100) || 100, 500);
+  const since = url.searchParams.get('since');
+  const until = url.searchParams.get('until');
 
   const supabase = createClient();
 
-  const [tasksRes, adHocRes] = await Promise.all([
-    supabase
-      .from('medication_tasks')
-      .select(
-        `id, due_at, confirmed_at,
+  let tasksQuery = supabase
+    .from('medication_tasks')
+    .select(
+      `id, due_at, confirmed_at,
          medication:medications!inner(id, medicine_name, dose, route, notes),
          confirmer:profiles!medication_tasks_confirmed_by_fkey(id, full_name)`
-      )
-      .eq('cat_id', params.id)
-      .not('confirmed_at', 'is', null)
-      .order('confirmed_at', { ascending: false })
-      .limit(limit),
-    supabase
-      .from('ad_hoc_medicines')
-      .select(
-        `id, given_at, medicine_name, dose, unit, route, notes,
+    )
+    .eq('cat_id', params.id)
+    .not('confirmed_at', 'is', null)
+    .order('confirmed_at', { ascending: false })
+    .limit(limit);
+  if (since) tasksQuery = tasksQuery.gte('confirmed_at', since);
+  if (until) tasksQuery = tasksQuery.lte('confirmed_at', until);
+
+  let adHocQuery = supabase
+    .from('ad_hoc_medicines')
+    .select(
+      `id, given_at, medicine_name, dose, unit, route, notes,
          submitter:profiles!ad_hoc_medicines_submitted_by_fkey(id, full_name)`
-      )
-      .eq('cat_id', params.id)
-      .order('given_at', { ascending: false })
-      .limit(limit)
-  ]);
+    )
+    .eq('cat_id', params.id)
+    .order('given_at', { ascending: false })
+    .limit(limit);
+  if (since) adHocQuery = adHocQuery.gte('given_at', since);
+  if (until) adHocQuery = adHocQuery.lte('given_at', until);
+
+  const [tasksRes, adHocRes] = await Promise.all([tasksQuery, adHocQuery]);
 
   if (tasksRes.error) return NextResponse.json({ error: tasksRes.error.message }, { status: 500 });
   if (adHocRes.error) return NextResponse.json({ error: adHocRes.error.message }, { status: 500 });

@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Pencil, Plus, Trash2, Utensils } from 'lucide-react';
+import { ArrowRight, Pencil, Plus, Trash2, Utensils } from 'lucide-react';
 
 import type { EatenRatio, FeedingMethod, UserRole } from '@/lib/supabase/aliases';
 import { Button } from '@/components/ui/button';
@@ -141,13 +142,21 @@ export function EatingCard({ catId, role, currentUserId }: Props) {
           <Utensils className="h-4 w-4 text-amber-500" />
           {t('title')}
         </CardTitle>
-        <Button
-          size="sm"
-          onClick={() => setOpen(true)}
-          className="bg-amber-500 text-white shadow hover:bg-amber-600"
-        >
-          <Plus className="h-4 w-4" /> {t('log')}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/cats/${catId}/eating`}
+            className="text-xs text-amber-700 hover:text-amber-800 dark:text-amber-300 dark:hover:text-amber-200 inline-flex items-center gap-0.5"
+          >
+            {tc('viewDetails')} <ArrowRight className="h-3 w-3" />
+          </Link>
+          <Button
+            size="sm"
+            onClick={() => setOpen(true)}
+            className="bg-amber-500 text-white shadow hover:bg-amber-600"
+          >
+            <Plus className="h-4 w-4" /> {t('log')}
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-3">
         {target === null ? (
@@ -286,56 +295,102 @@ function Last7DaysBars({
 }) {
   const max = Math.max(target ?? 0, ...days.map((d) => d.kcal), 1);
   const peak = Math.max(...days.map((d) => d.kcal), 1);
+  // Rounded Y-axis ticks (0, mid, top). Nice-round max so labels read cleanly.
+  const yMax = niceCeil(max);
+  const ticks = [0, Math.round(yMax / 2), yMax];
+  const PLOT_H = 96;
   return (
     <div>
       <div className="mb-1 flex items-center justify-between text-xs uppercase tracking-wider text-muted-foreground">
         <span>Last 7 days · kcal</span>
         {target != null && <span className="normal-case">target {target}</span>}
       </div>
-      <div className="relative flex items-end gap-1 h-20">
-        {target != null && (
-          <div
-            aria-hidden
-            className="pointer-events-none absolute left-0 right-0 border-t border-dashed border-emerald-400/60"
-            style={{ bottom: `${Math.round((target / max) * 100)}%` }}
-            title={`Target: ${target} kcal`}
-          />
-        )}
-        {days.map((d) => {
-          const h = Math.round((d.kcal / max) * 100);
-          const color = target
-            ? d.kcal / target >= 0.8
-              ? 'bg-emerald-500'
-              : d.kcal / target >= 0.5
-                ? 'bg-amber-500'
-                : d.kcal > 0
-                  ? 'bg-destructive/60'
-                  : 'bg-muted'
-            : d.kcal > 0
-              ? 'bg-amber-500'
-              : 'bg-muted';
-          return (
-            <div
-              key={d.date}
-              className="flex flex-1 flex-col items-center gap-1"
-              title={`${d.date}: ${d.kcal} kcal`}
-            >
-              <span className="text-[9px] text-muted-foreground leading-none">
-                {d.kcal > 0 && d.kcal >= peak * 0.1 ? d.kcal : ''}
+      <div className="flex gap-2">
+        <div
+          className="relative flex flex-col justify-between text-[9px] text-muted-foreground shrink-0"
+          style={{ height: PLOT_H, width: 28 }}
+          aria-hidden
+        >
+          {ticks
+            .slice()
+            .reverse()
+            .map((v) => (
+              <span key={v} className="leading-none text-right">
+                {v}
               </span>
+            ))}
+        </div>
+        <div className="flex-1">
+          <div
+            className="relative flex items-end gap-1 border-l border-b border-muted-foreground/20"
+            style={{ height: PLOT_H }}
+          >
+            {target != null && target <= yMax && (
               <div
-                className={cn('w-full rounded-t-sm transition-all', color)}
-                style={{ height: `${h}%` }}
+                aria-hidden
+                className="pointer-events-none absolute left-0 right-0 border-t border-dashed border-emerald-400/60"
+                style={{ bottom: `${(target / yMax) * 100}%` }}
+                title={`Target: ${target} kcal`}
               />
-              <span className="text-[9px] text-muted-foreground">
+            )}
+            {days.map((d) => {
+              const h = (d.kcal / yMax) * 100;
+              const color = target
+                ? d.kcal / target >= 0.8
+                  ? 'bg-emerald-500'
+                  : d.kcal / target >= 0.5
+                    ? 'bg-amber-500'
+                    : d.kcal > 0
+                      ? 'bg-destructive/60'
+                      : 'bg-muted'
+                : d.kcal > 0
+                  ? 'bg-amber-500'
+                  : 'bg-muted';
+              return (
+                <div
+                  key={d.date}
+                  className="relative flex-1 h-full flex flex-col justify-end items-center"
+                  title={`${d.date}: ${d.kcal} kcal`}
+                >
+                  {d.kcal > 0 && d.kcal >= peak * 0.1 && (
+                    <span
+                      className="absolute text-[9px] text-muted-foreground leading-none"
+                      style={{ bottom: `calc(${h}% + 2px)` }}
+                    >
+                      {d.kcal}
+                    </span>
+                  )}
+                  <div
+                    className={cn('w-full rounded-t-sm transition-all', color)}
+                    style={{ height: `${h}%` }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-1 flex gap-1">
+            {days.map((d) => (
+              <span
+                key={d.date}
+                className="flex-1 text-center text-[9px] text-muted-foreground"
+              >
                 {d.date.slice(5).replace('-', '/')}
               </span>
-            </div>
-          );
-        })}
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
+}
+
+// Round 470 → 500, 1234 → 1500, etc. — keeps y-axis labels readable.
+function niceCeil(n: number): number {
+  if (n <= 0) return 1;
+  const pow = Math.pow(10, Math.floor(Math.log10(n)));
+  const f = n / pow;
+  const nice = f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10;
+  return nice * pow;
 }
 
 function isToday(iso: string) {

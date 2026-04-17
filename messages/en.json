@@ -412,7 +412,31 @@
     "optional": "optional",
     "notes": "Notes",
     "showMore": "Show {count} more",
-    "showLess": "Show less"
+    "showLess": "Show less",
+    "viewDetails": "View details",
+    "from": "From",
+    "to": "To"
+  },
+  "catDetail": {
+    "dailyKcalOverRange": "Daily kcal over range",
+    "mealsInRange": "Meals in range",
+    "totalKcal": "Total kcal",
+    "avgKcalPerDay": "Avg kcal / day",
+    "target": "Target",
+    "meals": "Meals",
+    "weightOverRange": "Weight over range",
+    "weightLogs": "Weight logs",
+    "min": "Min",
+    "max": "Max",
+    "change": "Change",
+    "needMoreWeightPoints": "Log at least two weights in this range to see the chart.",
+    "pastSchedules": "Past schedules",
+    "totalDoses": "Total doses",
+    "scheduled": "Scheduled",
+    "adHoc": "Ad-hoc",
+    "visits": "Visits",
+    "visitCost": "Visit cost",
+    "transportCost": "Transport cost"
   },
   "users": {
     "title": "Users",
