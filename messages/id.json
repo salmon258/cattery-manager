@@ -412,7 +412,31 @@
     "optional": "opsional",
     "notes": "Catatan",
     "showMore": "Tampilkan {count} lagi",
-    "showLess": "Tampilkan lebih sedikit"
+    "showLess": "Tampilkan lebih sedikit",
+    "viewDetails": "Lihat detail",
+    "from": "Dari",
+    "to": "Hingga"
+  },
+  "catDetail": {
+    "dailyKcalOverRange": "Kalori harian dalam rentang",
+    "mealsInRange": "Makan dalam rentang",
+    "totalKcal": "Total kkal",
+    "avgKcalPerDay": "Rata-rata kkal / hari",
+    "target": "Target",
+    "meals": "Makan",
+    "weightOverRange": "Berat dalam rentang",
+    "weightLogs": "Catatan berat",
+    "min": "Min",
+    "max": "Maks",
+    "change": "Perubahan",
+    "needMoreWeightPoints": "Catat setidaknya dua berat dalam rentang ini untuk melihat grafik.",
+    "pastSchedules": "Jadwal sebelumnya",
+    "totalDoses": "Total dosis",
+    "scheduled": "Terjadwal",
+    "adHoc": "Insidental",
+    "visits": "Kunjungan",
+    "visitCost": "Biaya kunjungan",
+    "transportCost": "Biaya transportasi"
   },
   "users": {
     "title": "Pengguna",

@@ -9,14 +9,19 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
   const url = new URL(request.url);
   const limit = Math.min(Number(url.searchParams.get('limit') ?? 100), 500);
+  const since = url.searchParams.get('since');
+  const until = url.searchParams.get('until');
 
   const supabase = createClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from('weight_logs')
     .select('*, submitter:profiles!weight_logs_submitted_by_fkey(id, full_name)')
     .eq('cat_id', params.id)
     .order('recorded_at', { ascending: false })
     .limit(limit);
+  if (since) query = query.gte('recorded_at', since);
+  if (until) query = query.lte('recorded_at', until);
+  const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ logs: data ?? [] });
 }

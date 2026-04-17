@@ -9,9 +9,11 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
   const url = new URL(request.url);
   const limit = Math.min(Number(url.searchParams.get('limit') ?? 50), 500);
+  const since = url.searchParams.get('since');
+  const until = url.searchParams.get('until');
 
   const supabase = createClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from('eating_logs')
     .select(
       `*,
@@ -25,6 +27,9 @@ export async function GET(request: Request, { params }: { params: { id: string }
     .eq('cat_id', params.id)
     .order('meal_time', { ascending: false })
     .limit(limit);
+  if (since) query = query.gte('meal_time', since);
+  if (until) query = query.lte('meal_time', until);
+  const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ logs: data ?? [] });
 }

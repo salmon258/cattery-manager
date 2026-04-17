@@ -1,10 +1,11 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Check, Pill, Plus, Timer, StopCircle, Trash2 } from 'lucide-react';
+import { ArrowRight, Check, Pill, Plus, Timer, StopCircle, Trash2 } from 'lucide-react';
 
 import type { Medication, MedicationTask, UserRole } from '@/lib/supabase/aliases';
 import { Button } from '@/components/ui/button';
@@ -104,7 +105,13 @@ export function MedicationsCard({ catId, role }: { catId: string; role: UserRole
           <Pill className="h-4 w-4 text-violet-500" />
           {t('title')}
         </CardTitle>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Link
+            href={`/cats/${catId}/medications`}
+            className="text-xs text-violet-700 hover:text-violet-800 dark:text-violet-300 dark:hover:text-violet-200 inline-flex items-center gap-0.5"
+          >
+            {tc('viewDetails')} <ArrowRight className="h-3 w-3" />
+          </Link>
           <Button
             size="sm"
             onClick={() => setAdHocOpen(true)}

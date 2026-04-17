@@ -7,13 +7,17 @@ import { vetVisitSchema } from '@/lib/schemas/vet';
  * GET /api/cats/[id]/vet-visits
  * All authenticated users — list all vet visits for a cat.
  */
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: { id: string } }) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
 
+  const url = new URL(req.url);
+  const since = url.searchParams.get('since');
+  const until = url.searchParams.get('until');
+
   const supabase = createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  let query = (supabase as any)
     .from('vet_visits')
     .select(`
       *,
@@ -29,6 +33,9 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
     `)
     .eq('cat_id', params.id)
     .order('visit_date', { ascending: false });
+  if (since) query = query.gte('visit_date', since);
+  if (until) query = query.lte('visit_date', until);
+  const { data, error } = await query;
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ visits: data ?? [] });

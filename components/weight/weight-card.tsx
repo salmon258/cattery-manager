@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Plus, Scale, Pencil, Trash2 } from 'lucide-react';
+import { ArrowRight, Plus, Scale, Pencil, Trash2 } from 'lucide-react';
 
 import type { UserRole, WeightLog } from '@/lib/supabase/aliases';
 import { Button } from '@/components/ui/button';
@@ -120,13 +121,21 @@ export function WeightCard({ catId, role, currentUserId }: Props) {
           <Scale className="h-4 w-4 text-sky-500" />
           {t('title')}
         </CardTitle>
-        <Button
-          size="sm"
-          onClick={() => setOpen(true)}
-          className="bg-sky-500 text-white shadow hover:bg-sky-600"
-        >
-          <Plus className="h-4 w-4" /> {t('log')}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/cats/${catId}/weight`}
+            className="text-xs text-sky-700 hover:text-sky-800 dark:text-sky-300 dark:hover:text-sky-200 inline-flex items-center gap-0.5"
+          >
+            {tc('viewDetails')} <ArrowRight className="h-3 w-3" />
+          </Link>
+          <Button
+            size="sm"
+            onClick={() => setOpen(true)}
+            className="bg-sky-500 text-white shadow hover:bg-sky-600"
+          >
+            <Plus className="h-4 w-4" /> {t('log')}
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-3">
         {isLoading ? (
