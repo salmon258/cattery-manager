@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/current-user';
+import { EATEN_RATIO_FACTOR } from '@/lib/schemas/eating';
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -108,6 +109,7 @@ export async function GET() {
     meal_time: string;
     feeding_method: 'self' | 'assisted' | 'force_fed';
     total_grams: number;
+    total_eaten_g: number;
     total_kcal: number;
     food_names: string[];
   };
@@ -138,10 +140,14 @@ export async function GET() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for (const m of (todayMealsRes.data ?? []) as any[]) {
     let totalG = 0;
+    let totalEatenG = 0;
     let totalK = 0;
     const foodNames: string[] = [];
     for (const it of m.items ?? []) {
-      totalG += Number(it.quantity_given_g ?? 0);
+      const given = Number(it.quantity_given_g ?? 0);
+      const factor = EATEN_RATIO_FACTOR[it.quantity_eaten as keyof typeof EATEN_RATIO_FACTOR] ?? 1;
+      totalG += given;
+      totalEatenG += given * factor;
       totalK += Number(it.estimated_kcal_consumed ?? 0);
       if (it.food?.name) foodNames.push(it.food.name);
     }
@@ -150,6 +156,7 @@ export async function GET() {
       meal_time: m.meal_time,
       feeding_method: m.feeding_method,
       total_grams: totalG,
+      total_eaten_g: totalEatenG,
       total_kcal: totalK,
       food_names: foodNames
     };

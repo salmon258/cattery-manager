@@ -46,6 +46,7 @@ type TodayMeal = {
   meal_time: string;
   feeding_method: 'self' | 'assisted' | 'force_fed';
   total_grams: number;
+  total_eaten_g: number;
   total_kcal: number;
   food_names: string[];
 };
@@ -731,7 +732,7 @@ function TodayDetails({ summary }: { summary: TodaySummary }) {
                       <span className="shrink-0 text-muted-foreground">{formatTime(m.meal_time)}</span>
                     </div>
                     <div className="text-[11px] text-muted-foreground">
-                      {m.total_grams.toFixed(0)} g · {m.total_kcal.toFixed(0)} kcal · {m.feeding_method}
+                      {m.total_eaten_g.toFixed(0)}/{m.total_grams.toFixed(0)} g · {m.total_kcal.toFixed(0)} kcal · {m.feeding_method}
                     </div>
                   </li>
                 ))}

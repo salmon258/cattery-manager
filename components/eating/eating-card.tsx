@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { EATEN_RATIO_FACTOR } from '@/lib/schemas/eating';
 import { LogEatingModal, type EditableEatingLog } from '@/components/eating/log-eating-modal';
 
 type CalorieSummary = {
@@ -194,6 +195,13 @@ export function EatingCard({ catId, role, currentUserId }: Props) {
                     (acc, it) => acc + (Number(it.quantity_given_g) || 0),
                     0
                   );
+                  const eatenGrams = m.items.reduce(
+                    (acc, it) =>
+                      acc +
+                      (Number(it.quantity_given_g) || 0) *
+                        (EATEN_RATIO_FACTOR[it.quantity_eaten] ?? 1),
+                    0
+                  );
                   const editable = canEdit(m);
                   return (
                     <li
@@ -209,7 +217,7 @@ export function EatingCard({ catId, role, currentUserId }: Props) {
                         </div>
                       </div>
                       <span className="ml-2 whitespace-nowrap text-xs font-medium text-right">
-                        {Math.round(grams)} g
+                        {Math.round(eatenGrams)}/{Math.round(grams)} g
                         <span className="block text-muted-foreground font-normal">
                           {Math.round(total)} kcal
                         </span>
