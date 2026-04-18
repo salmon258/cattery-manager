@@ -98,6 +98,19 @@ export function MedicationsCard({ catId, role }: { catId: string; role: UserRole
     onError: (e: Error) => toast.error(e.message)
   });
 
+  const deleteTask = useMutation({
+    mutationFn: async (taskId: string) => {
+      const r = await fetch(`/api/tasks/${taskId}`, { method: 'DELETE' });
+      if (!r.ok) throw new Error((await r.json()).error ?? 'Failed');
+    },
+    onSuccess: () => {
+      toast.success(t('taskDeleted'));
+      qc.invalidateQueries({ queryKey: ['medication-tasks', catId] });
+      qc.invalidateQueries({ queryKey: ['me-tasks'] });
+    },
+    onError: (e: Error) => toast.error(e.message)
+  });
+
   return (
     <Card className="overflow-hidden border-l-4 border-l-violet-400 bg-gradient-to-r from-violet-50/50 to-transparent dark:from-violet-950/20 md:col-span-2">
       <CardHeader className="flex-row items-center justify-between flex-wrap gap-2">
@@ -161,14 +174,31 @@ export function MedicationsCard({ catId, role }: { catId: string; role: UserRole
                         {new Date(task.due_at).toLocaleString()}
                       </div>
                     </div>
-                    <Button
-                      size="sm"
-                      disabled={confirm.isPending}
-                      onClick={() => confirm.mutate(task.id)}
-                      className="bg-emerald-500 text-white shadow hover:bg-emerald-600"
-                    >
-                      <Check className="h-3.5 w-3.5" /> {t('confirm')}
-                    </Button>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Button
+                        size="sm"
+                        disabled={confirm.isPending}
+                        onClick={() => confirm.mutate(task.id)}
+                        className="bg-emerald-500 text-white shadow hover:bg-emerald-600"
+                      >
+                        <Check className="h-3.5 w-3.5" /> {t('confirm')}
+                      </Button>
+                      {isAdmin && overdue && (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8"
+                          disabled={deleteTask.isPending}
+                          onClick={() => {
+                            if (window.confirm(t('confirmDeleteTask'))) deleteTask.mutate(task.id);
+                          }}
+                          aria-label={t('deleteTask')}
+                          title={t('deleteTask')}
+                        >
+                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                        </Button>
+                      )}
+                    </div>
                   </li>
                 );
               })}
