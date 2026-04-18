@@ -15,6 +15,7 @@ import {
   Stethoscope,
   BarChart3,
   Settings,
+  Package,
   type LucideIcon
 } from 'lucide-react';
 
@@ -73,7 +74,8 @@ export function AdminSidebar({ profile, brandName, onNavigate }: Props) {
         { href: '/clinics', label: t('clinics'), icon: Stethoscope, iconColor: 'text-sky-500' },
         { href: '/breeding', label: t('breeding'), icon: Dna, iconColor: 'text-pink-500' },
         { href: '/rooms', label: t('rooms'), icon: Home, iconColor: 'text-teal-500' },
-        { href: '/food-items', label: t('food'), icon: Utensils, iconColor: 'text-amber-500' }
+        { href: '/food-items', label: t('food'), icon: Utensils, iconColor: 'text-amber-500' },
+        { href: '/stock', label: t('stock'), icon: Package, iconColor: 'text-lime-500' }
       ]
     },
     {

@@ -12,6 +12,7 @@ import { HealthTicketsReport } from './sections/health-tickets-report';
 import { HeatLogsReport } from './sections/heat-logs-report';
 import { RoomMovementsReport } from './sections/room-movements-report';
 import { ActivityReport } from './sections/activity-report';
+import { SpendingReport } from './sections/spending-report';
 
 type TabKey =
   | 'weight'
@@ -22,7 +23,8 @@ type TabKey =
   | 'tickets'
   | 'heat'
   | 'rooms'
-  | 'activity';
+  | 'activity'
+  | 'spending';
 
 export function ReportsClient() {
   const t = useTranslations('reports');
@@ -37,7 +39,8 @@ export function ReportsClient() {
     { key: 'tickets',      label: t('tabs.tickets') },
     { key: 'heat',         label: t('tabs.heat') },
     { key: 'rooms',        label: t('tabs.rooms') },
-    { key: 'activity',     label: t('tabs.activity') }
+    { key: 'activity',     label: t('tabs.activity') },
+    { key: 'spending',     label: t('tabs.spending') }
   ];
 
   return (
@@ -75,6 +78,7 @@ export function ReportsClient() {
       {tab === 'heat'         && <HeatLogsReport />}
       {tab === 'rooms'        && <RoomMovementsReport />}
       {tab === 'activity'     && <ActivityReport />}
+      {tab === 'spending'     && <SpendingReport />}
     </div>
   );
 }
