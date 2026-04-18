@@ -210,7 +210,8 @@
     "status": {
       "green": "On track",
       "amber": "Under target",
-      "red": "Well under / force fed",
+      "red": "Well under",
+      "forceFed": "Force fed",
       "none": "—"
     }
   },
