@@ -11,6 +11,7 @@
     "breeding": "Breeding",
     "rooms": "Rooms",
     "food": "Food catalogue",
+    "stock": "Stock",
     "users": "Users",
     "reports": "Reports",
     "settings": "Settings",
@@ -30,6 +31,7 @@
   "sitterNav": {
     "myCats": "My Cats",
     "allCats": "All Cats",
+    "stock": "Stock",
     "profile": "Profile"
   },
   "adminDashboard": {
@@ -47,6 +49,11 @@
     "vetFollowups": "Vet follow-ups (14d)",
     "noneIn30": "None in next 30 days",
     "noneIn14": "None in next 14 days",
+    "lowStock": "Low stock",
+    "noLowStock": "All stocked up",
+    "expiringStock": "Expiring stock (14d)",
+    "noExpiring": "None expiring soon",
+    "expired": "Expired",
     "recentActivity": "Recent tickets",
     "noActivity": "Nothing recent.",
     "reports": "Reports",
@@ -811,7 +818,8 @@
       "tickets": "Health tickets",
       "heat": "Heat cycles",
       "rooms": "Room movements",
-      "activity": "Activity"
+      "activity": "Activity",
+      "spending": "Spending"
     }
   },
   "settings": {
@@ -839,6 +847,213 @@
       "leadDays": "Number of days before the due date to start showing reminders.",
       "weightDrop": "Flag readings that drop more than this percent vs. the previous reading.",
       "timezone": "Medication slots are interpreted in this timezone when generating daily tasks."
+    }
+  },
+  "stock": {
+    "title": "Stock",
+    "subtitle": "Track on-hand inventory, batches, expiry and movement.",
+    "empty": "No stock items yet. Ask an admin to add some.",
+    "inactive": "Inactive",
+    "showInactive": "Show inactive",
+    "showActive": "Show active",
+    "searchPlaceholder": "Search items…",
+    "backToOverview": "Back to stock",
+    "onHand": "On hand",
+    "depleted": "Depleted",
+    "earliestExpiry": "Earliest expiry",
+    "cost": "Cost/unit",
+    "receivedOn": "Received",
+    "from": "From",
+    "to": "To",
+    "by": "By",
+    "batches": "{count, plural, one {batch} other {batches}}",
+    "noBatches": "No batches in stock yet.",
+    "filters": {
+      "allCategories": "All categories",
+      "lowOnlyOff": "Only low stock",
+      "lowOnlyOn": "Showing low only"
+    },
+    "alerts": {
+      "lowStock": "Low stock items",
+      "lowStockHint": "Items below their minimum threshold.",
+      "expiring14": "Expiring in 14 days",
+      "expiringHint": "Batches approaching expiry — check the detail page."
+    },
+    "flags": {
+      "low": "Low",
+      "expiringInDays": "Expires in {n}d"
+    },
+    "categories": {
+      "food": "Food",
+      "medicine": "Medicine",
+      "supplement": "Supplement",
+      "litter": "Litter",
+      "cleaning": "Cleaning",
+      "grooming": "Grooming",
+      "equipment": "Equipment",
+      "other": "Other"
+    },
+    "units": {
+      "pcs": "pcs",
+      "box": "box",
+      "bottle": "bottle",
+      "pack": "pack",
+      "sachet": "sachet",
+      "bag": "bag",
+      "kg": "kg",
+      "g": "g",
+      "l": "L",
+      "ml": "ml"
+    },
+    "movementTypes": {
+      "stock_in": "Stock in",
+      "transfer": "Transfer",
+      "checkout": "Checkout",
+      "consume": "Consume",
+      "adjust": "Adjust",
+      "discard": "Discard"
+    },
+    "items": {
+      "title": "Stock items",
+      "subtitle": "Catalogue of everything you stock.",
+      "empty": "No stock items yet.",
+      "new": "New item",
+      "manage": "Manage items",
+      "created": "Stock item created.",
+      "updated": "Stock item updated.",
+      "deactivated": "Stock item deactivated.",
+      "deactivateConfirm": "Deactivate this item? Existing batches are preserved.",
+      "minThreshold": "Min threshold",
+      "fields": {
+        "name": "Name",
+        "brand": "Brand",
+        "category": "Category",
+        "unit": "Unit",
+        "minThreshold": "Minimum threshold (alert below this)",
+        "defaultLocation": "Default location",
+        "noLocation": "No default location",
+        "notes": "Notes",
+        "active": "Active"
+      }
+    },
+    "locations": {
+      "title": "Storage locations",
+      "subtitle": "Physical places where stock lives (pantry, fridge, vet cabinet…).",
+      "empty": "No locations yet. Add your first one.",
+      "new": "New location",
+      "manage": "Manage locations",
+      "created": "Location created.",
+      "updated": "Location updated.",
+      "deactivated": "Location deactivated.",
+      "deactivateConfirm": "Deactivate this location? Batches remain linked for history.",
+      "cold": "Cold storage",
+      "fields": {
+        "name": "Name",
+        "description": "Description",
+        "cold": "Cold storage (fridge/freezer)",
+        "active": "Active"
+      }
+    },
+    "checkout": {
+      "cta": "Checkout",
+      "takeSome": "Take",
+      "title": "Check out stock",
+      "confirm": "Confirm checkout",
+      "saved": "Stock checked out.",
+      "noItemsAvailable": "No items currently in stock.",
+      "noBatches": "No available batches for this item.",
+      "fields": {
+        "item": "Item",
+        "itemPlaceholder": "Pick an item…",
+        "batch": "Batch",
+        "batchHint": "Earliest expiry first — pick any one.",
+        "batchLine": "{qty} {unit} left",
+        "suggested": "Suggested (FIFO)",
+        "expired": "Expired",
+        "daysLeft": "{n}d left",
+        "expiresOn": "Expires",
+        "batchRef": "Ref",
+        "location": "Location",
+        "qty": "Quantity to take",
+        "maxAvailable": "Max {qty} {unit} in this batch.",
+        "forCat": "For which cat (optional)",
+        "forCatPlaceholder": "— select —",
+        "reason": "Reason / notes"
+      },
+      "errors": {
+        "pickBatch": "Pick a batch first.",
+        "qtyPositive": "Quantity must be greater than 0.",
+        "qtyExceeds": "Quantity exceeds what this batch has left."
+      }
+    },
+    "stockIn": {
+      "cta": "Stock in",
+      "title": "Record stock-in",
+      "saved": "Stock added.",
+      "fields": {
+        "qty": "Quantity received",
+        "location": "Location",
+        "noLocation": "No location",
+        "expiry": "Expiry date (optional)",
+        "batchRef": "Batch / lot number",
+        "costPerUnit": "Cost per unit",
+        "costHint": "If filled, auto-creates an Expense transaction.",
+        "currency": "Currency"
+      },
+      "errors": {
+        "qtyPositive": "Quantity must be greater than 0."
+      }
+    },
+    "transfer": {
+      "cta": "Transfer",
+      "title": "Move batch to another location",
+      "confirm": "Transfer",
+      "saved": "Batch transferred.",
+      "fields": {
+        "destination": "Destination location",
+        "destinationPlaceholder": "Pick a location…",
+        "reason": "Reason / notes"
+      },
+      "errors": {
+        "pickLocation": "Pick a destination location."
+      }
+    },
+    "adjust": {
+      "cta": "Adjust",
+      "title": "Manual adjustment",
+      "description": "Use positive numbers to add, negative to remove (e.g. -2 for 2 discarded).",
+      "confirm": "Adjust",
+      "saved": "Adjustment recorded.",
+      "fields": {
+        "delta": "Quantity change ({unit})",
+        "reason": "Reason",
+        "reasonPlaceholder": "e.g. Expired, Damaged, Counted wrong…"
+      },
+      "errors": {
+        "nonZero": "Change must be non-zero."
+      }
+    },
+    "movements": {
+      "title": "Recent movements",
+      "pageTitle": "Stock movements",
+      "subtitle": "Full append-only ledger of every stock change.",
+      "empty": "No movements yet.",
+      "filters": {
+        "type": "Type",
+        "location": "Location",
+        "since": "Since"
+      }
+    },
+    "reports": {
+      "title": "Stock & spending",
+      "subtitle": "Track how much was spent on stock, by category and period.",
+      "totalSpent": "Total spent",
+      "byCategory": "By category",
+      "recent": "Recent transactions",
+      "noSpending": "No expenses recorded in this period.",
+      "uncategorized": "Uncategorized",
+      "auto": "Auto",
+      "txnCount": "{count, plural, one {transaction} other {transactions}}"
     }
   }
 }

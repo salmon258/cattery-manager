@@ -5,7 +5,7 @@ import { getCurrentUser } from '@/lib/auth/current-user';
 import { createClient } from '@/lib/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Cat, Home, Users, TrendingUp, HeartPulse, Syringe, Stethoscope, Activity } from 'lucide-react';
+import { Cat, Home, Users, TrendingUp, HeartPulse, Syringe, Stethoscope, Activity, Package, Clock } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { DailyProgressTracker } from '@/components/dashboard/daily-progress-tracker';
 
@@ -33,7 +33,9 @@ export default async function DashboardPage() {
     upcomingVacc,
     upcomingPrev,
     upcomingFollowups,
-    recentActivityRaw
+    recentActivityRaw,
+    lowStockRows,
+    expiringRows
   ] = await Promise.all([
     supabase.from('cats').select('id', { count: 'exact', head: true }).eq('status', 'active'),
     supabase.from('rooms').select('id', { count: 'exact', head: true }).eq('is_active', true),
@@ -65,7 +67,20 @@ export default async function DashboardPage() {
     (supabase as any).from('health_tickets')
       .select('id, title, created_at, severity, cat:cats(id, name)')
       .order('created_at', { ascending: false })
-      .limit(8)
+      .limit(8),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (supabase as any).from('stock_item_status')
+      .select('stock_item_id, name, qty_on_hand, min_threshold, unit')
+      .eq('is_active', true)
+      .eq('is_low_stock', true)
+      .order('name', { ascending: true })
+      .limit(5),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (supabase as any).from('stock_expiring_batches')
+      .select('batch_id, stock_item_id, item_name, qty_remaining, expiry_date, days_to_expiry, unit')
+      .lte('days_to_expiry', 14)
+      .order('days_to_expiry', { ascending: true })
+      .limit(5)
   ]);
 
   const catsCount  = catsAgg.count  ?? 0;
@@ -88,6 +103,10 @@ export default async function DashboardPage() {
   const followups = (upcomingFollowups.data ?? []) as any[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recentTickets = (recentActivityRaw.data ?? []) as any[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const lowStock = (lowStockRows.data ?? []) as any[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const expiring = (expiringRows.data ?? []) as any[];
 
   const stats = [
     { href: '/cats',  label: t('nav.cats'),  value: catsCount,  icon: Cat,  hint: ta('activeProfiles') },
@@ -229,6 +248,58 @@ export default async function DashboardPage() {
                 </li>
               ))}
             </ul>
+          </CardContent>
+        </Card>
+
+        {/* Low stock */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Package className="h-4 w-4 text-muted-foreground" />
+              {ta('lowStock')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="text-2xl font-semibold">{lowStock.length}</div>
+            <ul className="space-y-1 text-xs">
+              {lowStock.length === 0 && <li className="text-muted-foreground">{ta('noLowStock')}</li>}
+              {lowStock.slice(0, 3).map((row) => (
+                <li key={row.stock_item_id} className="flex justify-between gap-2">
+                  <span className="truncate">{row.name}</span>
+                  <span className="text-muted-foreground shrink-0">{row.qty_on_hand} / {row.min_threshold}</span>
+                </li>
+              ))}
+            </ul>
+            <Button asChild variant="link" size="sm" className="h-auto p-0 text-xs">
+              <Link href="/stock">{ta('viewAll')} →</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Expiring stock */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              {ta('expiringStock')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="text-2xl font-semibold">{expiring.length}</div>
+            <ul className="space-y-1 text-xs">
+              {expiring.length === 0 && <li className="text-muted-foreground">{ta('noExpiring')}</li>}
+              {expiring.slice(0, 3).map((row) => (
+                <li key={row.batch_id} className="flex justify-between gap-2">
+                  <span className="truncate">{row.item_name}</span>
+                  <span className="text-muted-foreground shrink-0">
+                    {row.days_to_expiry < 0 ? ta('expired') : `${row.days_to_expiry}d`}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <Button asChild variant="link" size="sm" className="h-auto p-0 text-xs">
+              <Link href="/stock">{ta('viewAll')} →</Link>
+            </Button>
           </CardContent>
         </Card>
 

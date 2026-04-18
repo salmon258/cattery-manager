@@ -11,6 +11,7 @@
     "breeding": "Perkawinan",
     "rooms": "Ruangan",
     "food": "Katalog makanan",
+    "stock": "Stok",
     "users": "Pengguna",
     "reports": "Laporan",
     "settings": "Pengaturan",
@@ -30,6 +31,7 @@
   "sitterNav": {
     "myCats": "Kucing Saya",
     "allCats": "Semua Kucing",
+    "stock": "Stok",
     "profile": "Profil"
   },
   "adminDashboard": {
@@ -47,6 +49,11 @@
     "vetFollowups": "Follow-up dokter (14h)",
     "noneIn30": "Tidak ada dalam 30 hari ke depan",
     "noneIn14": "Tidak ada dalam 14 hari ke depan",
+    "lowStock": "Stok menipis",
+    "noLowStock": "Stok aman",
+    "expiringStock": "Stok hampir kedaluwarsa (14h)",
+    "noExpiring": "Tidak ada yang hampir kedaluwarsa",
+    "expired": "Kedaluwarsa",
     "recentActivity": "Tiket terbaru",
     "noActivity": "Belum ada aktivitas.",
     "reports": "Laporan",
@@ -811,7 +818,8 @@
       "tickets": "Tiket kesehatan",
       "heat": "Siklus birahi",
       "rooms": "Perpindahan ruangan",
-      "activity": "Aktivitas"
+      "activity": "Aktivitas",
+      "spending": "Pengeluaran"
     }
   },
   "settings": {
@@ -839,6 +847,213 @@
       "leadDays": "Jumlah hari sebelum tanggal jatuh tempo untuk mulai menampilkan pengingat.",
       "weightDrop": "Tandai pembacaan berat yang turun lebih dari persen ini dibanding pembacaan sebelumnya.",
       "timezone": "Slot waktu obat diinterpretasikan dalam zona waktu ini saat membuat tugas harian."
+    }
+  },
+  "stock": {
+    "title": "Stok",
+    "subtitle": "Lacak stok tersedia, batch, kedaluwarsa, dan perpindahan.",
+    "empty": "Belum ada item stok. Minta admin untuk menambahkannya.",
+    "inactive": "Non-aktif",
+    "showInactive": "Tampilkan non-aktif",
+    "showActive": "Tampilkan aktif",
+    "searchPlaceholder": "Cari item…",
+    "backToOverview": "Kembali ke stok",
+    "onHand": "Tersedia",
+    "depleted": "Habis",
+    "earliestExpiry": "Kedaluwarsa terdekat",
+    "cost": "Harga/unit",
+    "receivedOn": "Diterima",
+    "from": "Dari",
+    "to": "Ke",
+    "by": "Oleh",
+    "batches": "{count, plural, one {batch} other {batch}}",
+    "noBatches": "Belum ada batch di stok.",
+    "filters": {
+      "allCategories": "Semua kategori",
+      "lowOnlyOff": "Hanya stok menipis",
+      "lowOnlyOn": "Menampilkan yang menipis"
+    },
+    "alerts": {
+      "lowStock": "Item stok menipis",
+      "lowStockHint": "Item di bawah ambang minimum.",
+      "expiring14": "Kedaluwarsa 14 hari",
+      "expiringHint": "Batch mendekati kedaluwarsa — periksa halaman detail."
+    },
+    "flags": {
+      "low": "Menipis",
+      "expiringInDays": "Kedaluwarsa {n}h"
+    },
+    "categories": {
+      "food": "Makanan",
+      "medicine": "Obat",
+      "supplement": "Suplemen",
+      "litter": "Pasir",
+      "cleaning": "Pembersih",
+      "grooming": "Grooming",
+      "equipment": "Peralatan",
+      "other": "Lainnya"
+    },
+    "units": {
+      "pcs": "pcs",
+      "box": "kotak",
+      "bottle": "botol",
+      "pack": "pak",
+      "sachet": "sachet",
+      "bag": "karung",
+      "kg": "kg",
+      "g": "g",
+      "l": "L",
+      "ml": "ml"
+    },
+    "movementTypes": {
+      "stock_in": "Stok masuk",
+      "transfer": "Pindahkan",
+      "checkout": "Ambil",
+      "consume": "Pakai",
+      "adjust": "Sesuaikan",
+      "discard": "Buang"
+    },
+    "items": {
+      "title": "Item stok",
+      "subtitle": "Katalog semua hal yang Anda stok.",
+      "empty": "Belum ada item stok.",
+      "new": "Item baru",
+      "manage": "Kelola item",
+      "created": "Item stok dibuat.",
+      "updated": "Item stok diperbarui.",
+      "deactivated": "Item stok dinonaktifkan.",
+      "deactivateConfirm": "Nonaktifkan item ini? Batch yang ada akan tetap tersimpan.",
+      "minThreshold": "Ambang minimum",
+      "fields": {
+        "name": "Nama",
+        "brand": "Merek",
+        "category": "Kategori",
+        "unit": "Satuan",
+        "minThreshold": "Ambang minimum (peringatan di bawah ini)",
+        "defaultLocation": "Lokasi default",
+        "noLocation": "Tanpa lokasi default",
+        "notes": "Catatan",
+        "active": "Aktif"
+      }
+    },
+    "locations": {
+      "title": "Lokasi penyimpanan",
+      "subtitle": "Tempat fisik penyimpanan stok (pantry, kulkas, lemari dokter…).",
+      "empty": "Belum ada lokasi. Tambahkan yang pertama.",
+      "new": "Lokasi baru",
+      "manage": "Kelola lokasi",
+      "created": "Lokasi dibuat.",
+      "updated": "Lokasi diperbarui.",
+      "deactivated": "Lokasi dinonaktifkan.",
+      "deactivateConfirm": "Nonaktifkan lokasi ini? Batch tetap terkait untuk riwayat.",
+      "cold": "Penyimpanan dingin",
+      "fields": {
+        "name": "Nama",
+        "description": "Deskripsi",
+        "cold": "Penyimpanan dingin (kulkas/freezer)",
+        "active": "Aktif"
+      }
+    },
+    "checkout": {
+      "cta": "Ambil",
+      "takeSome": "Ambil",
+      "title": "Ambil stok",
+      "confirm": "Konfirmasi ambil",
+      "saved": "Stok diambil.",
+      "noItemsAvailable": "Tidak ada item yang tersedia.",
+      "noBatches": "Tidak ada batch tersedia untuk item ini.",
+      "fields": {
+        "item": "Item",
+        "itemPlaceholder": "Pilih item…",
+        "batch": "Batch",
+        "batchHint": "Kedaluwarsa terdekat dulu — bisa pilih yang mana saja.",
+        "batchLine": "{qty} {unit} tersisa",
+        "suggested": "Disarankan (FIFO)",
+        "expired": "Kedaluwarsa",
+        "daysLeft": "{n}h lagi",
+        "expiresOn": "Kedaluwarsa",
+        "batchRef": "Ref",
+        "location": "Lokasi",
+        "qty": "Jumlah diambil",
+        "maxAvailable": "Maksimal {qty} {unit} di batch ini.",
+        "forCat": "Untuk kucing mana (opsional)",
+        "forCatPlaceholder": "— pilih —",
+        "reason": "Alasan / catatan"
+      },
+      "errors": {
+        "pickBatch": "Pilih batch terlebih dahulu.",
+        "qtyPositive": "Jumlah harus lebih dari 0.",
+        "qtyExceeds": "Jumlah melebihi sisa batch ini."
+      }
+    },
+    "stockIn": {
+      "cta": "Stok masuk",
+      "title": "Catat stok masuk",
+      "saved": "Stok ditambahkan.",
+      "fields": {
+        "qty": "Jumlah diterima",
+        "location": "Lokasi",
+        "noLocation": "Tanpa lokasi",
+        "expiry": "Tanggal kedaluwarsa (opsional)",
+        "batchRef": "Nomor batch / lot",
+        "costPerUnit": "Harga per unit",
+        "costHint": "Jika diisi, otomatis membuat transaksi Pengeluaran.",
+        "currency": "Mata uang"
+      },
+      "errors": {
+        "qtyPositive": "Jumlah harus lebih dari 0."
+      }
+    },
+    "transfer": {
+      "cta": "Pindahkan",
+      "title": "Pindahkan batch ke lokasi lain",
+      "confirm": "Pindahkan",
+      "saved": "Batch dipindahkan.",
+      "fields": {
+        "destination": "Lokasi tujuan",
+        "destinationPlaceholder": "Pilih lokasi…",
+        "reason": "Alasan / catatan"
+      },
+      "errors": {
+        "pickLocation": "Pilih lokasi tujuan."
+      }
+    },
+    "adjust": {
+      "cta": "Sesuaikan",
+      "title": "Penyesuaian manual",
+      "description": "Nilai positif untuk menambah, negatif untuk mengurangi (mis. -2 untuk 2 dibuang).",
+      "confirm": "Sesuaikan",
+      "saved": "Penyesuaian dicatat.",
+      "fields": {
+        "delta": "Perubahan jumlah ({unit})",
+        "reason": "Alasan",
+        "reasonPlaceholder": "mis. Kedaluwarsa, Rusak, Salah hitung…"
+      },
+      "errors": {
+        "nonZero": "Perubahan tidak boleh nol."
+      }
+    },
+    "movements": {
+      "title": "Perpindahan terbaru",
+      "pageTitle": "Perpindahan stok",
+      "subtitle": "Catatan lengkap setiap perubahan stok (append-only).",
+      "empty": "Belum ada perpindahan.",
+      "filters": {
+        "type": "Jenis",
+        "location": "Lokasi",
+        "since": "Sejak"
+      }
+    },
+    "reports": {
+      "title": "Stok & pengeluaran",
+      "subtitle": "Lacak berapa banyak dibelanjakan untuk stok, per kategori dan periode.",
+      "totalSpent": "Total pengeluaran",
+      "byCategory": "Per kategori",
+      "recent": "Transaksi terbaru",
+      "noSpending": "Tidak ada pengeluaran di periode ini.",
+      "uncategorized": "Tanpa kategori",
+      "auto": "Auto",
+      "txnCount": "{count, plural, one {transaksi} other {transaksi}}"
     }
   }
 }
