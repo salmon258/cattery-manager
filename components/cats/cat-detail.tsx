@@ -201,41 +201,42 @@ export function CatDetail({ cat, initialPhotos, currentRoom, assignee, role, cur
         <Card>
           <CardHeader className="flex-row items-center justify-between">
             <CardTitle className="text-base">{t('fields.photos')}</CardTitle>
-            {isAdmin && (
-              <label className="cursor-pointer">
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => handlePhotoUpload(e.target.files)}
-                />
-                <Button asChild size="sm" variant="outline" disabled={uploading}>
-                  <span><Upload className="h-4 w-4" /> {uploading ? tc('saving') : tc('create')}</span>
-                </Button>
-              </label>
-            )}
+            <label className="cursor-pointer">
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handlePhotoUpload(e.target.files)}
+              />
+              <Button asChild size="sm" variant="outline" disabled={uploading}>
+                <span><Upload className="h-4 w-4" /> {uploading ? tc('saving') : tc('create')}</span>
+              </Button>
+            </label>
           </CardHeader>
           <CardContent>
             {photos.length === 0 ? (
               <p className="text-sm text-muted-foreground">{tc('empty')}</p>
             ) : (
               <div className="grid grid-cols-3 gap-2">
-                {photos.map((p) => (
-                  <div key={p.id} className="relative aspect-square rounded-md overflow-hidden group">
-                    <Image src={p.url} alt="" fill sizes="(max-width:768px) 33vw, 200px" className="object-cover" />
-                    {p.is_profile && <Badge className="absolute top-1 left-1">Profile</Badge>}
-                    {isAdmin && (
-                      <button
-                        onClick={() => deletePhoto(p.id)}
-                        className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition bg-destructive text-destructive-foreground rounded p-1"
-                        aria-label="delete"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
-                    )}
-                  </div>
-                ))}
+                {photos.map((p) => {
+                  const canDelete = isAdmin || p.created_by === currentUserId;
+                  return (
+                    <div key={p.id} className="relative aspect-square rounded-md overflow-hidden group">
+                      <Image src={p.url} alt="" fill sizes="(max-width:768px) 33vw, 200px" className="object-cover" />
+                      {p.is_profile && <Badge className="absolute top-1 left-1">Profile</Badge>}
+                      {canDelete && (
+                        <button
+                          onClick={() => deletePhoto(p.id)}
+                          className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition bg-destructive text-destructive-foreground rounded p-1"
+                          aria-label="delete"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </CardContent>

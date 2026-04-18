@@ -12,7 +12,6 @@ const addPhotoSchema = z.object({
 export async function POST(request: Request, { params }: { params: { id: string } }) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
-  if (user.profile.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const body = await request.json();
   const parsed = addPhotoSchema.safeParse(body);
@@ -57,7 +56,6 @@ export async function POST(request: Request, { params }: { params: { id: string 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
-  if (user.profile.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const url = new URL(request.url);
   const photoId = url.searchParams.get('photo_id');
@@ -66,6 +64,12 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
   const supabase = createClient();
   const { data: photo } = await supabase.from('cat_photos').select('*').eq('id', photoId).single();
   if (!photo) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+  // Sitters can only delete the photos they uploaded; admins can delete any.
+  const isAdmin = user.profile.role === 'admin';
+  if (!isAdmin && photo.created_by !== user.authId) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   await supabase.storage.from('cat-photos').remove([photo.storage_path]).catch(() => {});
   const { error } = await supabase.from('cat_photos').delete().eq('id', photoId);
