@@ -51,7 +51,7 @@
     "noneIn14": "Tidak ada dalam 14 hari ke depan",
     "lowStock": "Stok menipis",
     "noLowStock": "Stok aman",
-    "expiringStock": "Stok hampir kedaluwarsa (14h)",
+    "expiringStock": "Stok hampir kedaluwarsa (30h)",
     "noExpiring": "Tidak ada yang hampir kedaluwarsa",
     "expired": "Kedaluwarsa",
     "recentActivity": "Tiket terbaru",
@@ -876,7 +876,7 @@
     "alerts": {
       "lowStock": "Item stok menipis",
       "lowStockHint": "Item di bawah ambang minimum.",
-      "expiring14": "Kedaluwarsa 14 hari",
+      "expiringSoon": "Kedaluwarsa 30 hari",
       "expiringHint": "Batch mendekati kedaluwarsa — periksa halaman detail."
     },
     "flags": {
