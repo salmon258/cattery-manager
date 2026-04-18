@@ -223,7 +223,19 @@ function StockItemModal({
 
   return (
     <ResponsiveModal open={open} onOpenChange={(o) => !o && onClose()} title={isEdit ? tc('edit') : t('items.new')}>
-      <form onSubmit={form.handleSubmit((v) => m.mutate(v))} className="space-y-3 py-2">
+      <form
+        onSubmit={form.handleSubmit(
+          (v) => m.mutate(v),
+          (errs) => {
+            // Surface the first error so the user isn't left clicking a
+            // dead button when validation fails on a field that isn't rendered.
+            const first = Object.values(errs)[0];
+            const msg = (first && (first as { message?: string }).message) || 'Invalid input';
+            toast.error(msg);
+          }
+        )}
+        className="space-y-3 py-2"
+      >
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label={t('items.fields.name')} error={errors.name?.message}>
             <Input {...form.register('name')} />
