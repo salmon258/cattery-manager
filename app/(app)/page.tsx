@@ -78,7 +78,7 @@ export default async function DashboardPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase as any).from('stock_expiring_batches')
       .select('batch_id, stock_item_id, item_name, qty_remaining, expiry_date, days_to_expiry, unit')
-      .lte('days_to_expiry', 14)
+      .lte('days_to_expiry', 30)
       .order('days_to_expiry', { ascending: true })
       .limit(5)
   ]);

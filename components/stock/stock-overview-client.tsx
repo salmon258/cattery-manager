@@ -69,7 +69,7 @@ export function StockOverviewClient({ isAdmin }: Props) {
   }, [status, search, categoryFilter, onlyLow]);
 
   const lowCount = status.filter((s) => s.is_low_stock && s.qty_on_hand >= 0).length;
-  const expiringSoon = expiring.filter((b) => b.days_to_expiry <= 14).length;
+  const expiringSoon = expiring.filter((b) => b.days_to_expiry <= 30).length;
 
   return (
     <div className="space-y-5">
@@ -127,7 +127,7 @@ export function StockOverviewClient({ isAdmin }: Props) {
                 <Clock className="h-4 w-4" />
               </div>
               <div>
-                <div className="text-sm font-medium">{t('alerts.expiring14')}</div>
+                <div className="text-sm font-medium">{t('alerts.expiringSoon')}</div>
                 <div className="text-xs text-muted-foreground">{t('alerts.expiringHint')}</div>
               </div>
             </div>
@@ -191,7 +191,7 @@ export function StockOverviewClient({ isAdmin }: Props) {
                     {row.is_low_stock && (
                       <Badge variant="destructive">{t('flags.low')}</Badge>
                     )}
-                    {row.earliest_expiry && daysBetween(row.earliest_expiry) <= 14 && (
+                    {row.earliest_expiry && daysBetween(row.earliest_expiry) <= 30 && (
                       <Badge variant="destructive">
                         {t('flags.expiringInDays', { n: Math.max(daysBetween(row.earliest_expiry), 0) })}
                       </Badge>

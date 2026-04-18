@@ -51,7 +51,7 @@
     "noneIn14": "None in next 14 days",
     "lowStock": "Low stock",
     "noLowStock": "All stocked up",
-    "expiringStock": "Expiring stock (14d)",
+    "expiringStock": "Expiring stock (30d)",
     "noExpiring": "None expiring soon",
     "expired": "Expired",
     "recentActivity": "Recent tickets",
@@ -876,7 +876,7 @@
     "alerts": {
       "lowStock": "Low stock items",
       "lowStockHint": "Items below their minimum threshold.",
-      "expiring14": "Expiring in 14 days",
+      "expiringSoon": "Expiring in 30 days",
       "expiringHint": "Batches approaching expiry — check the detail page."
     },
     "flags": {
