@@ -210,7 +210,8 @@
     "status": {
       "green": "Sesuai target",
       "amber": "Di bawah target",
-      "red": "Jauh di bawah / disuapkan paksa",
+      "red": "Jauh di bawah",
+      "forceFed": "Disuapkan paksa",
       "none": "—"
     }
   },

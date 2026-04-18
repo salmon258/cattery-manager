@@ -121,15 +121,15 @@ export function EatingCard({ catId, role, currentUserId }: Props) {
   const target = summary?.recommended_kcal ?? null;
   const progress = target ? Math.min(100, Math.round((today / target) * 100)) : 0;
 
-  // Status mapping per spec:
-  // green (on track), amber (>20% under), red (>50% under OR any force-fed meal today)
+  // Intake status reflects kcal shortfall only so the progress bar matches
+  // the per-day bar chart colours. Force-fed is surfaced as a separate badge.
   const forceFedToday = meals.some(
     (m) => m.feeding_method === 'force_fed' && isToday(m.meal_time)
   );
   const shortfall = target ? (target - today) / target : 0;
   const status: 'green' | 'amber' | 'red' | 'none' = !target
     ? 'none'
-    : forceFedToday || shortfall > 0.5
+    : shortfall > 0.5
       ? 'red'
       : shortfall > 0.2
         ? 'amber'
@@ -167,9 +167,16 @@ export function EatingCard({ catId, role, currentUserId }: Props) {
               <div className="text-2xl font-semibold tracking-tight">
                 {today} <span className="text-sm font-normal text-muted-foreground">/ {target} kcal</span>
               </div>
-              <Badge variant={status === 'red' ? 'destructive' : 'secondary'} className="capitalize">
-                {t(`status.${status}`)}
-              </Badge>
+              <div className="flex items-center gap-1.5">
+                {forceFedToday && (
+                  <Badge variant="destructive" className="capitalize">
+                    {t('status.forceFed')}
+                  </Badge>
+                )}
+                <Badge variant={status === 'red' ? 'destructive' : 'secondary'} className="capitalize">
+                  {t(`status.${status}`)}
+                </Badge>
+              </div>
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
               <div
