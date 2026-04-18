@@ -89,9 +89,7 @@ export function VetVisitsCard({ catId, catName, role }: Props) {
       const r = await fetch(`/api/cats/${catId}/vet-visits`, { cache: 'no-store' });
       if (!r.ok) return [];
       return (await r.json()).visits;
-    },
-    // Cat sitters never see this section — don't even fetch.
-    enabled: isAdmin
+    }
   });
 
   const deleteVisit = useMutation({
@@ -112,9 +110,6 @@ export function VetVisitsCard({ catId, catName, role }: Props) {
     v.follow_up_date && v.follow_up_date < today
     && !visits.some((v2) => v2.visit_type === 'follow_up' && v2.visit_date >= v.follow_up_date!)
   );
-
-  // Vet history is an admin-only feature — cat sitters should not see it.
-  if (!isAdmin) return null;
 
   return (
     <>

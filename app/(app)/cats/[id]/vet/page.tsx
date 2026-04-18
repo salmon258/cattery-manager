@@ -6,8 +6,6 @@ import { VetDetail } from '@/components/cats/detail/vet-detail';
 export default async function CatVetDetailPage({ params }: { params: { id: string } }) {
   const user = await getCurrentUser();
   if (!user) redirect('/auth/signout');
-  // Vet history is admin-only; match the behaviour of VetVisitsCard.
-  if (user.profile.role !== 'admin') redirect(`/cats/${params.id}`);
 
   const supabase = createClient();
   const { data: cat } = await supabase

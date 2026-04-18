@@ -109,8 +109,7 @@ export function VetDetail({ catId, catName, profilePhotoUrl, role }: Props) {
       );
       if (!r.ok) return [];
       return (await r.json()).visits;
-    },
-    enabled: isAdmin
+    }
   });
 
   const deleteVisit = useMutation({

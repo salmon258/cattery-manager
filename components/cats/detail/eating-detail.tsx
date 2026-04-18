@@ -7,6 +7,7 @@ import { Utensils } from 'lucide-react';
 
 import type { EatenRatio, FeedingMethod, UserRole } from '@/lib/supabase/aliases';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 import { EATEN_RATIO_FACTOR } from '@/lib/schemas/eating';
 import { CatDetailHeader } from '@/components/cats/detail/cat-detail-header';
 import {
@@ -208,31 +209,49 @@ export function EatingDetail({ catId, catName, profilePhotoUrl }: Props) {
                       (EATEN_RATIO_FACTOR[it.quantity_eaten] ?? 1),
                   0
                 );
+                const showTotals = m.items.length > 1;
                 return (
-                  <li key={m.id} className="flex items-start justify-between gap-3 py-2">
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate font-medium">
-                        {m.items.map((it) => it.food?.name).filter(Boolean).join(', ') || '—'}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
+                  <li key={m.id} className="py-2">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1 text-xs text-muted-foreground">
                         {new Date(m.meal_time).toLocaleString()} ·{' '}
                         {t(`methods.${m.feeding_method}`)}
                         {m.submitter?.full_name ? ` · ${m.submitter.full_name}` : ''}
                       </div>
-                      {m.notes && (
-                        <p className="mt-0.5 text-xs italic text-muted-foreground whitespace-pre-wrap">
-                          {m.notes}
-                        </p>
+                      {showTotals && (
+                        <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">
+                          {Math.round(eaten)}/{Math.round(given)} g · {Math.round(kcal)} kcal
+                        </span>
                       )}
                     </div>
-                    <div className="text-right whitespace-nowrap">
-                      <div className="text-xs font-medium">
-                        {Math.round(eaten)}/{Math.round(given)} g
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {Math.round(kcal)} kcal
-                      </div>
-                    </div>
+                    <ul className="mt-1 space-y-0.5">
+                      {m.items.map((it) => {
+                        const itGiven = Number(it.quantity_given_g) || 0;
+                        const itEaten = itGiven * (EATEN_RATIO_FACTOR[it.quantity_eaten] ?? 1);
+                        const itKcal = Number(it.estimated_kcal_consumed) || 0;
+                        const disp = ratioDisplay(it.quantity_eaten);
+                        return (
+                          <li key={it.id} className="flex items-center justify-between gap-2">
+                            <span className="min-w-0 truncate font-medium">
+                              {it.food?.name || '—'}
+                            </span>
+                            <span className="flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
+                              <span>
+                                {Math.round(itEaten)}/{Math.round(itGiven)} g · {Math.round(itKcal)} kcal
+                              </span>
+                              <span className={cn('rounded px-1 py-0.5 text-[10px] font-medium', disp.cls)}>
+                                {disp.label}
+                              </span>
+                            </span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                    {m.notes && (
+                      <p className="mt-1 text-xs italic text-muted-foreground whitespace-pre-wrap">
+                        {m.notes}
+                      </p>
+                    )}
                   </li>
                 );
               })}
@@ -242,6 +261,16 @@ export function EatingDetail({ catId, catName, profilePhotoUrl }: Props) {
       </Card>
     </div>
   );
+}
+
+function ratioDisplay(r: EatenRatio): { label: string; cls: string } {
+  switch (r) {
+    case 'all':    return { label: '100%', cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' };
+    case 'most':   return { label: '~75%', cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' };
+    case 'half':   return { label: '~50%', cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' };
+    case 'little': return { label: '~20%', cls: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300' };
+    case 'none':   return { label: '0%',   cls: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' };
+  }
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
