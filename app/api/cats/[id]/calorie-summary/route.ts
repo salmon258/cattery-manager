@@ -20,6 +20,16 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
   const { data: recRaw } = await supabase.rpc('recommended_daily_kcal', { p_cat_id: params.id });
   const recommended_kcal = recRaw === null || recRaw === undefined ? null : Number(recRaw);
 
+  // Active life stage + the multiplier it resolves to (used for the stage
+  // badge on the detail page).
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: stageRaw } = await (supabase as any).rpc('cat_life_stage', { p_cat_id: params.id });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: mulRaw } = await (supabase as any).rpc('cat_derived_life_stage_multiplier', { p_cat_id: params.id });
+  const life_stage = (stageRaw ?? null) as
+    | 'kitten_young' | 'lactating' | 'pregnant' | 'kitten' | 'spayed' | 'adult' | null;
+  const life_stage_multiplier = mulRaw === null || mulRaw === undefined ? null : Number(mulRaw);
+
   // Latest weight (for display).
   const { data: latest } = await supabase
     .from('cat_latest_weight')
@@ -70,7 +80,9 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
     today_kcal,
     last7_days,
     latest_weight_kg: latest?.weight_kg ?? null,
-    latest_weight_at: latest?.recorded_at ?? null
+    latest_weight_at: latest?.recorded_at ?? null,
+    life_stage,
+    life_stage_multiplier
   });
 }
 
