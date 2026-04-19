@@ -134,6 +134,7 @@ export function CatDetail({ cat, initialPhotos, currentRoom, assignee, role, cur
               {tg(cat.gender)} · {cat.breed ?? '—'} · {formatDate(cat.date_of_birth)} · {t('age')}: {formatAge(cat.date_of_birth, {
                 years: t('ageUnits.years'),
                 months: t('ageUnits.months'),
+                weeks: t('ageUnits.weeks'),
                 days: t('ageUnits.days')
               })}
             </p>

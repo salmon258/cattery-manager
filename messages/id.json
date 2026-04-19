@@ -533,6 +533,7 @@
     "ageUnits": {
       "years": "thn",
       "months": "bln",
+      "weeks": "mgg",
       "days": "hari"
     },
     "spayedOn": "Disteril",

@@ -533,6 +533,7 @@
     "ageUnits": {
       "years": "yr",
       "months": "mo",
+      "weeks": "wk",
       "days": "d"
     },
     "spayedOn": "Spayed / neutered",
