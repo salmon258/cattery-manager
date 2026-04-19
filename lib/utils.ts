@@ -17,7 +17,7 @@ export function formatDate(iso: string | null | undefined, locale = 'en') {
 
 export function formatAge(
   dob: string | null | undefined,
-  labels: { years: string; months: string; days: string }
+  labels: { years: string; months: string; weeks: string; days: string }
 ): string {
   if (!dob) return '—';
   const birth = new Date(dob);
@@ -39,13 +39,14 @@ export function formatAge(
   }
   if (years < 0) return '—';
 
-  if (years >= 1) {
-    return months > 0
-      ? `${years} ${labels.years} ${months} ${labels.months}`
-      : `${years} ${labels.years}`;
-  }
-  if (months >= 1) {
-    return `${months} ${labels.months}`;
-  }
-  return `${days} ${labels.days}`;
+  const weeks = Math.floor(days / 7);
+  const remainingDays = days - weeks * 7;
+
+  const parts: string[] = [];
+  if (years > 0) parts.push(`${years} ${labels.years}`);
+  if (months > 0) parts.push(`${months} ${labels.months}`);
+  if (weeks > 0) parts.push(`${weeks} ${labels.weeks}`);
+  if (remainingDays > 0 || parts.length === 0) parts.push(`${remainingDays} ${labels.days}`);
+
+  return parts.join(' ');
 }

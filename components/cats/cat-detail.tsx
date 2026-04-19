@@ -30,6 +30,7 @@ import { MedicationHistoryCard } from '@/components/medications/medication-histo
 import { HealthTicketsCard } from '@/components/health/health-tickets-card';
 import { BreedingCard } from '@/components/breeding/breeding-card';
 import { VetVisitsCard } from '@/components/vet/vet-visits-card';
+import { AskAICard } from '@/components/cats/ask-ai-card';
 import { uploadImage } from '@/lib/storage/upload';
 import { formatAge, formatDate } from '@/lib/utils';
 
@@ -133,6 +134,7 @@ export function CatDetail({ cat, initialPhotos, currentRoom, assignee, role, cur
               {tg(cat.gender)} · {cat.breed ?? '—'} · {formatDate(cat.date_of_birth)} · {t('age')}: {formatAge(cat.date_of_birth, {
                 years: t('ageUnits.years'),
                 months: t('ageUnits.months'),
+                weeks: t('ageUnits.weeks'),
                 days: t('ageUnits.days')
               })}
             </p>
@@ -265,6 +267,8 @@ export function CatDetail({ cat, initialPhotos, currentRoom, assignee, role, cur
         <VetVisitsCard catId={cat.id} catName={cat.name} role={role} />
 
         <BreedingCard catId={cat.id} catName={cat.name} catGender={cat.gender} role={role} />
+
+        <AskAICard catId={cat.id} catName={cat.name} />
 
         {/* Room history + pedigree are admin-only surfaces. Sitters don't see
             lineage paperwork or movement audit trails. */}

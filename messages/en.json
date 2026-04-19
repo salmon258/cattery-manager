@@ -294,11 +294,18 @@
     "noTasksToday": "No doses due today.",
     "confirm": "Confirm",
     "taskConfirmed": "Dose confirmed.",
+    "editTitle": "Edit medication",
+    "updated": "Medication updated.",
+    "pause": "Pause plan",
+    "paused": "Medication plan paused.",
+    "pausedBadge": "Paused",
+    "confirmPause": "Pause this medication plan? Future doses will be cancelled while it is paused.",
+    "continue": "Continue plan",
+    "resumed": "Medication plan resumed.",
+    "confirmContinue": "Resume this medication plan? Future doses will be rescheduled from now.",
     "stop": "Stop plan",
     "stopped": "Medication plan stopped.",
-    "deleted": "Medication deleted.",
-    "confirmStop": "Stop this medication plan? Remaining tasks will be cancelled.",
-    "confirmDelete": "Permanently delete this medication plan? All related tasks will be removed.",
+    "confirmStop": "Stop this medication plan? The schedule and all future doses will be removed.",
     "overdue": "Overdue",
     "deleteTask": "Delete overdue dose",
     "confirmDeleteTask": "Delete this overdue dose? This cannot be undone.",
@@ -348,6 +355,27 @@
         "scheduled": "Scheduled",
         "ad_hoc": "Ad hoc"
       }
+    }
+  },
+  "askAi": {
+    "title": "Ask AI about this cat",
+    "subtitle": "We bundle {name}'s full on-file history with your question into a prompt you can paste into your favourite AI.",
+    "placeholder": "e.g. Is {name}'s weight trend healthy? Any concerns from the recent vet visits?",
+    "destLabel": "Open in:",
+    "openIn": "Open in {dest}",
+    "preparing": "Preparing…",
+    "copyPrompt": "Copy prompt",
+    "copied": "Prompt copied to clipboard.",
+    "copyFailed": "Couldn't copy — use the preview below.",
+    "copiedAndOpened": "Prompt copied — paste it into {dest} (⌘/Ctrl+V).",
+    "openedNoCopy": "{dest} opened. Use the preview below to copy the prompt.",
+    "showPrompt": "Show the prompt",
+    "disclaimer": "AI advice is informational only and does not replace a veterinarian.",
+    "suggestions": {
+      "weight": "Is the weight trend healthy?",
+      "diet": "Any diet adjustments you'd recommend?",
+      "followup": "What should we follow up on?",
+      "concerns": "Any red flags in the history?"
     }
   },
   "assignees": {
@@ -509,6 +537,7 @@
     "ageUnits": {
       "years": "yr",
       "months": "mo",
+      "weeks": "wk",
       "days": "d"
     },
     "spayedOn": "Spayed / neutered",

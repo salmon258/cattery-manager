@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { ArrowRight, Check, Pill, Plus, Timer, StopCircle, Trash2 } from 'lucide-react';
+import { ArrowRight, Check, Pause, Pencil, Pill, Play, Plus, Timer, Trash2 } from 'lucide-react';
 
 import type { Medication, MedicationTask, UserRole } from '@/lib/supabase/aliases';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils';
 import { NewMedicationModal } from '@/components/medications/new-medication-modal';
+import { EditMedicationModal } from '@/components/medications/edit-medication-modal';
 import { LogAdHocMedModal } from '@/components/medications/log-ad-hoc-med-modal';
 
 type TaskRow = MedicationTask & { medication: Pick<Medication, 'id' | 'medicine_name' | 'dose' | 'route'> };
@@ -41,6 +42,7 @@ export function MedicationsCard({ catId, role }: { catId: string; role: UserRole
 
   const [newOpen, setNewOpen] = useState(false);
   const [adHocOpen, setAdHocOpen] = useState(false);
+  const [editing, setEditing] = useState<Medication | null>(null);
 
   const { data: meds = [], isLoading } = useQuery({
     queryKey: ['medications', catId],
@@ -51,7 +53,14 @@ export function MedicationsCard({ catId, role }: { catId: string; role: UserRole
     queryFn: () => fetchUpcomingTasks(catId)
   });
 
-  const activeMeds = useMemo(() => meds.filter((m) => m.is_active), [meds]);
+  const visibleMeds = useMemo(
+    () =>
+      [...meds].sort((a, b) => {
+        if (a.is_active !== b.is_active) return a.is_active ? -1 : 1;
+        return a.medicine_name.localeCompare(b.medicine_name);
+      }),
+    [meds]
+  );
 
   const confirm = useMutation({
     mutationFn: async (taskId: string) => {
@@ -66,7 +75,7 @@ export function MedicationsCard({ catId, role }: { catId: string; role: UserRole
     onError: (e: Error) => toast.error(e.message)
   });
 
-  const stopMed = useMutation({
+  const pauseMed = useMutation({
     mutationFn: async (medId: string) => {
       const r = await fetch(`/api/medications/${medId}`, {
         method: 'PATCH',
@@ -76,7 +85,7 @@ export function MedicationsCard({ catId, role }: { catId: string; role: UserRole
       if (!r.ok) throw new Error((await r.json()).error ?? 'Failed');
     },
     onSuccess: () => {
-      toast.success(t('stopped'));
+      toast.success(t('paused'));
       qc.invalidateQueries({ queryKey: ['medications', catId] });
       qc.invalidateQueries({ queryKey: ['medication-tasks', catId] });
       qc.invalidateQueries({ queryKey: ['me-tasks'] });
@@ -84,13 +93,31 @@ export function MedicationsCard({ catId, role }: { catId: string; role: UserRole
     onError: (e: Error) => toast.error(e.message)
   });
 
-  const deleteMed = useMutation({
+  const continueMed = useMutation({
+    mutationFn: async (medId: string) => {
+      const r = await fetch(`/api/medications/${medId}`, {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ is_active: true })
+      });
+      if (!r.ok) throw new Error((await r.json()).error ?? 'Failed');
+    },
+    onSuccess: () => {
+      toast.success(t('resumed'));
+      qc.invalidateQueries({ queryKey: ['medications', catId] });
+      qc.invalidateQueries({ queryKey: ['medication-tasks', catId] });
+      qc.invalidateQueries({ queryKey: ['me-tasks'] });
+    },
+    onError: (e: Error) => toast.error(e.message)
+  });
+
+  const stopMed = useMutation({
     mutationFn: async (medId: string) => {
       const r = await fetch(`/api/medications/${medId}`, { method: 'DELETE' });
       if (!r.ok) throw new Error((await r.json()).error ?? 'Failed');
     },
     onSuccess: () => {
-      toast.success(t('deleted'));
+      toast.success(t('stopped'));
       qc.invalidateQueries({ queryKey: ['medications', catId] });
       qc.invalidateQueries({ queryKey: ['medication-tasks', catId] });
       qc.invalidateQueries({ queryKey: ['me-tasks'] });
@@ -206,23 +233,30 @@ export function MedicationsCard({ catId, role }: { catId: string; role: UserRole
           )}
         </section>
 
-        {/* Active schedules */}
+        {/* Schedules */}
         <section>
           <div className="mb-1 text-xs uppercase tracking-wider text-muted-foreground">
             {t('activeSchedules')}
           </div>
           {isLoading ? (
             <p className="text-sm text-muted-foreground">{tc('loading')}</p>
-          ) : activeMeds.length === 0 ? (
+          ) : visibleMeds.length === 0 ? (
             <p className="text-sm text-muted-foreground">{t('noSchedules')}</p>
           ) : (
             <ul className="space-y-1 text-sm">
-              {activeMeds.map((m) => (
-                <li key={m.id} className="flex items-center justify-between gap-2 border-b pb-1 last:border-0 group">
+              {visibleMeds.map((m) => (
+                <li
+                  key={m.id}
+                  className={cn(
+                    'flex items-center justify-between gap-2 border-b pb-1 last:border-0 group',
+                    !m.is_active && 'opacity-60'
+                  )}
+                >
                   <div className="min-w-0 flex-1">
-                    <div className="font-medium truncate">
-                      {m.medicine_name}
-                      <span className="text-xs text-muted-foreground"> · {m.dose}</span>
+                    <div className="font-medium truncate flex items-center gap-2 flex-wrap">
+                      <span className="truncate">{m.medicine_name}</span>
+                      <span className="text-xs text-muted-foreground">· {m.dose}</span>
+                      {!m.is_active && <Badge variant="secondary">{t('pausedBadge')}</Badge>}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {formatDate(m.start_date)} → {m.end_date ? formatDate(m.end_date) : t('ongoing')} ·{' '}
@@ -231,7 +265,46 @@ export function MedicationsCard({ catId, role }: { catId: string; role: UserRole
                     </div>
                   </div>
                   {isAdmin && (
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity shrink-0">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7"
+                        onClick={() => setEditing(m)}
+                        aria-label={tc('edit')}
+                        title={tc('edit')}
+                      >
+                        <Pencil className="h-3.5 w-3.5 text-sky-600" />
+                      </Button>
+                      {m.is_active ? (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7"
+                          disabled={pauseMed.isPending}
+                          onClick={() => {
+                            if (window.confirm(t('confirmPause'))) pauseMed.mutate(m.id);
+                          }}
+                          aria-label={t('pause')}
+                          title={t('pause')}
+                        >
+                          <Pause className="h-3.5 w-3.5 text-amber-600" />
+                        </Button>
+                      ) : (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7"
+                          disabled={continueMed.isPending}
+                          onClick={() => {
+                            if (window.confirm(t('confirmContinue'))) continueMed.mutate(m.id);
+                          }}
+                          aria-label={t('continue')}
+                          title={t('continue')}
+                        >
+                          <Play className="h-3.5 w-3.5 text-emerald-600" />
+                        </Button>
+                      )}
                       <Button
                         size="icon"
                         variant="ghost"
@@ -242,19 +315,6 @@ export function MedicationsCard({ catId, role }: { catId: string; role: UserRole
                         }}
                         aria-label={t('stop')}
                         title={t('stop')}
-                      >
-                        <StopCircle className="h-3.5 w-3.5 text-amber-600" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-7 w-7"
-                        disabled={deleteMed.isPending}
-                        onClick={() => {
-                          if (window.confirm(t('confirmDelete'))) deleteMed.mutate(m.id);
-                        }}
-                        aria-label={tc('delete')}
-                        title={tc('delete')}
                       >
                         <Trash2 className="h-3.5 w-3.5 text-destructive" />
                       </Button>
@@ -268,6 +328,14 @@ export function MedicationsCard({ catId, role }: { catId: string; role: UserRole
       </CardContent>
 
       {isAdmin && <NewMedicationModal open={newOpen} onClose={() => setNewOpen(false)} catId={catId} />}
+      {isAdmin && (
+        <EditMedicationModal
+          open={editing !== null}
+          onClose={() => setEditing(null)}
+          catId={catId}
+          medication={editing}
+        />
+      )}
       <LogAdHocMedModal open={adHocOpen} onClose={() => setAdHocOpen(false)} catId={catId} />
     </Card>
   );

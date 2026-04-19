@@ -294,11 +294,18 @@
     "noTasksToday": "Tidak ada dosis untuk hari ini.",
     "confirm": "Konfirmasi",
     "taskConfirmed": "Dosis dikonfirmasi.",
+    "editTitle": "Ubah obat",
+    "updated": "Obat diperbarui.",
+    "pause": "Jeda",
+    "paused": "Rencana obat dijeda.",
+    "pausedBadge": "Dijeda",
+    "confirmPause": "Jeda rencana obat ini? Dosis mendatang akan dibatalkan selama dijeda.",
+    "continue": "Lanjutkan",
+    "resumed": "Rencana obat dilanjutkan.",
+    "confirmContinue": "Lanjutkan rencana obat ini? Dosis mendatang akan dijadwalkan ulang dari sekarang.",
     "stop": "Hentikan",
     "stopped": "Rencana obat dihentikan.",
-    "deleted": "Obat dihapus.",
-    "confirmStop": "Hentikan rencana obat ini? Tugas tersisa akan dibatalkan.",
-    "confirmDelete": "Hapus rencana obat ini secara permanen? Semua tugas terkait akan dihapus.",
+    "confirmStop": "Hentikan rencana obat ini? Jadwal dan semua dosis mendatang akan dihapus.",
     "overdue": "Lewat tenggat",
     "deleteTask": "Hapus dosis telat",
     "confirmDeleteTask": "Hapus dosis yang telat ini? Tindakan ini tidak dapat dibatalkan.",
@@ -348,6 +355,27 @@
         "scheduled": "Terjadwal",
         "ad_hoc": "Sekali pakai"
       }
+    }
+  },
+  "askAi": {
+    "title": "Tanya AI tentang kucing ini",
+    "subtitle": "Kami gabungkan seluruh riwayat {name} dengan pertanyaanmu menjadi prompt yang bisa ditempel ke AI pilihanmu.",
+    "placeholder": "mis. Apakah tren berat {name} sehat? Ada yang perlu dicermati dari kunjungan dokter hewan terakhir?",
+    "destLabel": "Buka di:",
+    "openIn": "Buka di {dest}",
+    "preparing": "Menyiapkan…",
+    "copyPrompt": "Salin prompt",
+    "copied": "Prompt disalin ke clipboard.",
+    "copyFailed": "Gagal menyalin — gunakan pratinjau di bawah.",
+    "copiedAndOpened": "Prompt disalin — tempel di {dest} (⌘/Ctrl+V).",
+    "openedNoCopy": "{dest} dibuka. Gunakan pratinjau di bawah untuk menyalin prompt.",
+    "showPrompt": "Lihat prompt",
+    "disclaimer": "Saran AI hanya bersifat informasi dan tidak menggantikan dokter hewan.",
+    "suggestions": {
+      "weight": "Apakah tren berat sehat?",
+      "diet": "Adakah penyesuaian diet yang disarankan?",
+      "followup": "Apa yang perlu ditindaklanjuti?",
+      "concerns": "Ada indikasi yang mengkhawatirkan?"
     }
   },
   "assignees": {
@@ -509,6 +537,7 @@
     "ageUnits": {
       "years": "thn",
       "months": "bln",
+      "weeks": "mgg",
       "days": "hari"
     },
     "spayedOn": "Disteril",
