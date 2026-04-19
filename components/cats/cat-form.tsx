@@ -40,6 +40,7 @@ export function CatForm({ mode, cat }: Props) {
           registration_number: cat.registration_number ?? '',
           color_pattern: cat.color_pattern ?? '',
           status: cat.status,
+          is_spayed: cat.is_spayed ?? false,
           assignee_id: cat.assignee_id ?? null,
           notes: cat.notes ?? ''
         }
@@ -47,7 +48,8 @@ export function CatForm({ mode, cat }: Props) {
           name: '',
           date_of_birth: '',
           gender: 'female',
-          status: 'active'
+          status: 'active',
+          is_spayed: false
         }
   });
 
@@ -107,6 +109,14 @@ export function CatForm({ mode, cat }: Props) {
         <Field label={t('fields.colorPattern')}><Input {...form.register('color_pattern')} /></Field>
         <Field label={t('fields.microchip')}><Input {...form.register('microchip_number')} /></Field>
         <Field label={t('fields.registration')}><Input {...form.register('registration_number')} /></Field>
+        <Field label={t('fields.isSpayed')}>
+          <label className="flex items-center gap-2 text-sm h-10">
+            <input type="checkbox" {...form.register('is_spayed')} />
+            <span className="text-muted-foreground">
+              {form.watch('is_spayed') ? t('spayedOn') : t('spayedOff')}
+            </span>
+          </label>
+        </Field>
       </div>
 
       <Field label={t('fields.notes')}>

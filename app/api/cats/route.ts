@@ -16,7 +16,13 @@ export async function GET(request: Request) {
     .from('cats')
     .select('*, current_room:rooms(id, name), assignee:profiles!cats_assignee_id_fkey(id, full_name)')
     .order('created_at', { ascending: false });
-  if (status) query = query.eq('status', status as 'active' | 'retired' | 'deceased' | 'sold');
+  if (status) {
+    query = query.eq('status', status as 'active' | 'retired' | 'deceased' | 'sold');
+  } else {
+    // Deceased cats are hidden from list views by default; callers that need
+    // them (e.g. archive views) must opt in with an explicit status filter.
+    query = query.neq('status', 'deceased');
+  }
   if (q) query = query.ilike('name', `%${q}%`);
 
   const { data, error } = await query;

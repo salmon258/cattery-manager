@@ -12,6 +12,7 @@ export const catSchema = z.object({
   registration_number: z.string().max(50).nullable().optional(),
   color_pattern: z.string().max(100).nullable().optional(),
   status: catStatusSchema.default('active'),
+  is_spayed: z.boolean().default(false),
   assignee_id: z.string().uuid().nullable().optional(),
   notes: z.string().max(5000).nullable().optional()
 });

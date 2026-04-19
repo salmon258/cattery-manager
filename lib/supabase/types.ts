@@ -304,6 +304,7 @@ export type Database = {
           date_of_birth: string
           gender: Database["public"]["Enums"]["cat_gender"]
           id: string
+          is_spayed: boolean
           microchip_number: string | null
           name: string
           notes: string | null
@@ -324,6 +325,7 @@ export type Database = {
           date_of_birth: string
           gender: Database["public"]["Enums"]["cat_gender"]
           id?: string
+          is_spayed?: boolean
           microchip_number?: string | null
           name: string
           notes?: string | null
@@ -344,6 +346,7 @@ export type Database = {
           date_of_birth?: string
           gender?: Database["public"]["Enums"]["cat_gender"]
           id?: string
+          is_spayed?: boolean
           microchip_number?: string | null
           name?: string
           notes?: string | null

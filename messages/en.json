@@ -489,6 +489,7 @@
       "registration": "Registration number",
       "colorPattern": "Color / pattern",
       "status": "Status",
+      "isSpayed": "Spayed / neutered",
       "assignee": "Primary assignee",
       "notes": "Notes",
       "photos": "Photos",
@@ -504,6 +505,14 @@
       "deceased": "Deceased",
       "sold": "Sold"
     },
+    "age": "Age",
+    "ageUnits": {
+      "years": "yr",
+      "months": "mo",
+      "days": "d"
+    },
+    "spayedOn": "Spayed / neutered",
+    "spayedOff": "Intact",
     "created": "Cat profile created.",
     "updated": "Cat profile updated."
   },

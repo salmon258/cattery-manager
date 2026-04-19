@@ -489,6 +489,7 @@
       "registration": "Nomor pendaftaran",
       "colorPattern": "Warna / corak",
       "status": "Status",
+      "isSpayed": "Disteril",
       "assignee": "Penjaga utama",
       "notes": "Catatan",
       "photos": "Foto",
@@ -504,6 +505,14 @@
       "deceased": "Meninggal",
       "sold": "Terjual"
     },
+    "age": "Usia",
+    "ageUnits": {
+      "years": "thn",
+      "months": "bln",
+      "days": "hari"
+    },
+    "spayedOn": "Disteril",
+    "spayedOff": "Tidak disteril",
     "created": "Profil kucing dibuat.",
     "updated": "Profil kucing diperbarui."
   },

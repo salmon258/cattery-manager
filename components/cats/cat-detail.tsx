@@ -31,7 +31,7 @@ import { HealthTicketsCard } from '@/components/health/health-tickets-card';
 import { BreedingCard } from '@/components/breeding/breeding-card';
 import { VetVisitsCard } from '@/components/vet/vet-visits-card';
 import { uploadImage } from '@/lib/storage/upload';
-import { formatDate } from '@/lib/utils';
+import { formatAge, formatDate } from '@/lib/utils';
 
 interface Props {
   cat: Cat;
@@ -130,7 +130,11 @@ export function CatDetail({ cat, initialPhotos, currentRoom, assignee, role, cur
               <Badge variant="secondary" className="capitalize">{ts(cat.status)}</Badge>
             </h1>
             <p className="text-sm text-muted-foreground">
-              {tg(cat.gender)} · {cat.breed ?? '—'} · {formatDate(cat.date_of_birth)}
+              {tg(cat.gender)} · {cat.breed ?? '—'} · {formatDate(cat.date_of_birth)} · {t('age')}: {formatAge(cat.date_of_birth, {
+                years: t('ageUnits.years'),
+                months: t('ageUnits.months'),
+                days: t('ageUnits.days')
+              })}
             </p>
           </div>
         </div>
@@ -189,6 +193,10 @@ export function CatDetail({ cat, initialPhotos, currentRoom, assignee, role, cur
             <InfoRow label={t('fields.microchip')} value={cat.microchip_number} />
             <InfoRow label={t('fields.registration')} value={cat.registration_number} />
             <InfoRow label={t('fields.colorPattern')} value={cat.color_pattern} />
+            <InfoRow
+              label={t('fields.isSpayed')}
+              value={cat.is_spayed ? t('spayedOn') : t('spayedOff')}
+            />
             {cat.notes && (
               <div className="pt-2 border-t">
                 <div className="text-muted-foreground text-xs mb-1">{t('fields.notes')}</div>
