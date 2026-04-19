@@ -513,6 +513,15 @@
     },
     "spayedOn": "Spayed / neutered",
     "spayedOff": "Intact",
+    "lifeStage": {
+      "label": "Life stage",
+      "kitten_young": "Kitten (< 6 mo)",
+      "kitten": "Kitten (6–12 mo)",
+      "lactating": "Lactating",
+      "pregnant": "Pregnant",
+      "spayed": "Spayed adult",
+      "adult": "Adult"
+    },
     "created": "Cat profile created.",
     "updated": "Cat profile updated."
   },

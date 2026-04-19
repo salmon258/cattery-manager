@@ -513,6 +513,15 @@
     },
     "spayedOn": "Disteril",
     "spayedOff": "Tidak disteril",
+    "lifeStage": {
+      "label": "Tahap hidup",
+      "kitten_young": "Anak kucing (< 6 bln)",
+      "kitten": "Anak kucing (6–12 bln)",
+      "lactating": "Menyusui",
+      "pregnant": "Hamil",
+      "spayed": "Dewasa disteril",
+      "adult": "Dewasa"
+    },
     "created": "Profil kucing dibuat.",
     "updated": "Profil kucing diperbarui."
   },
