@@ -357,6 +357,23 @@
       }
     }
   },
+  "askAi": {
+    "title": "Ask AI about this cat",
+    "subtitle": "Ask any care question about {name}. The AI reads the full on-file history below before answering.",
+    "placeholder": "e.g. Is {name}'s weight trend healthy? Any concerns from the recent vet visits?",
+    "ask": "Ask",
+    "thinking": "Thinking…",
+    "thinkingHint": "Reading the full history and drafting an answer — this can take 10–30 seconds.",
+    "showContext": "Show the context the AI received",
+    "meta": "{model} · {inTokens} in / {outTokens} out tokens · {cached} cached",
+    "disclaimer": "AI advice is informational only and does not replace a veterinarian.",
+    "suggestions": {
+      "weight": "Is the weight trend healthy?",
+      "diet": "Any diet adjustments you'd recommend?",
+      "followup": "What should we follow up on?",
+      "concerns": "Any red flags in the history?"
+    }
+  },
   "assignees": {
     "primaryAssignee": "Primary assignee",
     "unassigned": "Unassigned",

@@ -357,6 +357,23 @@
       }
     }
   },
+  "askAi": {
+    "title": "Tanya AI tentang kucing ini",
+    "subtitle": "Ajukan pertanyaan apa pun tentang perawatan {name}. AI akan membaca seluruh riwayat di bawah sebelum menjawab.",
+    "placeholder": "mis. Apakah tren berat {name} sehat? Ada yang perlu dicermati dari kunjungan dokter hewan terakhir?",
+    "ask": "Tanya",
+    "thinking": "Memikirkan…",
+    "thinkingHint": "Membaca riwayat lengkap dan menyusun jawaban — bisa memakan 10–30 detik.",
+    "showContext": "Lihat konteks yang diterima AI",
+    "meta": "{model} · {inTokens} token masuk / {outTokens} keluar · {cached} dari cache",
+    "disclaimer": "Saran AI hanya bersifat informasi dan tidak menggantikan dokter hewan.",
+    "suggestions": {
+      "weight": "Apakah tren berat sehat?",
+      "diet": "Adakah penyesuaian diet yang disarankan?",
+      "followup": "Apa yang perlu ditindaklanjuti?",
+      "concerns": "Ada indikasi yang mengkhawatirkan?"
+    }
+  },
   "assignees": {
     "primaryAssignee": "Penjaga utama",
     "unassigned": "Belum ditugaskan",
