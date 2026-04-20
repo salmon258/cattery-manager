@@ -303,7 +303,12 @@ export function EatingCard({ catId, role, currentUserId }: Props) {
       </CardContent>
 
       <LogEatingModal open={open} onClose={() => setOpen(false)} catId={catId} />
+      {/* Key by the log id so React mounts a fresh form instance for each
+          distinct edit session. This stops form state (and useFieldArray's
+          internal `fields` cache) from leaking across edits, which was
+          letting removed items silently reappear on submit. */}
       <LogEatingModal
+        key={editingLog?.id ?? 'edit-idle'}
         open={!!editingLog}
         onClose={() => setEditingLog(null)}
         catId={catId}

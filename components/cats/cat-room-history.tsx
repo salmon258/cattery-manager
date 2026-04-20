@@ -52,34 +52,38 @@ export function CatRoomHistory({ catId }: { catId: string }) {
         ) : (
           <ul className="space-y-2 text-sm">
             {movements.map((mv) => (
-              <li key={mv.id} className="flex items-center gap-2 justify-between border-b pb-2 last:border-0">
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-muted-foreground">
-                    {mv.from_room_id ? (
-                      <Link href={`/rooms/${mv.from_room_id}`} className="hover:underline">
-                        {nameOf(mv.from_room_id)}
-                      </Link>
-                    ) : (
-                      nameOf(null)
-                    )}
+              <li key={mv.id} className="flex flex-col gap-1 border-b pb-2 last:border-0">
+                <div className="flex items-center gap-2 justify-between">
+                  <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="text-muted-foreground">
+                      {mv.from_room_id ? (
+                        <Link href={`/rooms/${mv.from_room_id}`} className="hover:underline">
+                          {nameOf(mv.from_room_id)}
+                        </Link>
+                      ) : (
+                        nameOf(null)
+                      )}
+                    </span>
+                    <ArrowRight className="h-3 w-3 text-muted-foreground shrink-0" />
+                    <span className="font-medium">
+                      {mv.to_room_id ? (
+                        <Link href={`/rooms/${mv.to_room_id}`} className="hover:underline">
+                          {nameOf(mv.to_room_id)}
+                        </Link>
+                      ) : (
+                        nameOf(null)
+                      )}
+                    </span>
+                  </div>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">
+                    {formatDate(mv.moved_at)}
                   </span>
-                  <ArrowRight className="h-3 w-3 text-muted-foreground shrink-0" />
-                  <span className="font-medium">
-                    {mv.to_room_id ? (
-                      <Link href={`/rooms/${mv.to_room_id}`} className="hover:underline">
-                        {nameOf(mv.to_room_id)}
-                      </Link>
-                    ) : (
-                      nameOf(null)
-                    )}
-                  </span>
-                  {mv.reason && (
-                    <span className="text-xs text-muted-foreground italic truncate">“{mv.reason}”</span>
-                  )}
                 </div>
-                <span className="text-xs text-muted-foreground whitespace-nowrap">
-                  {formatDate(mv.moved_at)}
-                </span>
+                {mv.reason && (
+                  <p className="text-xs text-muted-foreground italic break-words whitespace-pre-wrap">
+                    “{mv.reason}”
+                  </p>
+                )}
               </li>
             ))}
           </ul>
