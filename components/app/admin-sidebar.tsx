@@ -16,6 +16,8 @@ import {
   BarChart3,
   Settings,
   Package,
+  Wallet,
+  Banknote,
   type LucideIcon
 } from 'lucide-react';
 
@@ -33,6 +35,8 @@ type NavItem = {
   badge?: number;
   /** Tailwind text color used for the icon so the sidebar reads as colorful. */
   iconColor?: string;
+  /** Match only on exact pathname — use when another nav entry lives under this path. */
+  exact?: boolean;
 };
 
 type NavSection = {
@@ -75,7 +79,9 @@ export function AdminSidebar({ profile, brandName, onNavigate }: Props) {
         { href: '/breeding', label: t('breeding'), icon: Dna, iconColor: 'text-pink-500' },
         { href: '/rooms', label: t('rooms'), icon: Home, iconColor: 'text-teal-500' },
         { href: '/food-items', label: t('food'), icon: Utensils, iconColor: 'text-amber-500' },
-        { href: '/stock', label: t('stock'), icon: Package, iconColor: 'text-lime-500' }
+        { href: '/stock', label: t('stock'), icon: Package, iconColor: 'text-lime-500' },
+        { href: '/finance', label: t('finance'), icon: Wallet, iconColor: 'text-green-500', exact: true },
+        { href: '/finance/payroll', label: t('payroll'), icon: Banknote, iconColor: 'text-cyan-500' }
       ]
     },
     {
@@ -91,8 +97,10 @@ export function AdminSidebar({ profile, brandName, onNavigate }: Props) {
     }
   ];
 
-  const isActive = (href: string) =>
-    pathname === href || (href !== '/' && pathname.startsWith(href));
+  const isActive = (item: NavItem) => {
+    if (item.exact) return pathname === item.href;
+    return pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
+  };
 
   return (
     <aside className="flex h-full w-full flex-col bg-gradient-to-b from-violet-50/60 via-background to-fuchsia-50/40 dark:from-violet-950/40 dark:via-background dark:to-fuchsia-950/20">
@@ -120,7 +128,7 @@ export function AdminSidebar({ profile, brandName, onNavigate }: Props) {
             </div>
             <ul className="space-y-0.5">
               {section.items.map((item) => {
-                const active = isActive(item.href);
+                const active = isActive(item);
                 const Icon = item.icon;
                 return (
                   <li key={item.href}>

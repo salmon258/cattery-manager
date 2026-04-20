@@ -12,6 +12,8 @@
     "rooms": "Rooms",
     "food": "Food catalogue",
     "stock": "Stock",
+    "finance": "Finance",
+    "payroll": "Payroll",
     "users": "Users",
     "reports": "Reports",
     "settings": "Settings",
@@ -32,6 +34,7 @@
     "myCats": "My Cats",
     "allCats": "All Cats",
     "stock": "Stock",
+    "myPayroll": "Payroll",
     "profile": "Profile"
   },
   "adminDashboard": {
@@ -454,7 +457,8 @@
     "showLess": "Show less",
     "viewDetails": "View details",
     "from": "From",
-    "to": "To"
+    "to": "To",
+    "export": "Export"
   },
   "catDetail": {
     "dailyKcalOverRange": "Daily kcal over range",
@@ -1101,6 +1105,177 @@
       "uncategorized": "Uncategorized",
       "auto": "Auto",
       "txnCount": "{count, plural, one {transaction} other {transactions}}"
+    }
+  },
+  "finance": {
+    "title": "Finance",
+    "subtitle": "Full ledger of income and expenses across the cattery.",
+    "uncategorized": "Uncategorized",
+    "auto": "Auto",
+    "nav": {
+      "payroll": "Payroll"
+    },
+    "type": {
+      "income": "Income",
+      "expense": "Expense"
+    },
+    "method": {
+      "cash": "Cash",
+      "bank_transfer": "Bank transfer",
+      "card": "Card",
+      "e_wallet": "E-wallet",
+      "other": "Other"
+    },
+    "related": {
+      "stock_batch": "Stock",
+      "stock_movement": "Stock",
+      "vet_visit": "Vet",
+      "adoption": "Adoption",
+      "payroll": "Payroll",
+      "cat": "Cat",
+      "other": "Other"
+    },
+    "filter": {
+      "type": "Type",
+      "allTypes": "All types",
+      "category": "Category",
+      "allCategories": "All categories",
+      "source": "Source",
+      "allSources": "All sources",
+      "manual": "Manual",
+      "auto": "Auto"
+    },
+    "totals": {
+      "period": "This period",
+      "income": "Income",
+      "expense": "Expenses",
+      "net": "Net"
+    },
+    "ledger": {
+      "title": "Transactions",
+      "empty": "No transactions recorded in this period."
+    },
+    "actions": {
+      "newIncome": "Add income",
+      "newExpense": "Add expense"
+    },
+    "attachment": {
+      "uploaded": "Attachment uploaded."
+    },
+    "txn": {
+      "newIncome": "New income",
+      "newExpense": "New expense",
+      "edit": "Edit transaction",
+      "created": "Transaction added.",
+      "updated": "Transaction updated.",
+      "deleted": "Transaction deleted.",
+      "confirmDelete": "Delete this transaction? This cannot be undone.",
+      "receipt": "Receipt",
+      "fields": {
+        "type": "Type",
+        "category": "Category",
+        "pickCategory": "Choose category",
+        "amount": "Amount",
+        "currency": "Currency",
+        "date": "Date",
+        "method": "Payment method",
+        "noMethod": "Not set",
+        "description": "Description",
+        "reference": "Reference number",
+        "receipt": "Receipt URL"
+      }
+    },
+    "payroll": {
+      "title": "Payroll",
+      "subtitle": "Manage salaries, generate monthly payroll, and record payments.",
+      "noProfiles": "No active users yet.",
+      "generated": "Generated {count} payroll rows.",
+      "role": {
+        "admin": "Administrator",
+        "sitter": "Cat sitter"
+      },
+      "status": {
+        "pending": "Pending",
+        "paid": "Paid",
+        "cancelled": "Cancelled"
+      },
+      "method": {
+        "cash": "Cash",
+        "bank_transfer": "Bank transfer",
+        "card": "Card",
+        "e_wallet": "E-wallet",
+        "other": "Other"
+      },
+      "salary": {
+        "new": "New salary",
+        "currentTitle": "Active salaries",
+        "historyTitle": "Salary history",
+        "since": "since {date}",
+        "notSet": "Not set",
+        "saved": "Salary saved.",
+        "deleted": "Salary removed.",
+        "confirmDelete": "Remove this salary entry? History is lost.",
+        "modalTitle": "Set salary",
+        "fields": {
+          "profile": "Staff member",
+          "amount": "Monthly salary",
+          "currency": "Currency",
+          "effectiveFrom": "Effective from",
+          "notes": "Notes"
+        }
+      },
+      "generate": {
+        "period": "Generate for month",
+        "run": "Generate payroll"
+      },
+      "entry": {
+        "title": "Payroll entries",
+        "empty": "No payroll entries in this range.",
+        "new": "New entry",
+        "edit": "Edit entry",
+        "created": "Entry created.",
+        "updated": "Entry updated.",
+        "deleted": "Entry deleted.",
+        "confirmDelete": "Delete this payroll entry? The linked ledger row will also be removed.",
+        "markPaid": "Mark paid",
+        "paidSuccess": "Entry marked as paid.",
+        "paidOn": "paid on {date}",
+        "payModalTitle": "Mark payroll paid",
+        "confirmPaid": "Confirm paid",
+        "grossLabel": "Gross",
+        "bonusLabel": "Bonus",
+        "deductionLabel": "Deduction",
+        "netPreview": "Net (gross + bonus − deduction)",
+        "proofAttached": "Proof attached",
+        "salaryHint": "Current salary: {amount} {currency}",
+        "useSalary": "Use salary",
+        "fields": {
+          "profile": "Staff member",
+          "periodStart": "Period start",
+          "periodEnd": "Period end",
+          "gross": "Gross amount",
+          "bonus": "Bonus",
+          "deduction": "Deduction",
+          "currency": "Currency",
+          "status": "Status",
+          "paymentDate": "Payment date",
+          "paymentMethod": "Payment method",
+          "noMethod": "Not set",
+          "reference": "Reference / transaction ID",
+          "notes": "Notes",
+          "proof": "Transfer proof (image or PDF)"
+        }
+      }
+    },
+    "myPayroll": {
+      "title": "My Payroll",
+      "subtitle": "Your salary history and monthly payouts.",
+      "currentSalary": "Current monthly salary",
+      "since": "effective {date}",
+      "empty": "No payroll entries yet.",
+      "pending": "Payment pending",
+      "paidOn": "Paid on {date}",
+      "viewProof": "View transfer proof"
     }
   }
 }

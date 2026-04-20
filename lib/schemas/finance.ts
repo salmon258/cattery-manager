@@ -55,3 +55,89 @@ export type FinancialTransactionInput = z.infer<typeof financialTransactionSchem
 
 export const financialTransactionUpdateSchema = financialTransactionSchema.partial();
 export type FinancialTransactionUpdateInput = z.infer<typeof financialTransactionUpdateSchema>;
+
+// ─── Payroll — profile salaries ──────────────────────────────────────────────
+export const profileSalarySchema = z.object({
+  profile_id: z.string().uuid(),
+  monthly_salary: z.coerce.number().min(0).max(1_000_000_000_000),
+  currency: z.string().length(3),
+  effective_from: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD'),
+  notes: z.string().max(2000).nullable().optional()
+});
+export type ProfileSalaryInput = z.infer<typeof profileSalarySchema>;
+
+export const profileSalaryUpdateSchema = profileSalarySchema
+  .omit({ profile_id: true })
+  .partial();
+export type ProfileSalaryUpdateInput = z.infer<typeof profileSalaryUpdateSchema>;
+
+// ─── Payroll — entries ───────────────────────────────────────────────────────
+export const payrollStatusSchema = z.enum(['pending', 'paid', 'cancelled']);
+export type PayrollStatus = z.infer<typeof payrollStatusSchema>;
+
+const dateStr = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD');
+const nullableDate = z.preprocess(
+  (v) => (v === '' || v === undefined ? null : v),
+  dateStr.nullable()
+);
+const nullableString = (max: number) =>
+  z.preprocess(
+    (v) => (v === '' || v === undefined ? null : v),
+    z.string().max(max).nullable()
+  );
+
+export const payrollEntrySchema = z
+  .object({
+    profile_id: z.string().uuid(),
+    period_start: dateStr,
+    period_end: dateStr,
+    gross_amount: z.coerce.number().min(0).max(1_000_000_000_000),
+    bonus_amount: z.coerce.number().min(0).max(1_000_000_000_000).default(0),
+    deduction_amount: z.coerce.number().min(0).max(1_000_000_000_000).default(0),
+    net_amount: z.coerce.number().min(0).max(1_000_000_000_000).optional(),
+    currency: z.string().length(3),
+    status: payrollStatusSchema.default('pending'),
+    payment_date: nullableDate.optional(),
+    payment_method: financialPaymentMethodSchema.nullable().optional(),
+    transfer_proof_url: nullableString(2000).optional(),
+    transfer_proof_path: nullableString(500).optional(),
+    reference_number: nullableString(120).optional(),
+    notes: nullableString(2000).optional()
+  })
+  .refine((d) => d.period_end >= d.period_start, {
+    message: 'Period end must be on or after period start',
+    path: ['period_end']
+  })
+  .refine((d) => d.status !== 'paid' || !!d.payment_date, {
+    message: 'Payment date is required when status is paid',
+    path: ['payment_date']
+  });
+export type PayrollEntryInput = z.infer<typeof payrollEntrySchema>;
+
+export const payrollEntryUpdateSchema = z
+  .object({
+    period_start: dateStr.optional(),
+    period_end: dateStr.optional(),
+    gross_amount: z.coerce.number().min(0).optional(),
+    bonus_amount: z.coerce.number().min(0).optional(),
+    deduction_amount: z.coerce.number().min(0).optional(),
+    net_amount: z.coerce.number().min(0).optional(),
+    currency: z.string().length(3).optional(),
+    status: payrollStatusSchema.optional(),
+    payment_date: nullableDate.optional(),
+    payment_method: financialPaymentMethodSchema.nullable().optional(),
+    transfer_proof_url: nullableString(2000).optional(),
+    transfer_proof_path: nullableString(500).optional(),
+    reference_number: nullableString(120).optional(),
+    notes: nullableString(2000).optional()
+  })
+  .refine(
+    (d) =>
+      d.period_start === undefined ||
+      d.period_end === undefined ||
+      d.period_end >= d.period_start,
+    { message: 'Period end must be on or after period start', path: ['period_end'] }
+  );
+export type PayrollEntryUpdateInput = z.infer<typeof payrollEntryUpdateSchema>;
