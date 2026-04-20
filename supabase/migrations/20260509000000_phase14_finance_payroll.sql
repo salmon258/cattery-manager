@@ -287,27 +287,61 @@ create trigger vet_visits_autofinance_upd
   execute function public.handle_vet_visit_financial();
 
 -- Backfill vet costs that were captured before this phase shipped.
-do $$
-declare r record;
-begin
-  for r in
-    select id, cat_id, visit_date, visit_cost, transport_cost, visit_type, created_by
-      from public.vet_visits
-     where (coalesce(visit_cost,0) > 0 or coalesce(transport_cost,0) > 0)
-  loop
-    -- Re-run the trigger body by issuing a no-op touch update; the WHEN
-    -- clause gates on a change in any of the tracked columns, so we nudge
-    -- visit_date to itself to bypass it, then set it back.
-    update public.vet_visits
-       set visit_cost = r.visit_cost,
-           transport_cost = r.transport_cost
-     where id = r.id
-       and not exists (
-         select 1 from public.financial_transactions
-          where related_entity_type='vet_visit' and related_entity_id = r.id
-       );
-  end loop;
-end$$;
+-- Insert ledger rows directly rather than trying to re-fire the trigger —
+-- the update trigger's WHEN clause requires a `DISTINCT FROM` change, so
+-- writing the same value back no-ops. Anything that's already in the
+-- ledger (by related_entity_id) is skipped.
+insert into public.financial_transactions (
+  type, category_id, amount, currency, transaction_date, description,
+  related_entity_type, related_entity_id, auto_generated, recorded_by
+)
+select
+  'expense',
+  (select id from public.transaction_categories where slug = 'vet_medical' limit 1),
+  v.visit_cost,
+  coalesce((select default_currency from public.system_settings limit 1), 'IDR'),
+  v.visit_date,
+  'Vet visit: ' || coalesce(c.name, 'cat')
+    || ' — ' || coalesce(v.visit_type::text, 'visit')
+    || ' (' || v.visit_date::text || ')',
+  'vet_visit', v.id, true, v.created_by
+from public.vet_visits v
+left join public.cats c on c.id = v.cat_id
+where coalesce(v.visit_cost, 0) > 0
+  and not exists (
+    select 1 from public.financial_transactions ft
+    where ft.related_entity_type = 'vet_visit'
+      and ft.related_entity_id   = v.id
+      and ft.category_id = (
+        select id from public.transaction_categories where slug = 'vet_medical' limit 1
+      )
+  );
+
+insert into public.financial_transactions (
+  type, category_id, amount, currency, transaction_date, description,
+  related_entity_type, related_entity_id, auto_generated, recorded_by
+)
+select
+  'expense',
+  (select id from public.transaction_categories where slug = 'transport' limit 1),
+  v.transport_cost,
+  coalesce((select default_currency from public.system_settings limit 1), 'IDR'),
+  v.visit_date,
+  'Vet transport: ' || coalesce(c.name, 'cat')
+    || ' — ' || coalesce(v.visit_type::text, 'visit')
+    || ' (' || v.visit_date::text || ')',
+  'vet_visit', v.id, true, v.created_by
+from public.vet_visits v
+left join public.cats c on c.id = v.cat_id
+where coalesce(v.transport_cost, 0) > 0
+  and not exists (
+    select 1 from public.financial_transactions ft
+    where ft.related_entity_type = 'vet_visit'
+      and ft.related_entity_id   = v.id
+      and ft.category_id = (
+        select id from public.transaction_categories where slug = 'transport' limit 1
+      )
+  );
 
 -- ============================================================================
 -- View: payroll status for the admin dashboard / payroll page
