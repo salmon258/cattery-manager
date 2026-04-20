@@ -12,6 +12,8 @@
     "rooms": "Ruangan",
     "food": "Katalog makanan",
     "stock": "Stok",
+    "finance": "Keuangan",
+    "payroll": "Penggajian",
     "users": "Pengguna",
     "reports": "Laporan",
     "settings": "Pengaturan",
@@ -32,6 +34,7 @@
     "myCats": "Kucing Saya",
     "allCats": "Semua Kucing",
     "stock": "Stok",
+    "myPayroll": "Gaji",
     "profile": "Profil"
   },
   "adminDashboard": {
@@ -454,7 +457,8 @@
     "showLess": "Tampilkan lebih sedikit",
     "viewDetails": "Lihat detail",
     "from": "Dari",
-    "to": "Hingga"
+    "to": "Hingga",
+    "export": "Ekspor"
   },
   "catDetail": {
     "dailyKcalOverRange": "Kalori harian dalam rentang",
@@ -1101,6 +1105,177 @@
       "uncategorized": "Tanpa kategori",
       "auto": "Auto",
       "txnCount": "{count, plural, one {transaksi} other {transaksi}}"
+    }
+  },
+  "finance": {
+    "title": "Keuangan",
+    "subtitle": "Buku besar lengkap pemasukan dan pengeluaran kucingan.",
+    "uncategorized": "Tanpa kategori",
+    "auto": "Auto",
+    "nav": {
+      "payroll": "Penggajian"
+    },
+    "type": {
+      "income": "Pemasukan",
+      "expense": "Pengeluaran"
+    },
+    "method": {
+      "cash": "Tunai",
+      "bank_transfer": "Transfer bank",
+      "card": "Kartu",
+      "e_wallet": "E-wallet",
+      "other": "Lainnya"
+    },
+    "related": {
+      "stock_batch": "Stok",
+      "stock_movement": "Stok",
+      "vet_visit": "Vet",
+      "adoption": "Adopsi",
+      "payroll": "Gaji",
+      "cat": "Kucing",
+      "other": "Lainnya"
+    },
+    "filter": {
+      "type": "Jenis",
+      "allTypes": "Semua jenis",
+      "category": "Kategori",
+      "allCategories": "Semua kategori",
+      "source": "Sumber",
+      "allSources": "Semua sumber",
+      "manual": "Manual",
+      "auto": "Auto"
+    },
+    "totals": {
+      "period": "Periode ini",
+      "income": "Pemasukan",
+      "expense": "Pengeluaran",
+      "net": "Bersih"
+    },
+    "ledger": {
+      "title": "Transaksi",
+      "empty": "Tidak ada transaksi di periode ini."
+    },
+    "actions": {
+      "newIncome": "Tambah pemasukan",
+      "newExpense": "Tambah pengeluaran"
+    },
+    "attachment": {
+      "uploaded": "Lampiran diunggah."
+    },
+    "txn": {
+      "newIncome": "Pemasukan baru",
+      "newExpense": "Pengeluaran baru",
+      "edit": "Ubah transaksi",
+      "created": "Transaksi ditambahkan.",
+      "updated": "Transaksi diperbarui.",
+      "deleted": "Transaksi dihapus.",
+      "confirmDelete": "Hapus transaksi ini? Tidak bisa dibatalkan.",
+      "receipt": "Kuitansi",
+      "fields": {
+        "type": "Jenis",
+        "category": "Kategori",
+        "pickCategory": "Pilih kategori",
+        "amount": "Jumlah",
+        "currency": "Mata uang",
+        "date": "Tanggal",
+        "method": "Metode pembayaran",
+        "noMethod": "Tidak diatur",
+        "description": "Deskripsi",
+        "reference": "Nomor referensi",
+        "receipt": "URL kuitansi"
+      }
+    },
+    "payroll": {
+      "title": "Penggajian",
+      "subtitle": "Kelola gaji, buat slip gaji bulanan, dan catat pembayaran.",
+      "noProfiles": "Belum ada pengguna aktif.",
+      "generated": "{count} slip gaji dibuat.",
+      "role": {
+        "admin": "Administrator",
+        "sitter": "Penjaga kucing"
+      },
+      "status": {
+        "pending": "Menunggu",
+        "paid": "Dibayar",
+        "cancelled": "Dibatalkan"
+      },
+      "method": {
+        "cash": "Tunai",
+        "bank_transfer": "Transfer bank",
+        "card": "Kartu",
+        "e_wallet": "E-wallet",
+        "other": "Lainnya"
+      },
+      "salary": {
+        "new": "Gaji baru",
+        "currentTitle": "Gaji aktif",
+        "historyTitle": "Riwayat gaji",
+        "since": "sejak {date}",
+        "notSet": "Belum diatur",
+        "saved": "Gaji disimpan.",
+        "deleted": "Gaji dihapus.",
+        "confirmDelete": "Hapus entri gaji ini? Riwayat akan hilang.",
+        "modalTitle": "Atur gaji",
+        "fields": {
+          "profile": "Anggota staf",
+          "amount": "Gaji bulanan",
+          "currency": "Mata uang",
+          "effectiveFrom": "Berlaku sejak",
+          "notes": "Catatan"
+        }
+      },
+      "generate": {
+        "period": "Buat untuk bulan",
+        "run": "Buat penggajian"
+      },
+      "entry": {
+        "title": "Slip gaji",
+        "empty": "Tidak ada slip gaji di rentang ini.",
+        "new": "Slip baru",
+        "edit": "Ubah slip",
+        "created": "Slip dibuat.",
+        "updated": "Slip diperbarui.",
+        "deleted": "Slip dihapus.",
+        "confirmDelete": "Hapus slip ini? Entri buku besar terkait juga akan dihapus.",
+        "markPaid": "Tandai dibayar",
+        "paidSuccess": "Slip ditandai sudah dibayar.",
+        "paidOn": "dibayar pada {date}",
+        "payModalTitle": "Tandai gaji dibayar",
+        "confirmPaid": "Konfirmasi dibayar",
+        "grossLabel": "Bruto",
+        "bonusLabel": "Bonus",
+        "deductionLabel": "Potongan",
+        "netPreview": "Bersih (bruto + bonus − potongan)",
+        "proofAttached": "Bukti terlampir",
+        "salaryHint": "Gaji saat ini: {amount} {currency}",
+        "useSalary": "Pakai gaji",
+        "fields": {
+          "profile": "Anggota staf",
+          "periodStart": "Awal periode",
+          "periodEnd": "Akhir periode",
+          "gross": "Jumlah bruto",
+          "bonus": "Bonus",
+          "deduction": "Potongan",
+          "currency": "Mata uang",
+          "status": "Status",
+          "paymentDate": "Tanggal pembayaran",
+          "paymentMethod": "Metode pembayaran",
+          "noMethod": "Tidak diatur",
+          "reference": "Referensi / ID transaksi",
+          "notes": "Catatan",
+          "proof": "Bukti transfer (gambar atau PDF)"
+        }
+      }
+    },
+    "myPayroll": {
+      "title": "Gaji Saya",
+      "subtitle": "Riwayat gaji dan pembayaran bulanan Anda.",
+      "currentSalary": "Gaji bulanan saat ini",
+      "since": "berlaku {date}",
+      "empty": "Belum ada slip gaji.",
+      "pending": "Pembayaran tertunda",
+      "paidOn": "Dibayar pada {date}",
+      "viewProof": "Lihat bukti transfer"
     }
   }
 }

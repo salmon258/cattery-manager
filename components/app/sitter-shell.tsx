@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Cat, ListChecks, Package, User } from 'lucide-react';
+import { Cat, ListChecks, Package, User, Wallet } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import type { Profile } from '@/lib/supabase/aliases';
@@ -43,6 +43,13 @@ export function SitterShell({ profile, brandName, children }: Props) {
       icon: Package,
       activeText: 'text-lime-600 dark:text-lime-400',
       activeBg: 'bg-lime-100 dark:bg-lime-950/50'
+    },
+    {
+      href: '/my-payroll',
+      label: ts('myPayroll'),
+      icon: Wallet,
+      activeText: 'text-emerald-600 dark:text-emerald-400',
+      activeBg: 'bg-emerald-100 dark:bg-emerald-950/50'
     },
     {
       href: '/profile',
