@@ -175,12 +175,20 @@ export function LogEatingModal({ open, onClose, catId, catName, editLog }: Props
 
   const form = useForm<EatingFormInput>({
     resolver: zodResolver(eatingFormSchema),
-    defaultValues: emptyDefaults
+    defaultValues: editLog ? editDefaults(editLog) : emptyDefaults
   });
-  const { fields, append, remove } = useFieldArray({ control: form.control, name: 'items' });
+  const { fields, append, remove, replace } = useFieldArray({ control: form.control, name: 'items' });
 
+  // Explicitly `replace` the field array after `form.reset`. `form.reset`
+  // alone does not always re-sync useFieldArray's internal `fields` when
+  // the items array's length changes — stale entries could leak through on
+  // submit, which caused edits to keep the old food AND add the new one
+  // when the user tried to swap items.
   useEffect(() => {
-    if (open) form.reset(editLog ? editDefaults(editLog) : emptyDefaults);
+    if (!open) return;
+    const defaults = editLog ? editDefaults(editLog) : emptyDefaults;
+    form.reset(defaults);
+    replace(defaults.items);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, editLog]);
 
