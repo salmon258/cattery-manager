@@ -121,6 +121,9 @@ export default async function DashboardPage() {
         <p className="text-sm text-muted-foreground">{ta('subtitle')}</p>
       </header>
 
+      {/* Daily care tracker — every cat grouped by sitter */}
+      <DailyProgressTracker />
+
       {/* Top stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {stats.map((s) => {
@@ -329,9 +332,6 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Daily care tracker — every cat grouped by sitter */}
-      <DailyProgressTracker />
 
       <Card>
         <CardHeader>
