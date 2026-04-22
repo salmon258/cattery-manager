@@ -260,7 +260,11 @@
   "preventive": {
     "title": "Deworming / flea",
     "log": "Log",
+    "edit": "Edit treatment",
     "logged": "Treatment recorded.",
+    "updated": "Treatment updated.",
+    "deleted": "Treatment deleted.",
+    "confirmDelete": "Delete this treatment?",
     "empty": "No treatments recorded yet.",
     "nextDue": "Next due",
     "fields": {

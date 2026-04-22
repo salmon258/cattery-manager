@@ -260,7 +260,11 @@
   "preventive": {
     "title": "Obat cacing / kutu",
     "log": "Catat",
+    "edit": "Ubah pemberian",
     "logged": "Tercatat.",
+    "updated": "Perubahan disimpan.",
+    "deleted": "Pemberian dihapus.",
+    "confirmDelete": "Hapus pemberian ini?",
     "empty": "Belum ada pemberian.",
     "nextDue": "Jatuh tempo",
     "fields": {
