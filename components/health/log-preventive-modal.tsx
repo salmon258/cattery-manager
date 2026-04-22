@@ -29,49 +29,74 @@ function addDays(yyyyMmDd: string, days: number): string {
   return d.toISOString().slice(0, 10);
 }
 
+export type EditablePreventiveTreatment = {
+  id: string;
+  treatment_type: PreventiveTypeInput;
+  product_name: string;
+  administered_date: string;
+  next_due_date: string | null;
+  notes: string | null;
+};
+
 export function LogPreventiveModal({
   open,
   onClose,
-  catId
+  catId,
+  editTreatment
 }: {
   open: boolean;
   onClose: () => void;
   catId: string;
+  editTreatment?: EditablePreventiveTreatment | null;
 }) {
   const t = useTranslations('preventive');
   const tc = useTranslations('common');
   const qc = useQueryClient();
+  const isEditing = !!editTreatment;
 
   const today = new Date().toISOString().slice(0, 10);
   const form = useForm<PreventiveTreatmentInput>({
     resolver: zodResolver(preventiveTreatmentSchema),
-    defaultValues: {
-      treatment_type: 'deworming',
-      product_name: '',
-      administered_date: today,
-      next_due_date: addDays(today, PREVENTIVE_DEFAULT_INTERVAL_DAYS),
-      notes: ''
-    }
+    defaultValues: editTreatment
+      ? {
+          treatment_type: editTreatment.treatment_type,
+          product_name: editTreatment.product_name,
+          administered_date: editTreatment.administered_date,
+          next_due_date: editTreatment.next_due_date ?? '',
+          notes: editTreatment.notes ?? ''
+        }
+      : {
+          treatment_type: 'deworming',
+          product_name: '',
+          administered_date: today,
+          next_due_date: addDays(today, PREVENTIVE_DEFAULT_INTERVAL_DAYS),
+          notes: ''
+        }
   });
 
   const watchedAdmin = form.watch('administered_date');
   useEffect(() => {
-    if (watchedAdmin) {
+    // Only auto-advance next_due_date when creating — editing shouldn't clobber
+    // a user's existing due date every time they touch administered_date.
+    if (!isEditing && watchedAdmin) {
       form.setValue('next_due_date', addDays(watchedAdmin, PREVENTIVE_DEFAULT_INTERVAL_DAYS), { shouldValidate: false });
     }
-  }, [watchedAdmin, form]);
+  }, [watchedAdmin, form, isEditing]);
 
   const m = useMutation({
     mutationFn: async (v: PreventiveTreatmentInput) => {
-      const r = await fetch(`/api/cats/${catId}/preventive`, {
-        method: 'POST',
+      const url = isEditing
+        ? `/api/preventive/${editTreatment!.id}`
+        : `/api/cats/${catId}/preventive`;
+      const r = await fetch(url, {
+        method: isEditing ? 'PATCH' : 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(v)
       });
       if (!r.ok) throw new Error((await r.json()).error ?? 'Failed');
     },
     onSuccess: () => {
-      toast.success(t('logged'));
+      toast.success(isEditing ? t('updated') : t('logged'));
       qc.invalidateQueries({ queryKey: ['preventive', catId] });
       qc.invalidateQueries({ queryKey: ['me-cats'] });
       onClose();
@@ -82,7 +107,11 @@ export function LogPreventiveModal({
   const errors = form.formState.errors;
 
   return (
-    <ResponsiveModal open={open} onOpenChange={(o) => !o && onClose()} title={t('log')}>
+    <ResponsiveModal
+      open={open}
+      onOpenChange={(o) => !o && onClose()}
+      title={isEditing ? t('edit') : t('log')}
+    >
       <form onSubmit={form.handleSubmit((v) => m.mutate(v))} className="space-y-3 py-2">
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label={t('fields.type')}>

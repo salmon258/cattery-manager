@@ -6,7 +6,6 @@ import { preventiveTreatmentSchema } from '@/lib/schemas/preventive';
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
-  if (user.profile.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const body = await request.json();
   const parsed = preventiveTreatmentSchema.partial().safeParse(body);
@@ -15,6 +14,20 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   }
 
   const supabase = createClient();
+  const { data: existing, error: fetchErr } = await supabase
+    .from('preventive_treatments')
+    .select('id, recorded_by')
+    .eq('id', params.id)
+    .maybeSingle();
+  if (fetchErr) return NextResponse.json({ error: fetchErr.message }, { status: 500 });
+  if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+  const isAdmin = user.profile.role === 'admin';
+  const isOwner = existing.recorded_by === user.authId;
+  if (!isAdmin && !isOwner) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const { data, error } = await supabase
     .from('preventive_treatments')
     .update(parsed.data)
@@ -28,9 +41,22 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 export async function DELETE(_: Request, { params }: { params: { id: string } }) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
-  if (user.profile.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const supabase = createClient();
+  const { data: existing, error: fetchErr } = await supabase
+    .from('preventive_treatments')
+    .select('id, recorded_by')
+    .eq('id', params.id)
+    .maybeSingle();
+  if (fetchErr) return NextResponse.json({ error: fetchErr.message }, { status: 500 });
+  if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+  const isAdmin = user.profile.role === 'admin';
+  const isOwner = existing.recorded_by === user.authId;
+  if (!isAdmin && !isOwner) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const { error } = await supabase.from('preventive_treatments').delete().eq('id', params.id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
