@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { ArrowRight, Check, Pause, Pencil, Pill, Play, Plus, Timer, Trash2 } from 'lucide-react';
 
-import type { Medication, MedicationTask, UserRole } from '@/lib/supabase/aliases';
+import type { Medication, MedicationTask } from '@/lib/supabase/aliases';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -34,11 +34,10 @@ async function fetchUpcomingTasks(catId: string): Promise<TaskRow[]> {
   return tasks.filter((t) => t.cat?.id === catId);
 }
 
-export function MedicationsCard({ catId, role }: { catId: string; role: UserRole }) {
+export function MedicationsCard({ catId }: { catId: string }) {
   const t = useTranslations('medications');
   const tc = useTranslations('common');
   const qc = useQueryClient();
-  const isAdmin = role === 'admin';
 
   const [newOpen, setNewOpen] = useState(false);
   const [adHocOpen, setAdHocOpen] = useState(false);
@@ -159,16 +158,14 @@ export function MedicationsCard({ catId, role }: { catId: string; role: UserRole
           >
             <Plus className="h-4 w-4" /> {t('adHoc.log')}
           </Button>
-          {isAdmin && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="border-violet-300 text-violet-700 hover:bg-violet-50 dark:border-violet-800 dark:text-violet-300 dark:hover:bg-violet-950/40"
-              onClick={() => setNewOpen(true)}
-            >
-              <Plus className="h-4 w-4" /> {t('newSchedule')}
-            </Button>
-          )}
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-violet-300 text-violet-700 hover:bg-violet-50 dark:border-violet-800 dark:text-violet-300 dark:hover:bg-violet-950/40"
+            onClick={() => setNewOpen(true)}
+          >
+            <Plus className="h-4 w-4" /> {t('newSchedule')}
+          </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -210,7 +207,7 @@ export function MedicationsCard({ catId, role }: { catId: string; role: UserRole
                       >
                         <Check className="h-3.5 w-3.5" /> {t('confirm')}
                       </Button>
-                      {isAdmin && overdue && (
+                      {overdue && (
                         <Button
                           size="icon"
                           variant="ghost"
@@ -264,62 +261,60 @@ export function MedicationsCard({ catId, role }: { catId: string; role: UserRole
                       {m.time_slots.join(', ')}
                     </div>
                   </div>
-                  {isAdmin && (
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity shrink-0">
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity shrink-0">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7"
+                      onClick={() => setEditing(m)}
+                      aria-label={tc('edit')}
+                      title={tc('edit')}
+                    >
+                      <Pencil className="h-3.5 w-3.5 text-sky-600" />
+                    </Button>
+                    {m.is_active ? (
                       <Button
                         size="icon"
                         variant="ghost"
                         className="h-7 w-7"
-                        onClick={() => setEditing(m)}
-                        aria-label={tc('edit')}
-                        title={tc('edit')}
-                      >
-                        <Pencil className="h-3.5 w-3.5 text-sky-600" />
-                      </Button>
-                      {m.is_active ? (
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-7 w-7"
-                          disabled={pauseMed.isPending}
-                          onClick={() => {
-                            if (window.confirm(t('confirmPause'))) pauseMed.mutate(m.id);
-                          }}
-                          aria-label={t('pause')}
-                          title={t('pause')}
-                        >
-                          <Pause className="h-3.5 w-3.5 text-amber-600" />
-                        </Button>
-                      ) : (
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-7 w-7"
-                          disabled={continueMed.isPending}
-                          onClick={() => {
-                            if (window.confirm(t('confirmContinue'))) continueMed.mutate(m.id);
-                          }}
-                          aria-label={t('continue')}
-                          title={t('continue')}
-                        >
-                          <Play className="h-3.5 w-3.5 text-emerald-600" />
-                        </Button>
-                      )}
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-7 w-7"
-                        disabled={stopMed.isPending}
+                        disabled={pauseMed.isPending}
                         onClick={() => {
-                          if (window.confirm(t('confirmStop'))) stopMed.mutate(m.id);
+                          if (window.confirm(t('confirmPause'))) pauseMed.mutate(m.id);
                         }}
-                        aria-label={t('stop')}
-                        title={t('stop')}
+                        aria-label={t('pause')}
+                        title={t('pause')}
                       >
-                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                        <Pause className="h-3.5 w-3.5 text-amber-600" />
                       </Button>
-                    </div>
-                  )}
+                    ) : (
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7"
+                        disabled={continueMed.isPending}
+                        onClick={() => {
+                          if (window.confirm(t('confirmContinue'))) continueMed.mutate(m.id);
+                        }}
+                        aria-label={t('continue')}
+                        title={t('continue')}
+                      >
+                        <Play className="h-3.5 w-3.5 text-emerald-600" />
+                      </Button>
+                    )}
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7"
+                      disabled={stopMed.isPending}
+                      onClick={() => {
+                        if (window.confirm(t('confirmStop'))) stopMed.mutate(m.id);
+                      }}
+                      aria-label={t('stop')}
+                      title={t('stop')}
+                    >
+                      <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                    </Button>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -327,15 +322,13 @@ export function MedicationsCard({ catId, role }: { catId: string; role: UserRole
         </section>
       </CardContent>
 
-      {isAdmin && <NewMedicationModal open={newOpen} onClose={() => setNewOpen(false)} catId={catId} />}
-      {isAdmin && (
-        <EditMedicationModal
-          open={editing !== null}
-          onClose={() => setEditing(null)}
-          catId={catId}
-          medication={editing}
-        />
-      )}
+      <NewMedicationModal open={newOpen} onClose={() => setNewOpen(false)} catId={catId} />
+      <EditMedicationModal
+        open={editing !== null}
+        onClose={() => setEditing(null)}
+        catId={catId}
+        medication={editing}
+      />
       <LogAdHocMedModal open={adHocOpen} onClose={() => setAdHocOpen(false)} catId={catId} />
     </Card>
   );

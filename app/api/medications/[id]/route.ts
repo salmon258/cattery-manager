@@ -44,7 +44,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
-  if (user.profile.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  if (!user.profile.is_active) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const body = await request.json();
   const parsed = medicationUpdateSchema.safeParse(body);
@@ -79,7 +79,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 export async function DELETE(_: Request, { params }: { params: { id: string } }) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
-  if (user.profile.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  if (!user.profile.is_active) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const supabase = createClient();
   const { error } = await supabase.from('medications').delete().eq('id', params.id);
