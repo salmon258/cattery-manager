@@ -11,16 +11,31 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
   if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
 
   const supabase = createClient();
-  const { data, error } = await supabase.from('cats').select('*').eq('id', params.id).single();
+  const { data: cat, error } = await supabase.from('cats').select('*').eq('id', params.id).single();
   if (error) return NextResponse.json({ error: error.message }, { status: 404 });
 
-  const { data: photos } = await supabase
-    .from('cat_photos')
-    .select('*')
-    .eq('cat_id', params.id)
-    .order('sort_order', { ascending: true });
+  // Fan out the non-dependent reads in parallel; room + assignee depend on
+  // `cat`, so they run after but in parallel with each other.
+  const [{ data: photos }, { data: currentRoom }, { data: assignee }] = await Promise.all([
+    supabase
+      .from('cat_photos')
+      .select('*')
+      .eq('cat_id', params.id)
+      .order('sort_order', { ascending: true }),
+    cat.current_room_id
+      ? supabase.from('rooms').select('id, name').eq('id', cat.current_room_id).single()
+      : Promise.resolve({ data: null }),
+    cat.assignee_id
+      ? supabase.from('profiles').select('id, full_name').eq('id', cat.assignee_id).single()
+      : Promise.resolve({ data: null })
+  ]);
 
-  return NextResponse.json({ cat: data, photos: photos ?? [] });
+  return NextResponse.json({
+    cat,
+    photos: photos ?? [],
+    currentRoom: currentRoom ?? null,
+    assignee: assignee ?? null
+  });
 }
 
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {

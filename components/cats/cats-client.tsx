@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { catDetailQueryOptions } from '@/lib/queries/cats';
 import { useTranslations } from 'next-intl';
 import { Pill, Plus, Search, UserPlus, X } from 'lucide-react';
 
@@ -43,10 +44,21 @@ export function CatsClient({ role }: { role: UserRole }) {
   const [batchMedModalOpen, setBatchMedModalOpen] = useState(false);
   const isAdmin = role === 'admin';
 
+  const qc = useQueryClient();
+
   const { data: cats = [], isLoading, error, refetch } = useQuery({
     queryKey: ['cats', q],
     queryFn: () => fetchCats(q)
   });
+
+  // Warm the cat-detail cache when the user hovers / focuses a row. Next's
+  // <Link prefetch> already grabs the route chunks; this grabs the actual
+  // data. If the user taps the card within ~150ms, the detail page renders
+  // instantly without a loading flash. Deduped by React Query — repeat
+  // hovers on the same row are cheap.
+  const prefetchCatDetail = (id: string) => {
+    qc.prefetchQuery(catDetailQueryOptions(id));
+  };
 
   function toggleSelect(id: string, e: React.MouseEvent) {
     e.preventDefault();
@@ -202,7 +214,13 @@ export function CatsClient({ role }: { role: UserRole }) {
             );
           }
           return (
-            <Link key={c.id} href={`/cats/${c.id}`}>
+            <Link
+              key={c.id}
+              href={`/cats/${c.id}`}
+              onMouseEnter={() => prefetchCatDetail(c.id)}
+              onFocus={() => prefetchCatDetail(c.id)}
+              onTouchStart={() => prefetchCatDetail(c.id)}
+            >
               {cardInner}
             </Link>
           );

@@ -1,50 +1,16 @@
-import { notFound, redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth/current-user';
-import { CatDetail } from '@/components/cats/cat-detail';
+import { CatDetailLoader } from '@/components/cats/cat-detail-loader';
 
 export default async function CatDetailPage({ params }: { params: { id: string } }) {
   const user = await getCurrentUser();
   if (!user) redirect('/auth/signout');
-  const supabase = createClient();
 
-  const { data: cat } = await supabase.from('cats').select('*').eq('id', params.id).single();
-  if (!cat) notFound();
-
-  const { data: photos } = await supabase
-    .from('cat_photos')
-    .select('*')
-    .eq('cat_id', params.id)
-    .order('sort_order', { ascending: true });
-
-  let currentRoom = null as { id: string; name: string } | null;
-  if (cat.current_room_id) {
-    const { data: room } = await supabase
-      .from('rooms')
-      .select('id, name')
-      .eq('id', cat.current_room_id)
-      .single();
-    currentRoom = room;
-  }
-
-  let assignee = null as { id: string; full_name: string } | null;
-  if (cat.assignee_id) {
-    const { data: a } = await supabase
-      .from('profiles')
-      .select('id, full_name')
-      .eq('id', cat.assignee_id)
-      .single();
-    assignee = a;
-  }
-
+  // Data (cat, photos, room, assignee) is now fetched client-side via
+  // useQuery + /api/cats/[id], so repeat visits paint instantly from the
+  // React Query IndexedDB persister and a stale-while-revalidate refetch
+  // keeps the view current in the background.
   return (
-    <CatDetail
-      cat={cat}
-      initialPhotos={photos ?? []}
-      currentRoom={currentRoom}
-      assignee={assignee}
-      role={user.profile.role}
-      currentUserId={user.authId}
-    />
+    <CatDetailLoader catId={params.id} role={user.profile.role} currentUserId={user.authId} />
   );
 }
