@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
+import { useIsRestoring, useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
 import type { UserRole } from '@/lib/supabase/aliases';
@@ -18,7 +18,17 @@ interface Props {
 }
 
 export function CatDetailLoader({ catId, role, currentUserId }: Props) {
+  // `isRestoring` is true during the brief window after a cold app start
+  // while the IndexedDB persister is rehydrating the React Query cache.
+  // In that window `useQuery` still reports `isPending: true` even for a
+  // cat whose snapshot is sitting in IDB, which caused a skeleton flash
+  // on PWA relaunch. Keep the content area empty until restore settles;
+  // a cached cat then paints straight to content with no flash, and an
+  // uncached cat falls through to the skeleton below.
+  const isRestoring = useIsRestoring();
   const { data, isPending, isError, refetch } = useQuery(catDetailQueryOptions(catId));
+
+  if (isRestoring) return null;
 
   if (isPending) return <CatDetailSkeleton />;
 
