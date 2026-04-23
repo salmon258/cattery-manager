@@ -18,13 +18,21 @@ export function NavigationProgress() {
   // Safety valve: auto-hide after a maximum duration in case a navigation is
   // cancelled mid-flight and we never see a pathname change.
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Debounce the bar so near-instant navigations (prefetched / SW-cached)
+  // don't flash a progress bar that appears and vanishes in one frame.
+  const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function startBar() {
-    setLoading(true);
+    if (showTimerRef.current) clearTimeout(showTimerRef.current);
+    showTimerRef.current = setTimeout(() => setLoading(true), 180);
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     hideTimerRef.current = setTimeout(() => setLoading(false), 8000);
   }
   function stopBar() {
+    if (showTimerRef.current) {
+      clearTimeout(showTimerRef.current);
+      showTimerRef.current = null;
+    }
     setLoading(false);
     if (hideTimerRef.current) {
       clearTimeout(hideTimerRef.current);
@@ -116,6 +124,7 @@ export function NavigationProgress() {
       window.history.pushState = origPush;
       window.history.replaceState = origReplace;
       if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+      if (showTimerRef.current) clearTimeout(showTimerRef.current);
     };
   }, []);
 
