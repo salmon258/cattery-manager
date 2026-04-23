@@ -1,7 +1,39 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider, keepPreviousData } from '@tanstack/react-query';
+import { PersistQueryClientProvider, type Persister } from '@tanstack/react-query-persist-client';
+import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { createStore, get, set, del } from 'idb-keyval';
+import { createClient } from '@/lib/supabase/client';
+
+// Bump to invalidate every persisted cache on the device (e.g. after a
+// breaking query-shape change). Unrelated to app version / deploy hash.
+const CACHE_BUSTER = 'v1';
+
+const ONE_MIN = 60_000;
+const ONE_HOUR = 60 * ONE_MIN;
+const ONE_DAY = 24 * ONE_HOUR;
+
+function createIdbPersister(): Persister | null {
+  if (typeof window === 'undefined' || typeof indexedDB === 'undefined') {
+    return null;
+  }
+  try {
+    const store = createStore('cattery-manager-query-cache', 'queries');
+    return createAsyncStoragePersister({
+      storage: {
+        getItem: async (key) => (await get<string>(key, store)) ?? null,
+        setItem: async (key, value) => set(key, value, store),
+        removeItem: async (key) => del(key, store)
+      },
+      key: 'tanstack-query',
+      throttleTime: 1000
+    });
+  } catch {
+    return null;
+  }
+}
 
 export function QueryProvider({ children }: { children: React.ReactNode }) {
   const [client] = useState(
@@ -9,22 +41,21 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            // Treat cached data as fresh for 5 min so navigating back to a
-            // previously-visited page paints immediately from cache with
-            // no network round-trip. After that window, a stale remount
-            // kicks off a background refetch but `isLoading` stays false
-            // (since we already have data) — no spinner, no flicker.
-            // Mutations invalidate specific keys so writes stay reflected.
-            staleTime: 5 * 60_000,
-            // Keep unused query data around for 30 min so instant revisits
-            // still work for screens the user briefly left.
-            gcTime: 30 * 60_000,
-            // Firing a refetch every time the user alt-tabs creates the
-            // "data flashes/re-loads" feel, especially on mobile where
-            // visibilitychange fires on every foreground.
+            // Data stays fresh for 30 min. Revisits within the window paint
+            // instantly from the (in-memory or IDB-restored) cache with zero
+            // network. Past 30 min a mounted query fires a background
+            // refetch — `isLoading` stays false because data is already
+            // present, so the UI shows cached data and swaps in fresh data
+            // when the request lands (stale-while-revalidate).
+            staleTime: 30 * ONE_MIN,
+            // Keep unused queries in memory for 24h so the persister has a
+            // snapshot to dehydrate on page hide / app close.
+            gcTime: ONE_DAY,
+            // Don't refetch on every alt-tab — disruptive on mobile.
             refetchOnWindowFocus: false,
-            // Show prior data while a new key (e.g. search term) is
-            // fetching, so lists don't blank out between keystrokes.
+            // Do catch up after a network drop (PWA on mobile).
+            refetchOnReconnect: true,
+            // Show prior data while a new key (search term, filter) loads.
             placeholderData: keepPreviousData,
             retry: 1
           }
@@ -32,10 +63,52 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
       })
   );
 
+  const [persister] = useState(createIdbPersister);
+
+  // Cached data belongs to a specific user. On sign-out, purge everything so
+  // the next user can't momentarily see the previous user's cats/rooms from
+  // IndexedDB before the first refetch replaces it.
+  useEffect(() => {
+    const supabase = createClient();
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        client.clear();
+      }
+    });
+    return () => data.subscription.unsubscribe();
+  }, [client]);
+
+  const devtools = process.env.NODE_ENV === 'development' ? (
+    <ReactQueryDevtools initialIsOpen={false} />
+  ) : null;
+
+  if (!persister) {
+    return (
+      <QueryClientProvider client={client}>
+        {children}
+        {devtools}
+      </QueryClientProvider>
+    );
+  }
+
   return (
-    <QueryClientProvider client={client}>
+    <PersistQueryClientProvider
+      client={client}
+      persistOptions={{
+        persister,
+        // Drop anything older than a day — matches gcTime so we don't hold
+        // arbitrarily stale snapshots across app upgrades.
+        maxAge: ONE_DAY,
+        buster: CACHE_BUSTER,
+        dehydrateOptions: {
+          // Only persist successful queries. Errors/pending states should
+          // re-fetch fresh next time.
+          shouldDehydrateQuery: (q) => q.state.status === 'success'
+        }
+      }}
+    >
       {children}
-      {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
-    </QueryClientProvider>
+      {devtools}
+    </PersistQueryClientProvider>
   );
 }
