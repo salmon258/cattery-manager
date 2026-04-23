@@ -57,7 +57,20 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
             refetchOnReconnect: true,
             // Show prior data while a new key (search term, filter) loads.
             placeholderData: keepPreviousData,
-            retry: 1
+            retry: 1,
+            // New in @tanstack/react-query 5.100: `retryOnMount` takes a
+            // predicate over the whole query. When a component remounts
+            // with a cached error, retrying a 4xx (auth, forbidden, not
+            // found) request will fail the same way and just waste a
+            // round-trip. Bounce those; keep retrying 5xx/network errors
+            // where a fresh attempt has a chance.
+            retryOnMount: (query) => {
+              const err = query.state.error as (Error & { status?: number }) | null;
+              if (!err) return true;
+              const status = typeof err.status === 'number' ? err.status : undefined;
+              if (status && status >= 400 && status < 500) return false;
+              return true;
+            }
           }
         }
       })

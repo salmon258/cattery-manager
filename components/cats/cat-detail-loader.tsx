@@ -4,25 +4,12 @@ import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
-import type { Cat, CatPhoto, UserRole } from '@/lib/supabase/aliases';
+import type { UserRole } from '@/lib/supabase/aliases';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { CatDetail } from '@/components/cats/cat-detail';
-
-type CatDetailPayload = {
-  cat: Cat;
-  photos: CatPhoto[];
-  currentRoom: { id: string; name: string } | null;
-  assignee: { id: string; full_name: string } | null;
-};
-
-async function fetchCatDetail(id: string): Promise<CatDetailPayload | null> {
-  const r = await fetch(`/api/cats/${id}`);
-  if (r.status === 404) return null;
-  if (!r.ok) throw new Error('Failed to load cat');
-  return r.json();
-}
+import { catDetailQueryOptions } from '@/lib/queries/cats';
 
 interface Props {
   catId: string;
@@ -31,16 +18,7 @@ interface Props {
 }
 
 export function CatDetailLoader({ catId, role, currentUserId }: Props) {
-  // Bundled into a single key so the whole detail view restores from IDB
-  // in one shot. SW's /api/* StaleWhileRevalidate handles the backing
-  // HTTP cache; React Query's persister handles cross-session memory.
-  // Key aligns with existing `invalidateQueries({ queryKey: ['cat', catId] })`
-  // calls in cat-form / move-room / assign / log-weight modals, so mutations
-  // keep refreshing the detail view for free.
-  const { data, isPending, isError, refetch } = useQuery({
-    queryKey: ['cat', catId],
-    queryFn: () => fetchCatDetail(catId)
-  });
+  const { data, isPending, isError, refetch } = useQuery(catDetailQueryOptions(catId));
 
   if (isPending) return <CatDetailSkeleton />;
 
