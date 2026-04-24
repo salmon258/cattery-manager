@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { releaseScrollLockIfIdle } from '@/lib/scroll-lock';
 
 const THRESHOLD = 70;
 const MAX_PULL = 110;
@@ -46,6 +47,11 @@ export function PullToRefresh({ children }: { children: React.ReactNode }) {
       setRefreshing(false);
       setDistance(0);
       distanceRef.current = 0;
+      // router.refresh() + invalidateQueries() can re-render in place while a
+      // Vaul drawer or Radix dialog is mid-close-animation, racing its
+      // scroll-lock cleanup and leaving <body> frozen. ScrollLockGuard only
+      // fires on pathname change, so clear the lock here too.
+      window.setTimeout(releaseScrollLockIfIdle, 150);
     }
   }, [qc, router]);
 
