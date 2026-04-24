@@ -63,6 +63,37 @@
   }
   /* iOS auto-zoom prevention on form fields */
   input, select, textarea { font-size: 16px; }
+
+  /* iOS Safari renders <input type="date">/etc. with a fixed UA height,
+     centered text, and no calendar affordance — strip the native chrome so
+     these line up with our other inputs (h-10, left-aligned, 16px font). */
+  input[type="date"],
+  input[type="datetime-local"],
+  input[type="time"],
+  input[type="month"] {
+    -webkit-appearance: none;
+    appearance: none;
+    min-height: 2.5rem;
+    text-align: left;
+    font-family: inherit;
+    line-height: 1.5rem;
+  }
+
+  /* Surface the calendar/clock indicator at the right edge of the field —
+     iOS would otherwise leave the input with no visible affordance. */
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+  input[type="time"]::-webkit-calendar-picker-indicator,
+  input[type="month"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.55;
+  }
+  .dark input[type="date"]::-webkit-calendar-picker-indicator,
+  .dark input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+  .dark input[type="time"]::-webkit-calendar-picker-indicator,
+  .dark input[type="month"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+  }
 }
 
 /* Top navigation progress bar — indeterminate sliding stripe that plays while
