@@ -8,6 +8,7 @@ const emptyToNull = <T extends z.ZodTypeAny>(schema: T) =>
 
 export const stockCategorySchema = z.enum([
   'food',
+  'human_food',
   'medicine',
   'supplement',
   'litter',

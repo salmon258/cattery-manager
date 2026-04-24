@@ -939,7 +939,8 @@
       "expiringInDays": "Expires in {n}d"
     },
     "categories": {
-      "food": "Food",
+      "food": "Cat food",
+      "human_food": "Human food",
       "medicine": "Medicine",
       "supplement": "Supplement",
       "litter": "Litter",
