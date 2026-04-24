@@ -114,11 +114,9 @@ export function StockItemDetailClient({ itemId, isAdmin }: Props) {
               <Button variant="outline" onClick={() => setCheckoutOpen(true)} disabled={totalRemaining <= 0}>
                 <ClipboardList className="h-4 w-4" /> {t('checkout.cta')}
               </Button>
-              {isAdmin && (
-                <Button onClick={() => setStockInOpen(true)}>
-                  <PackagePlus className="h-4 w-4" /> {t('stockIn.cta')}
-                </Button>
-              )}
+              <Button onClick={() => setStockInOpen(true)}>
+                <PackagePlus className="h-4 w-4" /> {t('stockIn.cta')}
+              </Button>
             </div>
           </div>
         </CardContent>
