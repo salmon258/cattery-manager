@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
+import { releaseScrollLockIfIdle } from '@/lib/scroll-lock';
 
 // Vaul and Radix Dialog lock <body> scroll (overflow / position:fixed /
 // pointer-events / data-scroll-locked) while a drawer or dialog is open, and
@@ -20,26 +21,7 @@ export function ScrollLockGuard() {
   const pathname = usePathname();
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      const stillOpen = document.querySelector(
-        '[data-vaul-drawer][data-state="open"], [role="dialog"][data-state="open"]'
-      );
-      if (stillOpen) return;
-
-      const body = document.body;
-      body.style.removeProperty('overflow');
-      body.style.removeProperty('position');
-      body.style.removeProperty('top');
-      body.style.removeProperty('left');
-      body.style.removeProperty('right');
-      body.style.removeProperty('pointer-events');
-      body.removeAttribute('data-scroll-locked');
-
-      const html = document.documentElement;
-      html.style.removeProperty('overflow');
-      html.style.removeProperty('scroll-behavior');
-    }, 150);
-
+    const timer = window.setTimeout(releaseScrollLockIfIdle, 150);
     return () => window.clearTimeout(timer);
   }, [pathname]);
 
