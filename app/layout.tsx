@@ -5,6 +5,7 @@ import { getLocale, getMessages } from "next-intl/server";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { NavigationProgress } from "@/components/app/navigation-progress";
+import { ScrollLockGuard } from "@/components/app/scroll-lock-guard";
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -92,6 +93,7 @@ export default async function RootLayout({
               <Suspense fallback={null}>
                 <NavigationProgress />
               </Suspense>
+              <ScrollLockGuard />
               {children}
               <Toaster richColors position="top-right" />
             </QueryProvider>
