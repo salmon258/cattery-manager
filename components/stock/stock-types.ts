@@ -5,7 +5,7 @@
  */
 
 export type StockCategory =
-  | 'food' | 'medicine' | 'supplement' | 'litter'
+  | 'food' | 'human_food' | 'medicine' | 'supplement' | 'litter'
   | 'cleaning' | 'grooming' | 'equipment' | 'other';
 
 export type StockUnit =
@@ -115,7 +115,7 @@ export interface StockMovement {
 }
 
 export const STOCK_CATEGORIES: StockCategory[] = [
-  'food', 'medicine', 'supplement', 'litter', 'cleaning', 'grooming', 'equipment', 'other'
+  'food', 'human_food', 'medicine', 'supplement', 'litter', 'cleaning', 'grooming', 'equipment', 'other'
 ];
 export const STOCK_UNITS: StockUnit[] = [
   'pcs', 'box', 'bottle', 'pack', 'sachet', 'bag', 'kg', 'g', 'l', 'ml'

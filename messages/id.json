@@ -939,7 +939,8 @@
       "expiringInDays": "Kedaluwarsa {n}h"
     },
     "categories": {
-      "food": "Makanan",
+      "food": "Makanan kucing",
+      "human_food": "Makanan manusia",
       "medicine": "Obat",
       "supplement": "Suplemen",
       "litter": "Pasir",
