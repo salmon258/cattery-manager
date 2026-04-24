@@ -1,8 +1,17 @@
--- Allow cat sitters to record stock-in, not just admins.
--- The stock_in RPC previously gated on is_admin(); relax to is_active_user()
--- so sitters can log newly arrived items when an admin isn't around. Direct
--- writes on stock_batches stay admin-only via the existing RLS policy — sitters
--- must go through the RPC, which runs SECURITY DEFINER and still validates qty.
+-- Allow cat sitters to add items to stock, not just admins. Two things change:
+--   1. Sitters can INSERT new catalogue rows (stock_items) via a new RLS policy.
+--      Updates/deletes stay admin-only through the existing admin_all policy.
+--   2. The stock_in RPC, which previously gated on is_admin(), now gates on
+--      is_active_user() so sitters can record a delivery when the admin isn't
+--      around. Direct writes on stock_batches stay admin-only via RLS — sitters
+--      must go through the RPC, which runs SECURITY DEFINER and validates qty.
+
+-- ---- stock_items INSERT for any active user ----
+create policy stock_items_active_insert on public.stock_items
+  for insert to authenticated
+  with check (public.is_active_user() and created_by = auth.uid());
+
+-- ---- stock_in RPC: admin-only → any active user ----
 
 create or replace function public.stock_in(
   p_stock_item_id uuid,
