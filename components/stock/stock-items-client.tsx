@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Edit, Package, Plus, Trash2 } from 'lucide-react';
+import { Edit, Package, Plus, Search, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,7 +20,7 @@ import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 import { stockItemSchema, type StockItemInput } from '@/lib/schemas/stock';
-import { STOCK_CATEGORIES, STOCK_UNITS, type StockItem, type StockLocation } from './stock-types';
+import { STOCK_CATEGORIES, STOCK_UNITS, type StockCategory, type StockItem, type StockLocation } from './stock-types';
 
 async function fetchItems(includeInactive: boolean): Promise<StockItem[]> {
   const qs = includeInactive ? '?include_inactive=1' : '';
@@ -47,6 +47,8 @@ export function StockItemsClient({ isAdmin }: StockItemsClientProps) {
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<StockItem | null>(null);
   const [showInactive, setShowInactive] = useState(false);
+  const [search, setSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<StockCategory | 'all'>('all');
 
   // Auto-open "new" sheet via ?new=1 from the overview CTA
   useEffect(() => {
@@ -63,6 +65,18 @@ export function StockItemsClient({ isAdmin }: StockItemsClientProps) {
   });
 
   const locMap = useMemo(() => new Map(locations.map((l) => [l.id, l.name])), [locations]);
+
+  const filteredItems = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return items.filter((item) => {
+      if (categoryFilter !== 'all' && item.category !== categoryFilter) return false;
+      if (q) {
+        const hay = `${item.name} ${item.brand ?? ''}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [items, search, categoryFilter]);
 
   const del = useMutation({
     mutationFn: async (id: string) => {
@@ -94,15 +108,36 @@ export function StockItemsClient({ isAdmin }: StockItemsClientProps) {
         </div>
       </div>
 
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder={t('searchPlaceholder')}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v as StockCategory | 'all')}>
+          <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t('filters.allCategories')}</SelectItem>
+            {STOCK_CATEGORIES.map((c) => (
+              <SelectItem key={c} value={c}>{t(`categories.${c}`)}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       {isLoading && (
         <Card><CardContent className="p-6 text-sm text-muted-foreground">{tc('loading')}</CardContent></Card>
       )}
-      {!isLoading && items.length === 0 && (
+      {!isLoading && filteredItems.length === 0 && (
         <Card><CardContent className="p-6 text-sm text-muted-foreground">{t('items.empty')}</CardContent></Card>
       )}
 
       <div className="grid gap-3">
-        {items.map((item) => (
+        {filteredItems.map((item) => (
           <Card key={item.id}>
             <CardContent className="p-4 flex flex-wrap items-center justify-between gap-3">
               <Link href={`/stock/${item.id}`} className="flex min-w-0 flex-1 items-center gap-3">
