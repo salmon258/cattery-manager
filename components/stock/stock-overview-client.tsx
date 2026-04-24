@@ -96,11 +96,11 @@ export function StockOverviewClient({ isAdmin }: Props) {
               <Button asChild variant="outline">
                 <Link href="/stock/locations"><MapPin className="h-4 w-4" /> {t('locations.manage')}</Link>
               </Button>
-              <Button asChild>
-                <Link href="/stock/items?new=1"><PackagePlus className="h-4 w-4" /> {t('items.new')}</Link>
-              </Button>
             </>
           )}
+          <Button asChild>
+            <Link href="/stock/items?new=1"><PackagePlus className="h-4 w-4" /> {t('items.new')}</Link>
+          </Button>
         </div>
       </div>
 

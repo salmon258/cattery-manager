@@ -35,7 +35,11 @@ async function fetchLocations(): Promise<StockLocation[]> {
   return (await r.json()).locations;
 }
 
-export function StockItemsClient() {
+interface StockItemsClientProps {
+  isAdmin: boolean;
+}
+
+export function StockItemsClient({ isAdmin }: StockItemsClientProps) {
   const t = useTranslations('stock');
   const tc = useTranslations('common');
   const qc = useQueryClient();
@@ -120,20 +124,22 @@ export function StockItemsClient() {
                   </div>
                 </div>
               </Link>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => setEditing(item)}>
-                  <Edit className="h-4 w-4" /> {tc('edit')}
-                </Button>
-                {item.is_active && (
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => { if (confirm(t('items.deactivateConfirm'))) del.mutate(item.id); }}
-                  >
-                    <Trash2 className="h-4 w-4" />
+              {isAdmin && (
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setEditing(item)}>
+                    <Edit className="h-4 w-4" /> {tc('edit')}
                   </Button>
-                )}
-              </div>
+                  {item.is_active && (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => { if (confirm(t('items.deactivateConfirm'))) del.mutate(item.id); }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}
