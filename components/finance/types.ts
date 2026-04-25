@@ -105,3 +105,89 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
 ];
 
 export const PAYROLL_STATUSES: PayrollStatus[] = ['pending', 'paid', 'cancelled'];
+
+// ─── Reimbursements ──────────────────────────────────────────────────────────
+export type ReimbursementStatus =
+  | 'pending'
+  | 'approved'
+  | 'rejected'
+  | 'paid'
+  | 'cancelled';
+
+export const REIMBURSEMENT_STATUSES: ReimbursementStatus[] = [
+  'pending',
+  'approved',
+  'rejected',
+  'paid',
+  'cancelled'
+];
+
+export interface ReimbursementCategory {
+  id: string;
+  name: string;
+  slug: string | null;
+  icon: string | null;
+  finance_category_id: string | null;
+  sort_order: number;
+  is_active: boolean;
+  is_system: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ReimbursementRequest {
+  id: string;
+  profile_id: string;
+  category_id: string | null;
+  amount: number | string;
+  currency: string;
+  expense_date: string;
+  description: string | null;
+  receipt_url: string | null;
+  receipt_path: string | null;
+  status: ReimbursementStatus;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  review_notes: string | null;
+  payment_date: string | null;
+  payment_method: PaymentMethod | null;
+  payment_reference: string | null;
+  payment_proof_url: string | null;
+  payment_proof_path: string | null;
+  financial_txn_id: string | null;
+  created_at: string;
+  updated_at: string;
+  profile?: FinanceProfileLite | null;
+  category?: Pick<ReimbursementCategory, 'id' | 'name' | 'slug' | 'icon'> | null;
+}
+
+// ─── Ad-hoc payments ─────────────────────────────────────────────────────────
+export type AdhocPaymentStatus = 'pending' | 'paid' | 'cancelled';
+
+export const ADHOC_PAYMENT_STATUSES: AdhocPaymentStatus[] = [
+  'pending',
+  'paid',
+  'cancelled'
+];
+
+export interface AdhocPayment {
+  id: string;
+  profile_id: string;
+  kind: string;
+  finance_category_id: string | null;
+  amount: number | string;
+  currency: string;
+  payment_date: string;
+  description: string | null;
+  status: AdhocPaymentStatus;
+  payment_method: PaymentMethod | null;
+  payment_reference: string | null;
+  payment_proof_url: string | null;
+  payment_proof_path: string | null;
+  financial_txn_id: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+  profile?: FinanceProfileLite | null;
+  finance_category?: Pick<TransactionCategory, 'id' | 'name' | 'slug'> | null;
+}
