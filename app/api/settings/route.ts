@@ -11,8 +11,7 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
 
   const supabase = createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('system_settings')
     .select('*')
     .eq('id', 1)
@@ -43,8 +42,7 @@ export async function PATCH(req: Request) {
   };
 
   const supabase = createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: settings, error } = await (supabase as any)
+  const { data: settings, error } = await supabase
     .from('system_settings')
     .update(data)
     .eq('id', 1)

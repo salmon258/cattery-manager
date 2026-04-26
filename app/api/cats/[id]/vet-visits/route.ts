@@ -16,8 +16,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   const until = url.searchParams.get('until');
 
   const supabase = createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let query = (supabase as any)
+  let query = supabase
     .from('vet_visits')
     .select(`
       *,
@@ -67,8 +66,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   const isAdmin = user.profile.role === 'admin';
 
   // 1. Insert vet_visit
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: visit, error: visitErr } = await (supabase as any)
+  const { data: visit, error: visitErr } = await supabase
     .from('vet_visits')
     .insert({
       ...visitFields,
@@ -95,18 +93,19 @@ export async function POST(req: Request, { params }: { params: { id: string } })
           { status: 400 }
         );
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: medRow, error: medCreateErr } = await (supabase as any)
+      // schedule_enabled=true is gated by the zod refine on vetVisitSchema,
+      // which guarantees schedule_start_date and schedule_time_slots are set.
+      const { data: medRow, error: medCreateErr } = await supabase
         .from('medications')
         .insert({
           cat_id:        params.id,
           medicine_name: m.medicine_name,
           dose,
           route:         m.schedule_route ?? 'oral',
-          start_date:    m.schedule_start_date,
+          start_date:    m.schedule_start_date!,
           end_date:      m.schedule_end_date ?? null,
           interval_days: m.schedule_interval_days ?? 1,
-          time_slots:    m.schedule_time_slots,
+          time_slots:    m.schedule_time_slots!,
           notes:         m.notes ?? null,
           is_active:     true,
           created_by:    user.profile.id
@@ -117,8 +116,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       generated_medication_id = medRow.id;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: insErr } = await (supabase as any)
+    const { error: insErr } = await supabase
       .from('vet_visit_medicines')
       .insert({
         vet_visit_id:           visit.id,
@@ -140,8 +138,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
   // 3. Ticket integration: vet_referral event
   if (visitFields.health_ticket_id) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase as any)
+    await supabase
       .from('health_ticket_events')
       .insert({
         ticket_id:           visitFields.health_ticket_id,

@@ -68,8 +68,7 @@ export async function GET() {
       .gte('recorded_at', previousStartIso)
       .lt('recorded_at', startIso)
       .order('recorded_at', { ascending: false }),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any)
+    supabase
       .from('eating_logs')
       .select(`
         id, cat_id, meal_time, feeding_method,
@@ -90,8 +89,7 @@ export async function GET() {
       .gte('due_at', startIso)
       .lte('due_at', endIso)
       .order('due_at', { ascending: true }),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any)
+    supabase
       .from('health_tickets')
       .select('cat_id')
       .in('status', ['open', 'in_progress'])
@@ -141,8 +139,7 @@ export async function GET() {
   };
 
   const mealsByCat = new Map<string, MealSummary[]>();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for (const m of (mealsRes.data ?? []) as any[]) {
+  for (const m of mealsRes.data ?? []) {
     let totalG = 0;
     let totalK = 0;
     let worst: EatenRatio = 'all';
@@ -183,8 +180,7 @@ export async function GET() {
     medicine_name: string;
   };
   const medTasksByCat = new Map<string, MedTask[]>();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for (const t of (medsRes.data ?? []) as any[]) {
+  for (const t of medsRes.data ?? []) {
     const catId = t.medication?.cat_id;
     if (!catId) continue;
     const task: MedTask = {
@@ -200,14 +196,14 @@ export async function GET() {
   }
 
   const ticketsByCat = new Map<string, number>();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for (const tk of (ticketsRes.data ?? []) as any[]) {
+  for (const tk of ticketsRes.data ?? []) {
+    if (!tk.cat_id) continue;
     ticketsByCat.set(tk.cat_id, (ticketsByCat.get(tk.cat_id) ?? 0) + 1);
   }
 
   // ─── Assemble per-cat rows ────────────────────────────────────────────────
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function buildRow(c: any) {
+  type CatRow = NonNullable<typeof catsRes.data>[number];
+  function buildRow(c: CatRow) {
     return {
       id: c.id,
       name: c.name,
@@ -225,12 +221,10 @@ export async function GET() {
   const sitterGroups = sitters.map((s) => ({
     id:        s.id,
     full_name: s.full_name,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    cats: ((catsRes.data ?? []) as any[]).filter((c) => c.assignee_id === s.id).map(buildRow)
+    cats: (catsRes.data ?? []).filter((c) => c.assignee_id === s.id).map(buildRow)
   }));
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const unassigned = ((catsRes.data ?? []) as any[])
+  const unassigned = (catsRes.data ?? [])
     .filter((c) => !c.assignee_id)
     .map(buildRow);
 

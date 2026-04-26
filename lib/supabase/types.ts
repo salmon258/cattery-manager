@@ -75,6 +75,115 @@ export type Database = {
           },
         ]
       }
+      adhoc_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string | null
+          finance_category_id: string | null
+          financial_txn_id: string | null
+          id: string
+          kind: string
+          payment_date: string
+          payment_method:
+            | Database["public"]["Enums"]["financial_payment_method"]
+            | null
+          payment_proof_path: string | null
+          payment_proof_url: string | null
+          payment_reference: string | null
+          profile_id: string
+          status: Database["public"]["Enums"]["adhoc_payment_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          currency: string
+          description?: string | null
+          finance_category_id?: string | null
+          financial_txn_id?: string | null
+          id?: string
+          kind: string
+          payment_date?: string
+          payment_method?:
+            | Database["public"]["Enums"]["financial_payment_method"]
+            | null
+          payment_proof_path?: string | null
+          payment_proof_url?: string | null
+          payment_reference?: string | null
+          profile_id: string
+          status?: Database["public"]["Enums"]["adhoc_payment_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          finance_category_id?: string | null
+          financial_txn_id?: string | null
+          id?: string
+          kind?: string
+          payment_date?: string
+          payment_method?:
+            | Database["public"]["Enums"]["financial_payment_method"]
+            | null
+          payment_proof_path?: string | null
+          payment_proof_url?: string | null
+          payment_reference?: string | null
+          profile_id?: string
+          status?: Database["public"]["Enums"]["adhoc_payment_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adhoc_payments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "adhoc_payments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adhoc_payments_finance_category_id_fkey"
+            columns: ["finance_category_id"]
+            isOneToOne: false
+            referencedRelation: "transaction_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adhoc_payments_financial_txn_id_fkey"
+            columns: ["financial_txn_id"]
+            isOneToOne: false
+            referencedRelation: "financial_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "adhoc_payments_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "adhoc_payments_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assignee_change_log: {
         Row: {
           cat_id: string
@@ -578,6 +687,97 @@ export type Database = {
           },
         ]
       }
+      financial_transactions: {
+        Row: {
+          amount: number
+          auto_generated: boolean
+          category_id: string | null
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          payment_method:
+            | Database["public"]["Enums"]["financial_payment_method"]
+            | null
+          receipt_url: string | null
+          recorded_by: string | null
+          reference_number: string | null
+          related_entity_id: string | null
+          related_entity_type:
+            | Database["public"]["Enums"]["financial_related_entity_type"]
+            | null
+          transaction_date: string
+          type: Database["public"]["Enums"]["financial_transaction_type"]
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          auto_generated?: boolean
+          category_id?: string | null
+          created_at?: string
+          currency: string
+          description?: string | null
+          id?: string
+          payment_method?:
+            | Database["public"]["Enums"]["financial_payment_method"]
+            | null
+          receipt_url?: string | null
+          recorded_by?: string | null
+          reference_number?: string | null
+          related_entity_id?: string | null
+          related_entity_type?:
+            | Database["public"]["Enums"]["financial_related_entity_type"]
+            | null
+          transaction_date?: string
+          type: Database["public"]["Enums"]["financial_transaction_type"]
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          auto_generated?: boolean
+          category_id?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          payment_method?:
+            | Database["public"]["Enums"]["financial_payment_method"]
+            | null
+          receipt_url?: string | null
+          recorded_by?: string | null
+          reference_number?: string | null
+          related_entity_id?: string | null
+          related_entity_type?:
+            | Database["public"]["Enums"]["financial_related_entity_type"]
+            | null
+          transaction_date?: string
+          type?: Database["public"]["Enums"]["financial_transaction_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_transactions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "transaction_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       food_items: {
         Row: {
           brand: string | null
@@ -896,6 +1096,7 @@ export type Database = {
           file_type: Database["public"]["Enums"]["lab_result_file_type"]
           file_url: string
           id: string
+          kind: Database["public"]["Enums"]["lab_result_kind"]
           notes: string | null
           storage_path: string
           uploaded_at: string
@@ -908,6 +1109,7 @@ export type Database = {
           file_type: Database["public"]["Enums"]["lab_result_file_type"]
           file_url: string
           id?: string
+          kind?: Database["public"]["Enums"]["lab_result_kind"]
           notes?: string | null
           storage_path: string
           uploaded_at?: string
@@ -920,6 +1122,7 @@ export type Database = {
           file_type?: Database["public"]["Enums"]["lab_result_file_type"]
           file_url?: string
           id?: string
+          kind?: Database["public"]["Enums"]["lab_result_kind"]
           notes?: string | null
           storage_path?: string
           uploaded_at?: string
@@ -1150,7 +1353,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           dose: string
-          end_date: string
+          end_date: string | null
           id: string
           interval_days: number
           is_active: boolean
@@ -1166,7 +1369,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           dose: string
-          end_date: string
+          end_date?: string | null
           id?: string
           interval_days?: number
           is_active?: boolean
@@ -1182,7 +1385,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           dose?: string
-          end_date?: string
+          end_date?: string | null
           id?: string
           interval_days?: number
           is_active?: boolean
@@ -1211,6 +1414,117 @@ export type Database = {
           {
             foreignKeyName: "medications_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payroll_entries: {
+        Row: {
+          bonus_amount: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          deduction_amount: number
+          financial_txn_id: string | null
+          gross_amount: number
+          id: string
+          net_amount: number
+          notes: string | null
+          payment_date: string | null
+          payment_method:
+            | Database["public"]["Enums"]["financial_payment_method"]
+            | null
+          period_end: string
+          period_start: string
+          profile_id: string
+          reference_number: string | null
+          status: Database["public"]["Enums"]["payroll_status"]
+          transfer_proof_path: string | null
+          transfer_proof_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          bonus_amount?: number
+          created_at?: string
+          created_by?: string | null
+          currency: string
+          deduction_amount?: number
+          financial_txn_id?: string | null
+          gross_amount: number
+          id?: string
+          net_amount: number
+          notes?: string | null
+          payment_date?: string | null
+          payment_method?:
+            | Database["public"]["Enums"]["financial_payment_method"]
+            | null
+          period_end: string
+          period_start: string
+          profile_id: string
+          reference_number?: string | null
+          status?: Database["public"]["Enums"]["payroll_status"]
+          transfer_proof_path?: string | null
+          transfer_proof_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bonus_amount?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          deduction_amount?: number
+          financial_txn_id?: string | null
+          gross_amount?: number
+          id?: string
+          net_amount?: number
+          notes?: string | null
+          payment_date?: string | null
+          payment_method?:
+            | Database["public"]["Enums"]["financial_payment_method"]
+            | null
+          period_end?: string
+          period_start?: string
+          profile_id?: string
+          reference_number?: string | null
+          status?: Database["public"]["Enums"]["payroll_status"]
+          transfer_proof_path?: string | null
+          transfer_proof_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_entries_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "payroll_entries_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_entries_financial_txn_id_fkey"
+            columns: ["financial_txn_id"]
+            isOneToOne: false
+            referencedRelation: "financial_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_entries_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "payroll_entries_profile_id_fkey"
+            columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -1272,6 +1586,71 @@ export type Database = {
           {
             foreignKeyName: "preventive_treatments_recorded_by_fkey"
             columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profile_salaries: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          currency: string
+          effective_from: string
+          id: string
+          monthly_salary: number
+          notes: string | null
+          profile_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          currency: string
+          effective_from?: string
+          id?: string
+          monthly_salary: number
+          notes?: string | null
+          profile_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          effective_from?: string
+          id?: string
+          monthly_salary?: number
+          notes?: string | null
+          profile_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_salaries_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "profile_salaries_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_salaries_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "profile_salaries_profile_id_fkey"
+            columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -1346,6 +1725,191 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      reimbursement_categories: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          finance_category_id: string | null
+          icon: string | null
+          id: string
+          is_active: boolean
+          is_system: boolean
+          name: string
+          slug: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          finance_category_id?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name: string
+          slug?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          finance_category_id?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name?: string
+          slug?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reimbursement_categories_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "reimbursement_categories_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reimbursement_categories_finance_category_id_fkey"
+            columns: ["finance_category_id"]
+            isOneToOne: false
+            referencedRelation: "transaction_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reimbursement_requests: {
+        Row: {
+          amount: number
+          category_id: string | null
+          created_at: string
+          currency: string
+          description: string | null
+          expense_date: string
+          financial_txn_id: string | null
+          id: string
+          payment_date: string | null
+          payment_method:
+            | Database["public"]["Enums"]["financial_payment_method"]
+            | null
+          payment_proof_path: string | null
+          payment_proof_url: string | null
+          payment_reference: string | null
+          profile_id: string
+          receipt_path: string | null
+          receipt_url: string | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["reimbursement_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          category_id?: string | null
+          created_at?: string
+          currency: string
+          description?: string | null
+          expense_date: string
+          financial_txn_id?: string | null
+          id?: string
+          payment_date?: string | null
+          payment_method?:
+            | Database["public"]["Enums"]["financial_payment_method"]
+            | null
+          payment_proof_path?: string | null
+          payment_proof_url?: string | null
+          payment_reference?: string | null
+          profile_id: string
+          receipt_path?: string | null
+          receipt_url?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["reimbursement_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category_id?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          expense_date?: string
+          financial_txn_id?: string | null
+          id?: string
+          payment_date?: string | null
+          payment_method?:
+            | Database["public"]["Enums"]["financial_payment_method"]
+            | null
+          payment_proof_path?: string | null
+          payment_proof_url?: string | null
+          payment_reference?: string | null
+          profile_id?: string
+          receipt_path?: string | null
+          receipt_url?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["reimbursement_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reimbursement_requests_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "reimbursement_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reimbursement_requests_financial_txn_id_fkey"
+            columns: ["financial_txn_id"]
+            isOneToOne: false
+            referencedRelation: "financial_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reimbursement_requests_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "reimbursement_requests_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reimbursement_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "reimbursement_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       room_movements: {
         Row: {
@@ -1464,10 +2028,308 @@ export type Database = {
           },
         ]
       }
+      stock_batches: {
+        Row: {
+          batch_ref: string | null
+          cost_per_unit: number | null
+          created_at: string
+          currency: string | null
+          expiry_date: string | null
+          id: string
+          location_id: string | null
+          notes: string | null
+          qty_initial: number
+          qty_remaining: number
+          received_at: string
+          received_by: string | null
+          stock_item_id: string
+          updated_at: string
+        }
+        Insert: {
+          batch_ref?: string | null
+          cost_per_unit?: number | null
+          created_at?: string
+          currency?: string | null
+          expiry_date?: string | null
+          id?: string
+          location_id?: string | null
+          notes?: string | null
+          qty_initial: number
+          qty_remaining: number
+          received_at?: string
+          received_by?: string | null
+          stock_item_id: string
+          updated_at?: string
+        }
+        Update: {
+          batch_ref?: string | null
+          cost_per_unit?: number | null
+          created_at?: string
+          currency?: string | null
+          expiry_date?: string | null
+          id?: string
+          location_id?: string | null
+          notes?: string | null
+          qty_initial?: number
+          qty_remaining?: number
+          received_at?: string
+          received_by?: string | null
+          stock_item_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_batches_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "stock_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_batches_received_by_fkey"
+            columns: ["received_by"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "stock_batches_received_by_fkey"
+            columns: ["received_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_batches_stock_item_id_fkey"
+            columns: ["stock_item_id"]
+            isOneToOne: false
+            referencedRelation: "stock_item_status"
+            referencedColumns: ["stock_item_id"]
+          },
+          {
+            foreignKeyName: "stock_batches_stock_item_id_fkey"
+            columns: ["stock_item_id"]
+            isOneToOne: false
+            referencedRelation: "stock_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_items: {
+        Row: {
+          brand: string | null
+          category: Database["public"]["Enums"]["stock_category"]
+          created_at: string
+          created_by: string | null
+          default_location_id: string | null
+          id: string
+          is_active: boolean
+          min_threshold: number
+          name: string
+          notes: string | null
+          photo_url: string | null
+          unit: Database["public"]["Enums"]["stock_unit"]
+          updated_at: string
+        }
+        Insert: {
+          brand?: string | null
+          category?: Database["public"]["Enums"]["stock_category"]
+          created_at?: string
+          created_by?: string | null
+          default_location_id?: string | null
+          id?: string
+          is_active?: boolean
+          min_threshold?: number
+          name: string
+          notes?: string | null
+          photo_url?: string | null
+          unit?: Database["public"]["Enums"]["stock_unit"]
+          updated_at?: string
+        }
+        Update: {
+          brand?: string | null
+          category?: Database["public"]["Enums"]["stock_category"]
+          created_at?: string
+          created_by?: string | null
+          default_location_id?: string | null
+          id?: string
+          is_active?: boolean
+          min_threshold?: number
+          name?: string
+          notes?: string | null
+          photo_url?: string | null
+          unit?: Database["public"]["Enums"]["stock_unit"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_items_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "stock_items_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_items_default_location_id_fkey"
+            columns: ["default_location_id"]
+            isOneToOne: false
+            referencedRelation: "stock_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_locations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          is_cold_storage: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_cold_storage?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_cold_storage?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_locations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "stock_locations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_movements: {
+        Row: {
+          batch_id: string
+          created_at: string
+          for_cat_id: string | null
+          from_location_id: string | null
+          id: string
+          moved_at: string
+          moved_by: string | null
+          qty_delta: number
+          reason: string | null
+          to_location_id: string | null
+          type: Database["public"]["Enums"]["stock_movement_type"]
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string
+          for_cat_id?: string | null
+          from_location_id?: string | null
+          id?: string
+          moved_at?: string
+          moved_by?: string | null
+          qty_delta: number
+          reason?: string | null
+          to_location_id?: string | null
+          type: Database["public"]["Enums"]["stock_movement_type"]
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          for_cat_id?: string | null
+          from_location_id?: string | null
+          id?: string
+          moved_at?: string
+          moved_by?: string | null
+          qty_delta?: number
+          reason?: string | null
+          to_location_id?: string | null
+          type?: Database["public"]["Enums"]["stock_movement_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "stock_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "stock_expiring_batches"
+            referencedColumns: ["batch_id"]
+          },
+          {
+            foreignKeyName: "stock_movements_for_cat_id_fkey"
+            columns: ["for_cat_id"]
+            isOneToOne: false
+            referencedRelation: "cats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_from_location_id_fkey"
+            columns: ["from_location_id"]
+            isOneToOne: false
+            referencedRelation: "stock_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_moved_by_fkey"
+            columns: ["moved_by"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "stock_movements_moved_by_fkey"
+            columns: ["moved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_to_location_id_fkey"
+            columns: ["to_location_id"]
+            isOneToOne: false
+            referencedRelation: "stock_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       system_settings: {
         Row: {
           cattery_logo_url: string | null
           cattery_name: string
+          cattery_timezone: string
           default_currency: string
           gestation_days: number
           id: number
@@ -1482,6 +2344,7 @@ export type Database = {
         Insert: {
           cattery_logo_url?: string | null
           cattery_name?: string
+          cattery_timezone?: string
           default_currency?: string
           gestation_days?: number
           id?: number
@@ -1496,6 +2359,7 @@ export type Database = {
         Update: {
           cattery_logo_url?: string | null
           cattery_name?: string
+          cattery_timezone?: string
           default_currency?: string
           gestation_days?: number
           id?: number
@@ -1518,6 +2382,63 @@ export type Database = {
           {
             foreignKeyName: "system_settings_updated_by_fkey"
             columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transaction_categories: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          icon: string | null
+          id: string
+          is_active: boolean
+          is_system: boolean
+          name: string
+          slug: string | null
+          sort_order: number
+          type: Database["public"]["Enums"]["financial_transaction_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name: string
+          slug?: string | null
+          sort_order?: number
+          type: Database["public"]["Enums"]["financial_transaction_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name?: string
+          slug?: string | null
+          sort_order?: number
+          type?: Database["public"]["Enums"]["financial_transaction_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaction_categories_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "transaction_categories_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -1597,9 +2518,16 @@ export type Database = {
           dose: string | null
           duration: string | null
           frequency: string | null
+          generated_medication_id: string | null
           id: string
           medicine_name: string
           notes: string | null
+          schedule_enabled: boolean
+          schedule_end_date: string | null
+          schedule_interval_days: number | null
+          schedule_route: Database["public"]["Enums"]["med_route"] | null
+          schedule_start_date: string | null
+          schedule_time_slots: string[] | null
           vet_visit_id: string
         }
         Insert: {
@@ -1607,9 +2535,16 @@ export type Database = {
           dose?: string | null
           duration?: string | null
           frequency?: string | null
+          generated_medication_id?: string | null
           id?: string
           medicine_name: string
           notes?: string | null
+          schedule_enabled?: boolean
+          schedule_end_date?: string | null
+          schedule_interval_days?: number | null
+          schedule_route?: Database["public"]["Enums"]["med_route"] | null
+          schedule_start_date?: string | null
+          schedule_time_slots?: string[] | null
           vet_visit_id: string
         }
         Update: {
@@ -1617,12 +2552,26 @@ export type Database = {
           dose?: string | null
           duration?: string | null
           frequency?: string | null
+          generated_medication_id?: string | null
           id?: string
           medicine_name?: string
           notes?: string | null
+          schedule_enabled?: boolean
+          schedule_end_date?: string | null
+          schedule_interval_days?: number | null
+          schedule_route?: Database["public"]["Enums"]["med_route"] | null
+          schedule_start_date?: string | null
+          schedule_time_slots?: string[] | null
           vet_visit_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "vet_visit_medicines_generated_medication_fkey"
+            columns: ["generated_medication_id"]
+            isOneToOne: false
+            referencedRelation: "medications"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "vet_visit_medicines_visit_fkey"
             columns: ["vet_visit_id"]
@@ -1819,8 +2768,132 @@ export type Database = {
           },
         ]
       }
+      finance_monthly_summary: {
+        Row: {
+          category_id: string | null
+          category_name: string | null
+          category_slug: string | null
+          currency: string | null
+          period_month: string | null
+          total_amount: number | null
+          txn_count: number | null
+          type: Database["public"]["Enums"]["financial_transaction_type"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_transactions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "transaction_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      finance_payroll_status: {
+        Row: {
+          bonus_amount: number | null
+          created_at: string | null
+          currency: string | null
+          deduction_amount: number | null
+          financial_txn_id: string | null
+          gross_amount: number | null
+          id: string | null
+          net_amount: number | null
+          payment_date: string | null
+          payment_method:
+            | Database["public"]["Enums"]["financial_payment_method"]
+            | null
+          period_end: string | null
+          period_start: string | null
+          profile_id: string | null
+          profile_name: string | null
+          status: Database["public"]["Enums"]["payroll_status"] | null
+          transfer_proof_url: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_entries_financial_txn_id_fkey"
+            columns: ["financial_txn_id"]
+            isOneToOne: false
+            referencedRelation: "financial_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_entries_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "payroll_entries_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_expiring_batches: {
+        Row: {
+          batch_id: string | null
+          category: Database["public"]["Enums"]["stock_category"] | null
+          days_to_expiry: number | null
+          expiry_date: string | null
+          item_name: string | null
+          location_id: string | null
+          location_name: string | null
+          qty_remaining: number | null
+          stock_item_id: string | null
+          unit: Database["public"]["Enums"]["stock_unit"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_batches_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "stock_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_batches_stock_item_id_fkey"
+            columns: ["stock_item_id"]
+            isOneToOne: false
+            referencedRelation: "stock_item_status"
+            referencedColumns: ["stock_item_id"]
+          },
+          {
+            foreignKeyName: "stock_batches_stock_item_id_fkey"
+            columns: ["stock_item_id"]
+            isOneToOne: false
+            referencedRelation: "stock_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_item_status: {
+        Row: {
+          active_batches: number | null
+          brand: string | null
+          category: Database["public"]["Enums"]["stock_category"] | null
+          earliest_expiry: string | null
+          is_active: boolean | null
+          is_low_stock: boolean | null
+          min_threshold: number | null
+          name: string | null
+          qty_on_hand: number | null
+          stock_item_id: string | null
+          unit: Database["public"]["Enums"]["stock_unit"] | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      cat_derived_life_stage_multiplier: {
+        Args: { p_cat_id: string }
+        Returns: number
+      }
+      cat_life_stage: { Args: { p_cat_id: string }; Returns: string }
       is_active_user: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
       move_cat: {
@@ -1835,6 +2908,7 @@ export type Database = {
           date_of_birth: string
           gender: Database["public"]["Enums"]["cat_gender"]
           id: string
+          is_spayed: boolean
           microchip_number: string | null
           name: string
           notes: string | null
@@ -1852,10 +2926,120 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      cat_derived_life_stage_multiplier: { Args: { p_cat_id: string }; Returns: number }
       recommended_daily_kcal: { Args: { p_cat_id: string }; Returns: number }
+      stock_adjust: {
+        Args: { p_batch_id: string; p_qty_delta: number; p_reason?: string }
+        Returns: {
+          batch_id: string
+          created_at: string
+          for_cat_id: string | null
+          from_location_id: string | null
+          id: string
+          moved_at: string
+          moved_by: string | null
+          qty_delta: number
+          reason: string | null
+          to_location_id: string | null
+          type: Database["public"]["Enums"]["stock_movement_type"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "stock_movements"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      stock_checkout: {
+        Args: {
+          p_batch_id: string
+          p_for_cat_id?: string
+          p_qty: number
+          p_reason?: string
+        }
+        Returns: {
+          batch_id: string
+          created_at: string
+          for_cat_id: string | null
+          from_location_id: string | null
+          id: string
+          moved_at: string
+          moved_by: string | null
+          qty_delta: number
+          reason: string | null
+          to_location_id: string | null
+          type: Database["public"]["Enums"]["stock_movement_type"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "stock_movements"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      stock_in: {
+        Args: {
+          p_batch_ref?: string
+          p_cost_per_unit?: number
+          p_currency?: string
+          p_expiry_date?: string
+          p_location_id: string
+          p_notes?: string
+          p_qty: number
+          p_received_at?: string
+          p_stock_item_id: string
+        }
+        Returns: {
+          batch_ref: string | null
+          cost_per_unit: number | null
+          created_at: string
+          currency: string | null
+          expiry_date: string | null
+          id: string
+          location_id: string | null
+          notes: string | null
+          qty_initial: number
+          qty_remaining: number
+          received_at: string
+          received_by: string | null
+          stock_item_id: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "stock_batches"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      stock_transfer: {
+        Args: {
+          p_batch_id: string
+          p_reason?: string
+          p_to_location_id: string
+        }
+        Returns: {
+          batch_id: string
+          created_at: string
+          for_cat_id: string | null
+          from_location_id: string | null
+          id: string
+          moved_at: string
+          moved_by: string | null
+          qty_delta: number
+          reason: string | null
+          to_location_id: string | null
+          type: Database["public"]["Enums"]["stock_movement_type"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "stock_movements"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
+      adhoc_payment_status: "pending" | "paid" | "cancelled"
       cat_gender: "male" | "female"
       cat_status: "active" | "retired" | "deceased" | "sold"
       doctor_specialisation:
@@ -1868,10 +3052,26 @@ export type Database = {
         | "other"
       eaten_ratio: "all" | "most" | "half" | "little" | "none"
       feeding_method: "self" | "assisted" | "force_fed"
+      financial_payment_method:
+        | "cash"
+        | "bank_transfer"
+        | "card"
+        | "e_wallet"
+        | "other"
+      financial_related_entity_type:
+        | "stock_batch"
+        | "stock_movement"
+        | "vet_visit"
+        | "adoption"
+        | "payroll"
+        | "cat"
+        | "other"
+      financial_transaction_type: "income" | "expense"
       food_type: "wet" | "dry" | "raw" | "treat" | "supplement" | "other"
       food_unit: "g" | "ml" | "sachet" | "piece"
       heat_intensity: "mild" | "moderate" | "strong"
       lab_result_file_type: "pdf" | "image"
+      lab_result_kind: "lab_result" | "receipt"
       lang_code: "en" | "id"
       mating_method: "natural" | "ai"
       mating_status:
@@ -1881,7 +3081,14 @@ export type Database = {
         | "delivered"
         | "failed"
       med_route: "oral" | "topical" | "injection" | "other"
+      payroll_status: "pending" | "paid" | "cancelled"
       preventive_treatment_type: "deworming" | "flea" | "combined"
+      reimbursement_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "paid"
+        | "cancelled"
       room_type:
         | "breeding"
         | "kitten"
@@ -1889,6 +3096,34 @@ export type Database = {
         | "general"
         | "isolation"
         | "other"
+      stock_category:
+        | "food"
+        | "human_food"
+        | "medicine"
+        | "supplement"
+        | "litter"
+        | "cleaning"
+        | "grooming"
+        | "equipment"
+        | "other"
+      stock_movement_type:
+        | "stock_in"
+        | "transfer"
+        | "checkout"
+        | "consume"
+        | "adjust"
+        | "discard"
+      stock_unit:
+        | "pcs"
+        | "box"
+        | "bottle"
+        | "pack"
+        | "sachet"
+        | "bag"
+        | "kg"
+        | "g"
+        | "l"
+        | "ml"
       theme_pref: "light" | "dark" | "system"
       ticket_event_type:
         | "comment"
@@ -2036,6 +3271,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      adhoc_payment_status: ["pending", "paid", "cancelled"],
       cat_gender: ["male", "female"],
       cat_status: ["active", "retired", "deceased", "sold"],
       doctor_specialisation: [
@@ -2049,10 +3285,28 @@ export const Constants = {
       ],
       eaten_ratio: ["all", "most", "half", "little", "none"],
       feeding_method: ["self", "assisted", "force_fed"],
+      financial_payment_method: [
+        "cash",
+        "bank_transfer",
+        "card",
+        "e_wallet",
+        "other",
+      ],
+      financial_related_entity_type: [
+        "stock_batch",
+        "stock_movement",
+        "vet_visit",
+        "adoption",
+        "payroll",
+        "cat",
+        "other",
+      ],
+      financial_transaction_type: ["income", "expense"],
       food_type: ["wet", "dry", "raw", "treat", "supplement", "other"],
       food_unit: ["g", "ml", "sachet", "piece"],
       heat_intensity: ["mild", "moderate", "strong"],
       lab_result_file_type: ["pdf", "image"],
+      lab_result_kind: ["lab_result", "receipt"],
       lang_code: ["en", "id"],
       mating_method: ["natural", "ai"],
       mating_status: [
@@ -2063,7 +3317,15 @@ export const Constants = {
         "failed",
       ],
       med_route: ["oral", "topical", "injection", "other"],
+      payroll_status: ["pending", "paid", "cancelled"],
       preventive_treatment_type: ["deworming", "flea", "combined"],
+      reimbursement_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "paid",
+        "cancelled",
+      ],
       room_type: [
         "breeding",
         "kitten",
@@ -2071,6 +3333,37 @@ export const Constants = {
         "general",
         "isolation",
         "other",
+      ],
+      stock_category: [
+        "food",
+        "human_food",
+        "medicine",
+        "supplement",
+        "litter",
+        "cleaning",
+        "grooming",
+        "equipment",
+        "other",
+      ],
+      stock_movement_type: [
+        "stock_in",
+        "transfer",
+        "checkout",
+        "consume",
+        "adjust",
+        "discard",
+      ],
+      stock_unit: [
+        "pcs",
+        "box",
+        "bottle",
+        "pack",
+        "sachet",
+        "bag",
+        "kg",
+        "g",
+        "l",
+        "ml",
       ],
       theme_pref: ["light", "dark", "system"],
       ticket_event_type: [

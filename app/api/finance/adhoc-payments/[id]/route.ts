@@ -11,8 +11,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   const { data, error } = await supabase
     .from('adhoc_payments')
     .select(SELECT_COLS)
@@ -38,8 +37,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   const { data, error } = await supabase
     .from('adhoc_payments')
     .update(parsed.data)
@@ -56,8 +54,7 @@ export async function DELETE(_: Request, { params }: { params: { id: string } })
   if (user.profile.role !== 'admin')
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   const { data: existing } = await supabase
     .from('adhoc_payments')
     .select('financial_txn_id, payment_proof_path')

@@ -17,8 +17,7 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const profileId = url.searchParams.get('profile_id');
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   let q = supabase
     .from('profile_salaries')
     .select('*, profile:profiles!profile_salaries_profile_id_fkey(id, full_name, role, is_active)')
@@ -51,8 +50,7 @@ export async function POST(request: Request) {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   const { data, error } = await supabase
     .from('profile_salaries')
     .insert({ ...parsed.data, created_by: user.authId })

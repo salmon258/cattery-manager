@@ -18,12 +18,11 @@ export async function POST(request: Request) {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   const { data, error } = await supabase.rpc('stock_transfer', {
     p_batch_id: parsed.data.batch_id,
     p_to_location_id: parsed.data.to_location_id,
-    p_reason: parsed.data.reason ?? null
+    p_reason: parsed.data.reason ?? undefined
   });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ movement: data }, { status: 201 });

@@ -47,8 +47,7 @@ export async function AdminDashboardData() {
     supabase.from('cats').select('id', { count: 'exact', head: true }).eq('status', 'active'),
     supabase.from('rooms').select('id', { count: 'exact', head: true }).eq('is_active', true),
     supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('is_active', true),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any)
+    supabase
       .from('health_tickets')
       .select('severity')
       .in('status', ['open', 'in_progress']),
@@ -66,30 +65,26 @@ export async function AdminDashboardData() {
       .lte('next_due_date', in30Days)
       .order('next_due_date', { ascending: true })
       .limit(10),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any)
+    supabase
       .from('vet_visits')
       .select('id, follow_up_date, visit_type, cat:cats(id, name)')
       .gte('follow_up_date', todayStr)
       .lte('follow_up_date', in14Days)
       .order('follow_up_date', { ascending: true })
       .limit(10),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any)
+    supabase
       .from('health_tickets')
       .select('id, title, created_at, severity, cat:cats(id, name)')
       .order('created_at', { ascending: false })
       .limit(8),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any)
+    supabase
       .from('stock_item_status')
       .select('stock_item_id, name, qty_on_hand, min_threshold, unit')
       .eq('is_active', true)
       .eq('is_low_stock', true)
       .order('name', { ascending: true })
       .limit(5),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any)
+    supabase
       .from('stock_expiring_batches')
       .select('batch_id, stock_item_id, item_name, qty_remaining, expiry_date, days_to_expiry, unit')
       .lte('days_to_expiry', 30)
@@ -102,24 +97,17 @@ export async function AdminDashboardData() {
   const usersCount = usersAgg.count ?? 0;
 
   const sevCounts = { low: 0, medium: 0, high: 0, critical: 0 };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for (const tk of (openTicketsBySeverity.data ?? []) as any[]) {
+  for (const tk of openTicketsBySeverity.data ?? []) {
     if (tk.severity in sevCounts) sevCounts[tk.severity as keyof typeof sevCounts]++;
   }
   const totalOpen = sevCounts.low + sevCounts.medium + sevCounts.high + sevCounts.critical;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const vacc = (upcomingVacc.data ?? []) as any[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const prev = (upcomingPrev.data ?? []) as any[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const followups = (upcomingFollowups.data ?? []) as any[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const recentTickets = (recentActivityRaw.data ?? []) as any[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const lowStock = (lowStockRows.data ?? []) as any[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const expiring = (expiringRows.data ?? []) as any[];
+  const vacc = upcomingVacc.data ?? [];
+  const prev = upcomingPrev.data ?? [];
+  const followups = upcomingFollowups.data ?? [];
+  const recentTickets = recentActivityRaw.data ?? [];
+  const lowStock = lowStockRows.data ?? [];
+  const expiring = expiringRows.data ?? [];
 
   const stats = [
     { href: '/cats', label: t('nav.cats'), value: catsCount, icon: Cat, hint: ta('activeProfiles') },
@@ -298,7 +286,7 @@ export async function AdminDashboardData() {
                 <li key={row.batch_id} className="flex justify-between gap-2">
                   <span className="truncate">{row.item_name}</span>
                   <span className="text-muted-foreground shrink-0">
-                    {row.days_to_expiry < 0 ? ta('expired') : `${row.days_to_expiry}d`}
+                    {(row.days_to_expiry ?? 0) < 0 ? ta('expired') : `${row.days_to_expiry ?? 0}d`}
                   </span>
                 </li>
               ))}

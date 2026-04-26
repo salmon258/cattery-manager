@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/current-user';
-import { matingRecordSchema } from '@/lib/schemas/breeding';
+import { matingRecordSchema, matingStatusSchema } from '@/lib/schemas/breeding';
 
 /**
  * GET /api/mating-records
@@ -19,8 +19,7 @@ export async function GET(req: Request) {
 
   const supabase = createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let query = (supabase as any)
+  let query = supabase
     .from('mating_records')
     .select(`
       *,
@@ -35,7 +34,8 @@ export async function GET(req: Request) {
     query = query.or(`female_cat_id.eq.${catId},male_cat_id.eq.${catId}`);
   }
   if (status) {
-    query = query.eq('status', status);
+    const parsedStatus = matingStatusSchema.safeParse(status);
+    if (parsedStatus.success) query = query.eq('status', parsedStatus.data);
   }
 
   const { data, error } = await query;
@@ -63,8 +63,7 @@ export async function POST(req: Request) {
   }
 
   const supabase = createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('mating_records')
     .insert({ ...parsed.data, created_by: user.authId })
     .select('*')

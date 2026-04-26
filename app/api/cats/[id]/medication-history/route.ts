@@ -66,8 +66,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     by: { id: string; full_name: string } | null;
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const scheduled: Entry[] = (tasksRes.data ?? []).map((t: any) => ({
+  const scheduled: Entry[] = (tasksRes.data ?? []).map((t) => ({
     id: `task:${t.id}`,
     source: 'scheduled',
     given_at: t.confirmed_at as string,
@@ -79,8 +78,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     by: t.confirmer ?? null
   }));
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const adHoc: Entry[] = (adHocRes.data ?? []).map((a: any) => ({
+  const adHoc: Entry[] = (adHocRes.data ?? []).map((a) => ({
     id: `adhoc:${a.id}`,
     source: 'ad_hoc',
     given_at: a.given_at as string,

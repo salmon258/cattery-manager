@@ -21,8 +21,7 @@ export async function GET(
   const supabase = createClient();
 
   // 1. Own lineage row (parents)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: ownLineage } = await (supabase as any)
+  const { data: ownLineage } = await supabase
     .from('cat_lineage')
     .select(`
       litter_id,
@@ -35,8 +34,7 @@ export async function GET(
   // 2. Siblings from the same litter
   let siblings: unknown[] = [];
   if (ownLineage?.litter_id) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: siblingRows } = await (supabase as any)
+    const { data: siblingRows } = await supabase
       .from('cat_lineage')
       .select('kitten:cats!cat_lineage_kitten_fkey(id, name, profile_photo_url, gender, breed)')
       .eq('litter_id', ownLineage.litter_id)
@@ -45,8 +43,7 @@ export async function GET(
   }
 
   // 3. Offspring — litters where this cat is mother or father
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: offspringRows } = await (supabase as any)
+  const { data: offspringRows } = await supabase
     .from('cat_lineage')
     .select(`
       litter_id,
@@ -57,6 +54,7 @@ export async function GET(
   // Group offspring by litter
   const litterMap = new Map<string, { kittens: unknown[] }>();
   for (const row of offspringRows ?? []) {
+    if (!row.litter_id) continue;
     if (!litterMap.has(row.litter_id)) litterMap.set(row.litter_id, { kittens: [] });
     litterMap.get(row.litter_id)!.kittens.push(row.kitten);
   }
@@ -121,8 +119,7 @@ export async function PUT(
   const supabase = createClient();
 
   // Make sure the kitten itself exists.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: kitten, error: kittenErr } = await (supabase as any)
+  const { data: kitten, error: kittenErr } = await supabase
     .from('cats')
     .select('id')
     .eq('id', kittenId)
@@ -133,8 +130,7 @@ export async function PUT(
   // Validate gender alignment for any referenced parent.
   const parentIds = [mother_id, father_id].filter((x): x is string => typeof x === 'string');
   if (parentIds.length > 0) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: parents, error: parentErr } = await (supabase as any)
+    const { data: parents, error: parentErr } = await supabase
       .from('cats')
       .select('id, gender')
       .in('id', parentIds);
@@ -156,8 +152,7 @@ export async function PUT(
   }
 
   // Fetch existing lineage row so we can decide between update and insert.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: existing, error: existingErr } = await (supabase as any)
+  const { data: existing, error: existingErr } = await supabase
     .from('cat_lineage')
     .select('id, litter_id')
     .eq('kitten_id', kittenId)
@@ -168,8 +163,7 @@ export async function PUT(
     // Both sides cleared AND row has no litter linkage → drop the row entirely
     // so the cat reads as "no lineage" again instead of an empty placeholder.
     if (mother_id === null && father_id === null && !existing.litter_id) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: delErr } = await (supabase as any)
+      const { error: delErr } = await supabase
         .from('cat_lineage')
         .delete()
         .eq('id', existing.id);
@@ -177,8 +171,7 @@ export async function PUT(
       return NextResponse.json({ lineage: null });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: updated, error: updErr } = await (supabase as any)
+    const { data: updated, error: updErr } = await supabase
       .from('cat_lineage')
       .update({ mother_id, father_id })
       .eq('id', existing.id)
@@ -192,8 +185,7 @@ export async function PUT(
   if (mother_id === null && father_id === null) {
     return NextResponse.json({ lineage: null });
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: inserted, error: insErr } = await (supabase as any)
+  const { data: inserted, error: insErr } = await supabase
     .from('cat_lineage')
     .insert({ kitten_id: kittenId, mother_id, father_id, litter_id: null })
     .select('*')

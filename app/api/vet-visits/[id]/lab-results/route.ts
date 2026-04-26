@@ -19,8 +19,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   }
 
   const supabase = createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('lab_results')
     .insert({ ...parsed.data, vet_visit_id: params.id, uploaded_by: user.profile.id })
     .select('*')

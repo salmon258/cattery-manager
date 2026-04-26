@@ -10,8 +10,7 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const includeInactive = url.searchParams.get('include_inactive') === '1';
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   let query = supabase
     .from('reimbursement_categories')
     .select('*')
@@ -39,8 +38,7 @@ export async function POST(request: Request) {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   const { data, error } = await supabase
     .from('reimbursement_categories')
     .insert({ ...parsed.data, created_by: user.authId })

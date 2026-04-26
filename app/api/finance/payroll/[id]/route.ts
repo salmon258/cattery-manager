@@ -2,13 +2,15 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/current-user';
 import { payrollEntryUpdateSchema } from '@/lib/schemas/finance';
+import type { Database } from '@/lib/supabase/types';
+
+type PayrollEntryUpdate = Database['public']['Tables']['payroll_entries']['Update'];
 
 export async function GET(_: Request, { params }: { params: { id: string } }) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   const { data, error } = await supabase
     .from('payroll_entries')
     .select('*, profile:profiles!payroll_entries_profile_id_fkey(id, full_name, role, is_active)')
@@ -37,10 +39,8 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 
   // If any of (gross, bonus, deduction) changed and net_amount wasn't
   // explicitly supplied, recompute from the fresh row.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let patch: Record<string, any> = { ...parsed.data };
+  const supabase = createClient();
+  const patch: PayrollEntryUpdate = { ...parsed.data };
   if (
     patch.net_amount === undefined &&
     (patch.gross_amount !== undefined ||
@@ -76,8 +76,7 @@ export async function DELETE(_: Request, { params }: { params: { id: string } })
   if (user.profile.role !== 'admin')
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   // Clear the linked ledger row first so it doesn't dangle once the payroll
   // row is gone. This is only used when a mistake row needs undoing;
   // historical records normally stay as status='cancelled'.

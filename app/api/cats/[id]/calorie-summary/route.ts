@@ -22,10 +22,8 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
 
   // Active life stage + the multiplier it resolves to (used for the stage
   // badge on the detail page).
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: stageRaw } = await (supabase as any).rpc('cat_life_stage', { p_cat_id: params.id });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: mulRaw } = await (supabase as any).rpc('cat_derived_life_stage_multiplier', { p_cat_id: params.id });
+  const { data: stageRaw } = await supabase.rpc('cat_life_stage', { p_cat_id: params.id });
+  const { data: mulRaw } = await supabase.rpc('cat_derived_life_stage_multiplier', { p_cat_id: params.id });
   const life_stage = (stageRaw ?? null) as
     | 'kitten_young' | 'lactating' | 'pregnant' | 'kitten' | 'spayed' | 'adult' | null;
   const life_stage_multiplier = mulRaw === null || mulRaw === undefined ? null : Number(mulRaw);

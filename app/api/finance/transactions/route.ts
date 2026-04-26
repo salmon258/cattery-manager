@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/current-user';
-import { financialTransactionSchema } from '@/lib/schemas/finance';
+import {
+  financialRelatedEntityTypeSchema,
+  financialTransactionSchema,
+  financialTypeSchema
+} from '@/lib/schemas/finance';
 
 export async function GET(request: Request) {
   const user = await getCurrentUser();
@@ -18,8 +22,7 @@ export async function GET(request: Request) {
   const to = url.searchParams.get('to');
   const limit = Math.min(Number(url.searchParams.get('limit') ?? '100') || 100, 500);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   let query = supabase
     .from('financial_transactions')
     .select('*, category:transaction_categories(id, name, slug, type)')
@@ -27,9 +30,15 @@ export async function GET(request: Request) {
     .order('created_at', { ascending: false })
     .limit(limit);
 
-  if (type) query = query.eq('type', type);
+  if (type) {
+    const parsedType = financialTypeSchema.safeParse(type);
+    if (parsedType.success) query = query.eq('type', parsedType.data);
+  }
   if (categoryId) query = query.eq('category_id', categoryId);
-  if (relatedType) query = query.eq('related_entity_type', relatedType);
+  if (relatedType) {
+    const parsedRelated = financialRelatedEntityTypeSchema.safeParse(relatedType);
+    if (parsedRelated.success) query = query.eq('related_entity_type', parsedRelated.data);
+  }
   if (relatedId) query = query.eq('related_entity_id', relatedId);
   if (from) query = query.gte('transaction_date', from);
   if (to) query = query.lte('transaction_date', to);
@@ -54,8 +63,7 @@ export async function POST(request: Request) {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   const { data, error } = await supabase
     .from('financial_transactions')
     .insert({ ...parsed.data, recorded_by: user.authId })

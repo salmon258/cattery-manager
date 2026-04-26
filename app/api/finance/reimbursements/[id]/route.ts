@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { createClient, createServiceRoleClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/current-user';
 import { reimbursementUpdateSchema } from '@/lib/schemas/finance';
+import type { Database } from '@/lib/supabase/types';
+
+type ReimbursementUpdate = Database['public']['Tables']['reimbursement_requests']['Update'];
 
 const SELECT_COLS =
   '*, profile:profiles!reimbursement_requests_profile_id_fkey(id, full_name, role, is_active),' +
@@ -11,8 +14,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   const { data, error } = await supabase
     .from('reimbursement_requests')
     .select(SELECT_COLS)
@@ -46,8 +48,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   const { data: existing, error: fErr } = await supabase
     .from('reimbursement_requests')
     .select('*')
@@ -62,8 +63,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   // Build patch with role-based field whitelist.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const patch: Record<string, any> = {};
+  const patch: ReimbursementUpdate = {};
   if (isAdmin) {
     Object.assign(patch, parsed.data);
     // Stamp reviewer when status moves into a reviewed state.
@@ -114,8 +114,7 @@ export async function DELETE(_: Request, { params }: { params: { id: string } })
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   const { data: existing } = await supabase
     .from('reimbursement_requests')
     .select('profile_id, status, financial_txn_id, receipt_path, payment_proof_path')

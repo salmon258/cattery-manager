@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import { createClient, createServiceRoleClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/current-user';
+import { financialPaymentMethodSchema } from '@/lib/schemas/finance';
+import type { Database } from '@/lib/supabase/types';
+
+type AdhocPaymentUpdate = Database['public']['Tables']['adhoc_payments']['Update'];
 
 /**
  * GET — owner + admin can fetch a fresh signed URL for the admin-uploaded
@@ -10,8 +14,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   const { data: row, error } = await supabase
     .from('adhoc_payments')
     .select('profile_id, payment_proof_path')
@@ -83,15 +86,16 @@ export async function POST(request: Request, { params }: { params: { id: string 
     .from('finance-attachments')
     .createSignedUrl(path, 60 * 60 * 24 * 30);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const patch: Record<string, any> = {
+  const supabase = createClient();
+  const patch: AdhocPaymentUpdate = {
     payment_proof_url: signed?.signedUrl ?? null,
     payment_proof_path: path
   };
   if (paymentDate) patch.payment_date = paymentDate;
-  if (paymentMethod) patch.payment_method = paymentMethod;
+  if (paymentMethod) {
+    const parsedMethod = financialPaymentMethodSchema.safeParse(paymentMethod);
+    if (parsedMethod.success) patch.payment_method = parsedMethod.data;
+  }
   if (paymentReference) patch.payment_reference = paymentReference;
   if (markPaid) patch.status = 'paid';
 

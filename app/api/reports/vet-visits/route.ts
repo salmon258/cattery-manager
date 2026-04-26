@@ -17,8 +17,7 @@ export async function GET(req: Request) {
   const catId = url.searchParams.get('cat_id');
 
   const supabase = createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let q = (supabase as any)
+  let q = supabase
     .from('vet_visits')
     .select(`
       id, cat_id, visit_date, visit_type, status, diagnosis, visit_cost, transport_cost,
@@ -35,8 +34,7 @@ export async function GET(req: Request) {
   const { data, error } = await q;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const totals = (data ?? []).reduce((acc: { visit: number; transport: number }, v: any) => ({
+  const totals = (data ?? []).reduce((acc, v) => ({
     visit:     acc.visit     + Number(v.visit_cost     ?? 0),
     transport: acc.transport + Number(v.transport_cost ?? 0)
   }), { visit: 0, transport: 0 });

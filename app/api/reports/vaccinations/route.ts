@@ -31,8 +31,7 @@ export async function GET(req: Request) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   const todayStr = new Date().toISOString().slice(0, 10);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rows = (data ?? []).map((v: any) => ({
+  const rows = (data ?? []).map((v) => ({
     ...v,
     given_date: v.administered_date,
     overdue: v.next_due_date ? v.next_due_date < todayStr : false

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/current-user';
-import { adhocPaymentSchema } from '@/lib/schemas/finance';
+import { adhocPaymentSchema, adhocPaymentStatusSchema } from '@/lib/schemas/finance';
 
 const SELECT_COLS =
   '*, profile:profiles!adhoc_payments_profile_id_fkey(id, full_name, role, is_active),' +
@@ -22,15 +22,17 @@ export async function GET(request: Request) {
   const from = url.searchParams.get('from');
   const to = url.searchParams.get('to');
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   let q = supabase
     .from('adhoc_payments')
     .select(SELECT_COLS)
     .order('payment_date', { ascending: false })
     .order('created_at', { ascending: false });
   if (profileId) q = q.eq('profile_id', profileId);
-  if (status) q = q.eq('status', status);
+  if (status) {
+    const parsedStatus = adhocPaymentStatusSchema.safeParse(status);
+    if (parsedStatus.success) q = q.eq('status', parsedStatus.data);
+  }
   if (from) q = q.gte('payment_date', from);
   if (to) q = q.lte('payment_date', to);
 
@@ -58,8 +60,7 @@ export async function POST(request: Request) {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   const { data, error } = await supabase
     .from('adhoc_payments')
     .insert({ ...parsed.data, created_by: user.authId })

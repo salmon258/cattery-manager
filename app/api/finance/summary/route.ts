@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/current-user';
+import { financialTypeSchema } from '@/lib/schemas/finance';
 
 // Aggregated spending/income summary. Admin only (finance data).
 // Shape:
@@ -17,8 +18,7 @@ export async function GET(request: Request) {
   const to = url.searchParams.get('to');
   const type = url.searchParams.get('type');
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   let query = supabase
     .from('finance_monthly_summary')
     .select('*')
@@ -26,7 +26,10 @@ export async function GET(request: Request) {
 
   if (from) query = query.gte('period_month', from);
   if (to) query = query.lte('period_month', to);
-  if (type) query = query.eq('type', type);
+  if (type) {
+    const parsedType = financialTypeSchema.safeParse(type);
+    if (parsedType.success) query = query.eq('type', parsedType.data);
+  }
 
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

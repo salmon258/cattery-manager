@@ -18,8 +18,7 @@ export async function GET(req: Request) {
   const onlyActive = url.searchParams.get('active') === '1';
 
   const supabase = createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let query = (supabase as any)
+  let query = supabase
     .from('doctors')
     .select('*, clinic:clinics(id, name)')
     .order('full_name');
@@ -46,8 +45,7 @@ export async function POST(req: Request) {
   }
 
   const supabase = createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: doctor, error } = await (supabase as any)
+  const { data: doctor, error } = await supabase
     .from('doctors')
     .insert(parsed.data)
     .select('*')

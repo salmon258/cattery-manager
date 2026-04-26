@@ -15,8 +15,7 @@ export async function GET(
   if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
 
   const supabase = createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('mating_records')
     .select(`
       *,
@@ -65,8 +64,7 @@ export async function PATCH(
   // Fetch the current row first so we can reason about merged values.
   const patch = parsed.data;
   if (patch.female_cat_id || patch.male_cat_id) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: current, error: currentErr } = await (supabase as any)
+    const { data: current, error: currentErr } = await supabase
       .from('mating_records')
       .select('female_cat_id, male_cat_id')
       .eq('id', params.id)
@@ -86,8 +84,7 @@ export async function PATCH(
     if (patch.female_cat_id) idsToCheck.push(patch.female_cat_id);
     if (patch.male_cat_id)   idsToCheck.push(patch.male_cat_id);
     if (idsToCheck.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: catRows, error: catErr } = await (supabase as any)
+      const { data: catRows, error: catErr } = await supabase
         .from('cats')
         .select('id, gender')
         .in('id', idsToCheck);
@@ -104,8 +101,7 @@ export async function PATCH(
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('mating_records')
     .update(patch)
     .eq('id', params.id)

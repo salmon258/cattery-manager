@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient, createServiceRoleClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/current-user';
-import { reimbursementProposeSchema } from '@/lib/schemas/finance';
+import { reimbursementProposeSchema, reimbursementStatusSchema } from '@/lib/schemas/finance';
 
 const SELECT_COLS =
   '*, profile:profiles!reimbursement_requests_profile_id_fkey(id, full_name, role, is_active),' +
@@ -25,8 +25,7 @@ export async function GET(request: Request) {
   const from = url.searchParams.get('from');
   const to = url.searchParams.get('to');
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   let q = supabase
     .from('reimbursement_requests')
     .select(SELECT_COLS)
@@ -37,7 +36,10 @@ export async function GET(request: Request) {
   } else if (profileId) {
     q = q.eq('profile_id', profileId);
   }
-  if (status) q = q.eq('status', status);
+  if (status) {
+    const parsedStatus = reimbursementStatusSchema.safeParse(status);
+    if (parsedStatus.success) q = q.eq('status', parsedStatus.data);
+  }
   if (from) q = q.gte('expense_date', from);
   if (to) q = q.lte('expense_date', to);
 
@@ -84,11 +86,9 @@ export async function POST(request: Request) {
 
   const file = form.get('file');
   // Sitters never have storage RLS access; service role uploads on their behalf.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const admin = createServiceRoleClient() as any;
+  const admin = createServiceRoleClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   const insert = {
     ...parsed.data,
     profile_id: user.authId,

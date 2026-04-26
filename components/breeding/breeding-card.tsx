@@ -417,10 +417,8 @@ function MatingRow({
   catId: string;
   catGender: 'male' | 'female';
   isAdmin: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  t: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tc: any;
+  t: ReturnType<typeof useTranslations<'breeding'>>;
+  tc: ReturnType<typeof useTranslations<'common'>>;
   onUpdateStatus: () => void;
   onRegisterLitter: () => void;
   onEdit: () => void;

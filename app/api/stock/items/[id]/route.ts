@@ -7,8 +7,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   const [{ data: item, error: itemErr }, { data: batches, error: batchesErr }] =
     await Promise.all([
       supabase.from('stock_items').select('*').eq('id', params.id).maybeSingle(),
@@ -41,8 +40,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   const { data, error } = await supabase
     .from('stock_items')
     .update(parsed.data)
@@ -61,8 +59,7 @@ export async function DELETE(_: Request, { params }: { params: { id: string } })
 
   // Soft-delete — stock_batches FK uses ON DELETE RESTRICT so hard delete
   // would fail once the item has any batch history.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   const { error } = await supabase
     .from('stock_items')
     .update({ is_active: false })

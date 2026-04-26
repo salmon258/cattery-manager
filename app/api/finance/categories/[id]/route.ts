@@ -18,8 +18,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   const { data, error } = await supabase
     .from('transaction_categories')
     .update(parsed.data)
@@ -36,8 +35,7 @@ export async function DELETE(_: Request, { params }: { params: { id: string } })
   if (user.profile.role !== 'admin')
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   // Block delete of system categories (needed by auto-triggers); soft-delete custom ones.
   const { data: cat } = await supabase
     .from('transaction_categories')

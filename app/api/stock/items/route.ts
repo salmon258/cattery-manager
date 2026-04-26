@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/current-user';
-import { stockItemSchema } from '@/lib/schemas/stock';
+import { stockCategorySchema, stockItemSchema } from '@/lib/schemas/stock';
 
 export async function GET(request: Request) {
   const user = await getCurrentUser();
@@ -11,11 +11,13 @@ export async function GET(request: Request) {
   const includeInactive = url.searchParams.get('include_inactive') === '1';
   const category = url.searchParams.get('category');
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   let query = supabase.from('stock_items').select('*').order('name', { ascending: true });
   if (!includeInactive) query = query.eq('is_active', true);
-  if (category) query = query.eq('category', category);
+  if (category) {
+    const parsedCategory = stockCategorySchema.safeParse(category);
+    if (parsedCategory.success) query = query.eq('category', parsedCategory.data);
+  }
 
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -37,8 +39,7 @@ export async function POST(request: Request) {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   const { data, error } = await supabase
     .from('stock_items')
     .insert({ ...parsed.data, created_by: user.authId })

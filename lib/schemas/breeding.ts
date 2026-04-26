@@ -1,5 +1,13 @@
 import { z } from 'zod';
 
+export const matingStatusSchema = z.enum([
+  'planned',
+  'confirmed',
+  'pregnant',
+  'delivered',
+  'failed'
+]);
+
 export const matingRecordSchema = z.object({
   female_cat_id: z.string().uuid(),
   male_cat_id:   z.string().uuid(),

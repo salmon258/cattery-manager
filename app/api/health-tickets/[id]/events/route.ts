@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/current-user';
 import { addEventSchema } from '@/lib/schemas/health-tickets';
+import type { Database } from '@/lib/supabase/types';
+
+type HealthTicketUpdate = Database['public']['Tables']['health_tickets']['Update'];
 
 /**
  * POST /api/health-tickets/[id]/events
@@ -43,8 +46,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   const supabase = createClient();
 
   // Insert event record
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: event, error: eventError } = await (supabase as any)
+  const { data: event, error: eventError } = await supabase
     .from('health_ticket_events')
     .insert({
       ticket_id:  params.id,
@@ -60,8 +62,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
   // Attach photos to this event
   if (photo_urls && photo_urls.length > 0) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase as any)
+    await supabase
       .from('health_ticket_photos')
       .insert(
         photo_urls.map((url: string) => ({
@@ -75,8 +76,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   }
 
   // Side-effect: update ticket record
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ticketUpdate: Record<string, unknown> = {};
+  const ticketUpdate: HealthTicketUpdate = {};
   if (event_type === 'status_change' && new_status) {
     ticketUpdate.status = new_status;
   } else if (event_type === 'resolved') {
@@ -92,8 +92,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   }
 
   if (Object.keys(ticketUpdate).length) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: updateError } = await (supabase as any)
+    const { error: updateError } = await supabase
       .from('health_tickets')
       .update(ticketUpdate)
       .eq('id', params.id);

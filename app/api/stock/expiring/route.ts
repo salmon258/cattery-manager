@@ -10,8 +10,7 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const days = Math.min(Math.max(Number(url.searchParams.get('days') ?? '30') || 30, 1), 365);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   const { data, error } = await supabase
     .from('stock_expiring_batches')
     .select('*')

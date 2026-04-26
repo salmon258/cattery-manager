@@ -17,8 +17,7 @@ export async function GET(req: Request) {
   const catId = url.searchParams.get('cat_id');
 
   const supabase = createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let q = (supabase as any)
+  let q = supabase
     .from('eating_logs')
     .select(`
       id, cat_id, meal_time, feeding_method, notes,

@@ -7,8 +7,7 @@ export default async function MyPayrollPage() {
   const user = await getCurrentUser();
   if (!user) redirect('/auth/signout');
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   const { data: settings } = await supabase
     .from('system_settings')
     .select('default_currency')
