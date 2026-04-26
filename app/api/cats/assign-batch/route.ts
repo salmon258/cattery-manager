@@ -64,8 +64,7 @@ export async function POST(request: Request) {
     }));
 
   if (changedRows.length > 0) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase as any).from('assignee_change_log').insert(changedRows);
+    await supabase.from('assignee_change_log').insert(changedRows);
   }
 
   return NextResponse.json({ updated: count ?? 0 });

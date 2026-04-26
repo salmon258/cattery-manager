@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/current-user';
-import { payrollEntrySchema } from '@/lib/schemas/finance';
+import { payrollEntrySchema, payrollStatusSchema } from '@/lib/schemas/finance';
 
 /**
  * GET /api/finance/payroll — admin lists every entry.
@@ -23,8 +23,7 @@ export async function GET(request: Request) {
   const from = url.searchParams.get('from');
   const to = url.searchParams.get('to');
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   let q = supabase
     .from('payroll_entries')
     .select('*, profile:profiles!payroll_entries_profile_id_fkey(id, full_name, role, is_active)')
@@ -32,7 +31,10 @@ export async function GET(request: Request) {
     .order('created_at', { ascending: false });
 
   if (profileId) q = q.eq('profile_id', profileId);
-  if (status) q = q.eq('status', status);
+  if (status) {
+    const parsedStatus = payrollStatusSchema.safeParse(status);
+    if (parsedStatus.success) q = q.eq('status', parsedStatus.data);
+  }
   if (from) q = q.gte('period_start', from);
   if (to) q = q.lte('period_end', to);
 
@@ -71,8 +73,7 @@ export async function POST(request: Request) {
       ).toFixed(2)
     );
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   const { data, error } = await supabase
     .from('payroll_entries')
     .insert({ ...parsed.data, net_amount: net, created_by: user.authId })

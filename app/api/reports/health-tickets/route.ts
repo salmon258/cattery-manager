@@ -16,8 +16,7 @@ export async function GET(req: Request) {
   const to   = url.searchParams.get('to');
 
   const supabase = createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let q = (supabase as any)
+  let q = supabase
     .from('health_tickets')
     .select(`
       id, cat_id, title, severity, status, created_at, resolved_at, resolution_summary,
@@ -32,8 +31,7 @@ export async function GET(req: Request) {
   const { data, error } = await q;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rows = (data ?? []).map((t: any) => {
+  const rows = (data ?? []).map((t) => {
     let time_to_resolve_hours: number | null = null;
     if (t.resolved_at && t.created_at) {
       const ms = new Date(t.resolved_at).getTime() - new Date(t.created_at).getTime();
@@ -44,8 +42,7 @@ export async function GET(req: Request) {
 
   // Severity breakdown
   const severityCounts: Record<string, number> = { low: 0, medium: 0, high: 0, critical: 0 };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for (const t of rows as any[]) severityCounts[t.severity] = (severityCounts[t.severity] ?? 0) + 1;
+  for (const t of rows) severityCounts[t.severity] = (severityCounts[t.severity] ?? 0) + 1;
 
   return NextResponse.json({ rows, severityCounts });
 }

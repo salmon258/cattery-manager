@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/current-user';
+import { ticketSeveritySchema } from '@/lib/schemas/health-tickets';
 
 /**
  * GET /api/health-tickets
@@ -22,8 +23,7 @@ export async function GET(req: Request) {
 
   const supabase = createClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let query = (supabase as any)
+  let query = supabase
     .from('health_tickets')
     .select(
       countOnly
@@ -35,7 +35,10 @@ export async function GET(req: Request) {
     .in('status', ['open', 'in_progress'])
     .order('created_at', { ascending: false });
 
-  if (severity) query = query.eq('severity', severity);
+  if (severity) {
+    const parsedSeverity = ticketSeveritySchema.safeParse(severity);
+    if (parsedSeverity.success) query = query.eq('severity', parsedSeverity.data);
+  }
 
   const { data, count, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

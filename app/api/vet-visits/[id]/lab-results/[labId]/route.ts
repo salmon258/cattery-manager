@@ -17,8 +17,7 @@ export async function DELETE(
   if (user.profile.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const supabase = createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('lab_results')
     .delete()
     .eq('id', params.labId)

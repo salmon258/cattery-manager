@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/current-user';
-import { transactionCategorySchema } from '@/lib/schemas/finance';
+import { financialTypeSchema, transactionCategorySchema } from '@/lib/schemas/finance';
 
 export async function GET(request: Request) {
   const user = await getCurrentUser();
@@ -11,8 +11,7 @@ export async function GET(request: Request) {
   const type = url.searchParams.get('type');
   const includeInactive = url.searchParams.get('include_inactive') === '1';
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   let query = supabase
     .from('transaction_categories')
     .select('*')
@@ -20,7 +19,10 @@ export async function GET(request: Request) {
     .order('sort_order', { ascending: true })
     .order('name', { ascending: true });
   if (!includeInactive) query = query.eq('is_active', true);
-  if (type) query = query.eq('type', type);
+  if (type) {
+    const parsedType = financialTypeSchema.safeParse(type);
+    if (parsedType.success) query = query.eq('type', parsedType.data);
+  }
 
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -42,8 +44,7 @@ export async function POST(request: Request) {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   const { data, error } = await supabase
     .from('transaction_categories')
     .insert({ ...parsed.data, created_by: user.authId })

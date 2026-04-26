@@ -18,8 +18,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   const { data, error } = await supabase
     .from('stock_locations')
     .update(parsed.data)
@@ -37,8 +36,7 @@ export async function DELETE(_: Request, { params }: { params: { id: string } })
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   // Soft-delete: keep the row so existing batch/movement history still resolves
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   const { error } = await supabase
     .from('stock_locations')
     .update({ is_active: false })

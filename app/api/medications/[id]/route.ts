@@ -53,8 +53,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   }
 
   const supabase = createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('medications')
     .update(parsed.data)
     .eq('id', params.id)

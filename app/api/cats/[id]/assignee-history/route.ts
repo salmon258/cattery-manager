@@ -11,8 +11,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
 
   const supabase = createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('assignee_change_log')
     .select(`
       id, changed_at, note,

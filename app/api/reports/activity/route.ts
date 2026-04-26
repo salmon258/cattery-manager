@@ -36,19 +36,21 @@ export async function GET(req: Request) {
   const supabase = createClient();
   const rows: ActivityRow[] = [];
 
-  // Helper to apply date range to any column
-  function applyRange(q: unknown, col: string, endOfDay = false): unknown {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let qq: any = q;
+  // Helper to apply date range to any column. Generic over the postgrest
+  // query builder so the resulting promise keeps its row type.
+  function applyRange<T extends {
+    gte: (col: string, val: string) => T;
+    lte: (col: string, val: string) => T;
+  }>(q: T, col: string, endOfDay = false): T {
+    let qq = q;
     if (from) qq = qq.gte(col, from);
     if (to)   qq = qq.lte(col, endOfDay ? `${to}T23:59:59` : to);
     return qq;
   }
 
   // ─── assignee changes ─────────────────────────────────────────────────────
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: assignees } = await applyRange(
-    (supabase as any)
+    supabase
       .from('assignee_change_log')
       .select(`
         id, changed_at,
@@ -61,8 +63,7 @@ export async function GET(req: Request) {
       .limit(limit),
     'changed_at',
     true
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ) as any;
+  );
 
   for (const a of assignees ?? []) {
     const from_n = a.from_assignee?.full_name ?? 'Unassigned';
@@ -78,9 +79,8 @@ export async function GET(req: Request) {
   }
 
   // ─── room movements ───────────────────────────────────────────────────────
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: moves } = await applyRange(
-    (supabase as any)
+    supabase
       .from('room_movements')
       .select(`
         id, moved_at,
@@ -93,8 +93,7 @@ export async function GET(req: Request) {
       .limit(limit),
     'moved_at',
     true
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ) as any;
+  );
 
   for (const m of moves ?? []) {
     const from_n = m.from_room?.name ?? '—';
@@ -110,7 +109,6 @@ export async function GET(req: Request) {
   }
 
   // ─── weight logs ──────────────────────────────────────────────────────────
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: weights } = await applyRange(
     supabase
       .from('weight_logs')
@@ -123,8 +121,7 @@ export async function GET(req: Request) {
       .limit(limit),
     'recorded_at',
     true
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ) as any;
+  );
 
   for (const w of weights ?? []) {
     rows.push({
@@ -138,9 +135,8 @@ export async function GET(req: Request) {
   }
 
   // ─── tickets opened ───────────────────────────────────────────────────────
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: tickets } = await applyRange(
-    (supabase as any)
+    supabase
       .from('health_tickets')
       .select(`
         id, created_at, title, severity,
@@ -151,8 +147,7 @@ export async function GET(req: Request) {
       .limit(limit),
     'created_at',
     true
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ) as any;
+  );
 
   for (const tk of tickets ?? []) {
     rows.push({
@@ -166,9 +161,8 @@ export async function GET(req: Request) {
   }
 
   // ─── vet visits ───────────────────────────────────────────────────────────
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: visits } = await applyRange(
-    (supabase as any)
+    supabase
       .from('vet_visits')
       .select(`
         id, visit_date, visit_type,
@@ -179,8 +173,7 @@ export async function GET(req: Request) {
       .order('visit_date', { ascending: false })
       .limit(limit),
     'visit_date'
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ) as any;
+  );
 
   for (const v of visits ?? []) {
     rows.push({
@@ -194,9 +187,8 @@ export async function GET(req: Request) {
   }
 
   // ─── eating logs ──────────────────────────────────────────────────────────
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: meals } = await applyRange(
-    (supabase as any)
+    supabase
       .from('eating_logs')
       .select(`
         id, meal_time, feeding_method,
@@ -211,8 +203,7 @@ export async function GET(req: Request) {
       .limit(limit),
     'meal_time',
     true
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ) as any;
+  );
 
   for (const ml of meals ?? []) {
     const items = (ml.items ?? []) as Array<{
@@ -238,9 +229,8 @@ export async function GET(req: Request) {
   }
 
   // ─── medication doses (confirmed scheduled tasks) ─────────────────────────
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: medTasks } = await applyRange(
-    (supabase as any)
+    supabase
       .from('medication_tasks')
       .select(`
         id, confirmed_at,
@@ -253,10 +243,10 @@ export async function GET(req: Request) {
       .limit(limit),
     'confirmed_at',
     true
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ) as any;
+  );
 
   for (const mt of medTasks ?? []) {
+    if (!mt.confirmed_at) continue;
     const med = mt.medication;
     const name = med?.medicine_name ?? 'medication';
     const dosePart = med?.dose ? ` ${med.dose}` : '';
@@ -272,9 +262,8 @@ export async function GET(req: Request) {
   }
 
   // ─── ad-hoc medications ───────────────────────────────────────────────────
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: adHoc } = await applyRange(
-    (supabase as any)
+    supabase
       .from('ad_hoc_medicines')
       .select(`
         id, given_at, medicine_name, dose, unit, route,
@@ -285,8 +274,7 @@ export async function GET(req: Request) {
       .limit(limit),
     'given_at',
     true
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ) as any;
+  );
 
   for (const ah of adHoc ?? []) {
     const dosePart = ah.dose ? ` ${ah.dose}${ah.unit ?? ''}` : '';

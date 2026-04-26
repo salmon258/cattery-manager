@@ -40,8 +40,7 @@ export async function POST(
   const supabase = createClient();
 
   // Fetch the mating record to get parent cat IDs
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: mating, error: matingErr } = await (supabase as any)
+  const { data: mating, error: matingErr } = await supabase
     .from('mating_records')
     .select('id, female_cat_id, male_cat_id, status')
     .eq('id', params.id)
@@ -65,8 +64,7 @@ export async function POST(
     if (existingIds.includes(mating.female_cat_id) || existingIds.includes(mating.male_cat_id)) {
       return NextResponse.json({ error: 'A parent cannot be its own kitten' }, { status: 400 });
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: found, error: foundErr } = await (supabase as any)
+    const { data: found, error: foundErr } = await supabase
       .from('cats')
       .select('id')
       .in('id', existingIds);
@@ -79,8 +77,7 @@ export async function POST(
   }
 
   // 1. Create litter
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: litter, error: litterErr } = await (supabase as any)
+  const { data: litter, error: litterErr } = await supabase
     .from('litters')
     .insert({
       mating_record_id: params.id,
@@ -99,8 +96,7 @@ export async function POST(
   const resolvedKittens: { id: string; name: string; existing: boolean }[] = [];
   for (const kitten of kittens) {
     if (kitten.kind === 'new') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: catRow, error: catErr } = await (supabase as any)
+      const { data: catRow, error: catErr } = await supabase
         .from('cats')
         .insert({
           name:           kitten.name,
@@ -114,8 +110,7 @@ export async function POST(
 
       if (catErr) return NextResponse.json({ error: `Failed to create kitten: ${catErr.message}` }, { status: 500 });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: lineageErr } = await (supabase as any)
+      const { error: lineageErr } = await supabase
         .from('cat_lineage')
         .insert({
           kitten_id: catRow.id,
@@ -130,8 +125,7 @@ export async function POST(
       // Existing cat: upsert the lineage row. cat_lineage has a UNIQUE
       // constraint on kitten_id, so we check for an existing row first and
       // update in place rather than inserting blindly.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: existingLineage, error: lookupErr } = await (supabase as any)
+      const { data: existingLineage, error: lookupErr } = await supabase
         .from('cat_lineage')
         .select('id')
         .eq('kitten_id', kitten.cat_id)
@@ -139,8 +133,7 @@ export async function POST(
       if (lookupErr) return NextResponse.json({ error: lookupErr.message }, { status: 500 });
 
       if (existingLineage) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { error: updErr } = await (supabase as any)
+        const { error: updErr } = await supabase
           .from('cat_lineage')
           .update({
             mother_id: mating.female_cat_id,
@@ -150,8 +143,7 @@ export async function POST(
           .eq('id', existingLineage.id);
         if (updErr) return NextResponse.json({ error: updErr.message }, { status: 500 });
       } else {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { error: insErr } = await (supabase as any)
+        const { error: insErr } = await supabase
           .from('cat_lineage')
           .insert({
             kitten_id: kitten.cat_id,
@@ -162,8 +154,7 @@ export async function POST(
         if (insErr) return NextResponse.json({ error: insErr.message }, { status: 500 });
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: catRow } = await (supabase as any)
+      const { data: catRow } = await supabase
         .from('cats')
         .select('id, name')
         .eq('id', kitten.cat_id)
@@ -173,8 +164,7 @@ export async function POST(
   }
 
   // 3. Mark mating record as delivered
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (supabase as any)
+  await supabase
     .from('mating_records')
     .update({ status: 'delivered' })
     .eq('id', params.id);

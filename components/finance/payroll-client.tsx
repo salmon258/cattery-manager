@@ -9,8 +9,12 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import {
   Plus, Users, ArrowLeft, Edit, Trash2, CheckCircle2,
-  Clock, XCircle, Paperclip, DollarSign, CalendarClock, Sparkles
+  Clock, XCircle, Paperclip, DollarSign, CalendarClock, Sparkles,
+  Wallet, Receipt
 } from 'lucide-react';
+
+import { ReimbursementsAdmin } from './reimbursements-admin';
+import { AdhocAdmin } from './adhoc-admin';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -87,6 +91,7 @@ export function PayrollClient({ defaultCurrency }: Props) {
   const [entryModalOpen, setEntryModalOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<PayrollEntry | null>(null);
   const [payEntry, setPayEntry] = useState<PayrollEntry | null>(null);
+  const [tab, setTab] = useState<'salary' | 'reimbursements' | 'adhoc'>('salary');
 
   const { data: profiles = [] } = useQuery({
     queryKey: ['finance-profiles'],
@@ -176,28 +181,62 @@ export function PayrollClient({ defaultCurrency }: Props) {
             <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            onClick={() => {
-              setEditingSalary(null);
-              setSalaryModalOpen(true);
-            }}
-          >
-            <DollarSign className="h-4 w-4" /> {t('salary.new')}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => {
-              setEditingEntry(null);
-              setEntryModalOpen(true);
-            }}
-          >
-            <Plus className="h-4 w-4" /> {t('entry.new')}
-          </Button>
-        </div>
+        {tab === 'salary' && (
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setEditingSalary(null);
+                setSalaryModalOpen(true);
+              }}
+            >
+              <DollarSign className="h-4 w-4" /> {t('salary.new')}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setEditingEntry(null);
+                setEntryModalOpen(true);
+              }}
+            >
+              <Plus className="h-4 w-4" /> {t('entry.new')}
+            </Button>
+          </div>
+        )}
       </div>
 
+      {/* Tabs */}
+      <div className="flex flex-wrap gap-1 rounded-md border bg-muted/30 p-1">
+        <Button
+          variant={tab === 'salary' ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => setTab('salary')}
+        >
+          <Wallet className="h-4 w-4" /> {t('tabs.salary')}
+        </Button>
+        <Button
+          variant={tab === 'reimbursements' ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => setTab('reimbursements')}
+        >
+          <Receipt className="h-4 w-4" /> {t('tabs.reimbursements')}
+        </Button>
+        <Button
+          variant={tab === 'adhoc' ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => setTab('adhoc')}
+        >
+          <Sparkles className="h-4 w-4" /> {t('tabs.adhoc')}
+        </Button>
+      </div>
+
+      {tab === 'reimbursements' && <ReimbursementsAdmin defaultCurrency={defaultCurrency} />}
+      {tab === 'adhoc' && (
+        <AdhocAdmin defaultCurrency={defaultCurrency} profiles={visibleProfiles} />
+      )}
+
+      {tab === 'salary' && (
+        <>
       {/* Current salaries */}
       <section className="space-y-2">
         <h2 className="text-sm font-semibold flex items-center gap-2">
@@ -409,6 +448,9 @@ export function PayrollClient({ defaultCurrency }: Props) {
           ))}
         </div>
       </section>
+
+        </>
+      )}
 
       {/* Modals */}
       <SalaryModal

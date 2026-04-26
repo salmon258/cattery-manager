@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/current-user';
+import { stockMovementTypeSchema } from '@/lib/schemas/stock';
 
 export async function GET(request: Request) {
   const user = await getCurrentUser();
@@ -16,8 +17,7 @@ export async function GET(request: Request) {
   const since = url.searchParams.get('since'); // ISO date
   const limit = Math.min(Number(url.searchParams.get('limit') ?? '100') || 100, 500);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   let query = supabase
     .from('stock_movements')
     .select(
@@ -31,7 +31,10 @@ export async function GET(request: Request) {
     .order('moved_at', { ascending: false })
     .limit(limit);
 
-  if (type) query = query.eq('type', type);
+  if (type) {
+    const parsedType = stockMovementTypeSchema.safeParse(type);
+    if (parsedType.success) query = query.eq('type', parsedType.data);
+  }
   if (batchId) query = query.eq('batch_id', batchId);
   if (catId) query = query.eq('for_cat_id', catId);
   if (movedBy) query = query.eq('moved_by', movedBy);

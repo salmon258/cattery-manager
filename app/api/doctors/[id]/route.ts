@@ -18,8 +18,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   }
 
   const supabase = createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: doctor, error } = await (supabase as any)
+  const { data: doctor, error } = await supabase
     .from('doctors')
     .update(parsed.data)
     .eq('id', params.id)
@@ -39,8 +38,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
   if (user.profile.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const supabase = createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('doctors')
     .delete()
     .eq('id', params.id);

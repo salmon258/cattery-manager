@@ -52,8 +52,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
   // Audit log — only record if something actually changed
   if (fromAssigneeId !== parsed.data.assignee_id) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase as any)
+    await supabase
       .from('assignee_change_log')
       .insert({
         cat_id:           params.id,

@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/current-user';
 import { vetVisitUpdateSchema } from '@/lib/schemas/vet';
+import type { Database } from '@/lib/supabase/types';
+
+type VetVisitUpdate = Database['public']['Tables']['vet_visits']['Update'];
 
 /**
  * GET /api/vet-visits/[id]
@@ -12,8 +15,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
 
   const supabase = createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('vet_visits')
     .select(`
       *,
@@ -58,15 +60,13 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
   // Build the update patch: only include fields that were actually sent so we
   // don't accidentally null out columns the caller didn't touch.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const patch: Record<string, any> = { ...visitFields };
+  const patch: VetVisitUpdate = { ...visitFields };
   if (follow_up_date !== undefined) {
     patch.follow_up_date = follow_up_date || null;
   }
 
   if (Object.keys(patch).length > 0) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: updErr } = await (supabase as any)
+    const { error: updErr } = await supabase
       .from('vet_visits')
       .update(patch)
       .eq('id', params.id);
@@ -78,8 +78,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   // schedule tree cleanly.
   if (medicines !== undefined) {
     // Need the cat id up-front to create any new schedules that were added.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: visitCat, error: visitLookupErr } = await (supabase as any)
+    const { data: visitCat, error: visitLookupErr } = await supabase
       .from('vet_visits')
       .select('cat_id')
       .eq('id', params.id)
@@ -91,8 +90,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
     // Find existing generated medications linked to this visit so we can drop
     // them alongside their vet_visit_medicines parent rows.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: existing } = await (supabase as any)
+    const { data: existing } = await supabase
       .from('vet_visit_medicines')
       .select('generated_medication_id')
       .eq('vet_visit_id', params.id);
@@ -100,16 +98,14 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       .map((r: { generated_medication_id: string | null }) => r.generated_medication_id)
       .filter((id: string | null): id is string => !!id);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: delErr } = await (supabase as any)
+    const { error: delErr } = await supabase
       .from('vet_visit_medicines')
       .delete()
       .eq('vet_visit_id', params.id);
     if (delErr) return NextResponse.json({ error: delErr.message }, { status: 500 });
 
     if (linkedMedIds.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (supabase as any).from('medications').delete().in('id', linkedMedIds);
+      await supabase.from('medications').delete().in('id', linkedMedIds);
     }
 
     // Re-insert with the same logic as POST.
@@ -124,18 +120,19 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
             { status: 400 }
           );
         }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: medRow, error: medCreateErr } = await (supabase as any)
+        // schedule_enabled=true is gated by the zod refine, which guarantees
+        // schedule_start_date and schedule_time_slots are set.
+        const { data: medRow, error: medCreateErr } = await supabase
           .from('medications')
           .insert({
             cat_id:        catId,
             medicine_name: m.medicine_name,
             dose,
             route:         m.schedule_route ?? 'oral',
-            start_date:    m.schedule_start_date,
+            start_date:    m.schedule_start_date!,
             end_date:      m.schedule_end_date ?? null,
             interval_days: m.schedule_interval_days ?? 1,
-            time_slots:    m.schedule_time_slots,
+            time_slots:    m.schedule_time_slots!,
             notes:         m.notes ?? null,
             is_active:     true,
             created_by:    user.profile.id
@@ -146,8 +143,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
         generated_medication_id = medRow.id;
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: insErr } = await (supabase as any)
+      const { error: insErr } = await supabase
         .from('vet_visit_medicines')
         .insert({
           vet_visit_id:           params.id,
@@ -169,8 +165,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   }
 
   // Return the refreshed visit.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: refreshed } = await (supabase as any)
+  const { data: refreshed } = await supabase
     .from('vet_visits')
     .select('*')
     .eq('id', params.id)
@@ -188,8 +183,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
   if (user.profile.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const supabase = createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('vet_visits')
     .delete()
     .eq('id', params.id);

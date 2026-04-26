@@ -57,8 +57,7 @@ export async function POST(request: Request) {
     created_by: user.authId
   }));
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('medications')
     .insert(rows)
     .select('id, cat_id');

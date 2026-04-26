@@ -8,8 +8,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
 
   const supabase = createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('health_tickets')
     .select(
       `*, creator:profiles!health_tickets_created_by_fkey(id, full_name),
@@ -33,8 +32,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   }
 
   const supabase = createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('health_tickets')
     .insert({
       cat_id:      params.id,
@@ -51,8 +49,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   // Attach photos (ticket-level, event_id = null)
   const photoUrls = parsed.data.photo_urls ?? [];
   if (photoUrls.length > 0) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase as any)
+    await supabase
       .from('health_ticket_photos')
       .insert(
         photoUrls.map((url: string) => ({

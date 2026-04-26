@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/current-user';
 import { stockInSchema } from '@/lib/schemas/stock';
+import type { Database } from '@/lib/supabase/types';
+
+type StockInArgs = Database['public']['Functions']['stock_in']['Args'];
 
 // List batches (optionally filtered). Used by the checkout UI to pick a batch.
 export async function GET(request: Request) {
@@ -13,8 +16,7 @@ export async function GET(request: Request) {
   const locationId = url.searchParams.get('location_id');
   const availableOnly = url.searchParams.get('available_only') === '1';
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
   let query = supabase
     .from('stock_batches')
     .select('*')
@@ -48,9 +50,10 @@ export async function POST(request: Request) {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
-  const { data, error } = await supabase.rpc('stock_in', {
+  const supabase = createClient();
+  // p_location_id is typed as required string but SQL accepts NULL — type-gen
+  // doesn't model nullable function args, so cast the args object once.
+  const rpcArgs = {
     p_stock_item_id: parsed.data.stock_item_id,
     p_qty: parsed.data.qty,
     p_location_id: parsed.data.location_id ?? null,
@@ -60,7 +63,8 @@ export async function POST(request: Request) {
     p_batch_ref: parsed.data.batch_ref ?? null,
     p_notes: parsed.data.notes ?? null,
     p_received_at: parsed.data.received_at ?? null
-  });
+  } as unknown as StockInArgs;
+  const { data, error } = await supabase.rpc('stock_in', rpcArgs);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ batch: data }, { status: 201 });
 }

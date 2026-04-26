@@ -15,8 +15,7 @@ export async function GET(
   if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
 
   const supabase = createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('heat_logs')
     .select(`*, logger:profiles!heat_logs_logged_by_fkey(id, full_name)`)
     .eq('cat_id', params.id)
@@ -44,8 +43,7 @@ export async function POST(
   }
 
   const supabase = createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('heat_logs')
     .insert({ ...parsed.data, cat_id: params.id, logged_by: user.authId })
     .select('*')

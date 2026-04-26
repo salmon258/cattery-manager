@@ -462,7 +462,8 @@
     "viewDetails": "View details",
     "from": "From",
     "to": "To",
-    "export": "Export"
+    "export": "Export",
+    "add": "Add"
   },
   "catDetail": {
     "dailyKcalOverRange": "Daily kcal over range",
@@ -1195,6 +1196,11 @@
       "subtitle": "Manage salaries, generate monthly payroll, and record payments.",
       "noProfiles": "No active users yet.",
       "generated": "Generated {count} payroll rows.",
+      "tabs": {
+        "salary": "Salary",
+        "reimbursements": "Reimbursements",
+        "adhoc": "Ad-hoc payments"
+      },
       "role": {
         "admin": "Administrator",
         "sitter": "Cat sitter"
@@ -1274,13 +1280,142 @@
     },
     "myPayroll": {
       "title": "My Payroll",
-      "subtitle": "Your salary history and monthly payouts.",
+      "subtitle": "Your salary, reimbursements, and one-off payouts.",
       "currentSalary": "Current monthly salary",
       "since": "effective {date}",
       "empty": "No payroll entries yet.",
       "pending": "Payment pending",
       "paidOn": "Paid on {date}",
-      "viewProof": "View transfer proof"
+      "viewProof": "View transfer proof",
+      "payrollSection": "Monthly payroll"
+    },
+    "reimbursement": {
+      "myTitle": "My reimbursements",
+      "adminTitle": "Reimbursement requests",
+      "empty": "No reimbursement requests yet.",
+      "emptyAdmin": "No reimbursement requests in this filter.",
+      "uncategorized": "Uncategorized",
+      "propose": "Propose reimbursement",
+      "proposeTitle": "Propose a reimbursement",
+      "proposeSubtitle": "Submit an expense for the admin to approve.",
+      "proposed": "Reimbursement proposed.",
+      "submit": "Submit request",
+      "review": "Review",
+      "reviewTitle": "Review reimbursement",
+      "approve": "Approve",
+      "reject": "Reject",
+      "approved": "Reimbursement approved.",
+      "rejected": "Reimbursement rejected.",
+      "updated": "Reimbursement updated.",
+      "deleted": "Reimbursement deleted.",
+      "cancelled": "Reimbursement cancelled.",
+      "markPaid": "Mark paid",
+      "payTitle": "Mark reimbursement paid",
+      "confirmPaid": "Confirm payment",
+      "paidSuccess": "Reimbursement paid and added to finance.",
+      "paidOn": "paid on {date}",
+      "expenseDate": "Expense date",
+      "viewReceipt": "View receipt",
+      "viewPaymentProof": "View payment proof",
+      "reviewNotes": "Admin notes",
+      "confirmDelete": "Delete this reimbursement request? This will also remove the linked finance row.",
+      "confirmCancel": "Cancel this reimbursement request?",
+      "manageCategories": "Categories",
+      "categoriesTitle": "Reimbursement categories",
+      "errors": {
+        "amountInvalid": "Amount must be greater than 0",
+        "proofRequired": "Payment proof is required"
+      },
+      "filter": {
+        "all": "All statuses"
+      },
+      "status": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "paid": "Paid",
+        "cancelled": "Cancelled"
+      },
+      "method": {
+        "cash": "Cash",
+        "bank_transfer": "Bank transfer",
+        "card": "Card",
+        "e_wallet": "E-wallet",
+        "other": "Other"
+      },
+      "fields": {
+        "category": "Category",
+        "pickCategory": "Choose category",
+        "amount": "Amount",
+        "currency": "Currency",
+        "expenseDate": "Expense date",
+        "description": "What was this for?",
+        "descriptionHint": "e.g. Grab to clinic for Mochi's checkup",
+        "receipt": "Receipt screenshot (image or PDF)",
+        "reviewNotes": "Notes (optional)",
+        "reviewNotesHint": "Reason for approval/rejection — visible to the sitter",
+        "paymentDate": "Payment date",
+        "paymentMethod": "Payment method",
+        "paymentReference": "Reference / transaction ID",
+        "paymentProof": "Transfer proof (image or PDF)"
+      },
+      "category": {
+        "name": "Category name",
+        "created": "Category added.",
+        "deleted": "Category removed.",
+        "system": "System",
+        "confirmDelete": "Disable this category? Existing requests keep their label."
+      }
+    },
+    "adhoc": {
+      "myTitle": "Ad-hoc payments",
+      "adminTitle": "Ad-hoc payments",
+      "empty": "No ad-hoc payments yet.",
+      "emptyAdmin": "No ad-hoc payments in this filter.",
+      "new": "New ad-hoc payment",
+      "edit": "Edit ad-hoc payment",
+      "created": "Ad-hoc payment created.",
+      "updated": "Ad-hoc payment updated.",
+      "deleted": "Ad-hoc payment deleted.",
+      "markPaid": "Mark paid",
+      "payTitle": "Mark ad-hoc payment paid",
+      "confirmPaid": "Confirm payment",
+      "paidSuccess": "Payment recorded and added to finance.",
+      "viewPaymentProof": "View payment proof",
+      "confirmDelete": "Delete this ad-hoc payment? The linked finance row will also be removed.",
+      "errors": {
+        "amountInvalid": "Amount must be greater than 0",
+        "kindRequired": "Kind / label is required"
+      },
+      "filter": {
+        "all": "All statuses"
+      },
+      "status": {
+        "pending": "Pending",
+        "paid": "Paid",
+        "cancelled": "Cancelled"
+      },
+      "method": {
+        "cash": "Cash",
+        "bank_transfer": "Bank transfer",
+        "card": "Card",
+        "e_wallet": "E-wallet",
+        "other": "Other"
+      },
+      "fields": {
+        "profile": "Staff member",
+        "kind": "Kind / label",
+        "kindHint": "e.g. Meal allowance, Overtime, Holiday bonus",
+        "financeCategory": "Finance category",
+        "financeCategoryHint": "Defaults to Staff Payroll",
+        "amount": "Amount",
+        "currency": "Currency",
+        "paymentDate": "Payment date",
+        "description": "Notes",
+        "paymentMethod": "Payment method",
+        "paymentReference": "Reference / transaction ID",
+        "paymentProof": "Transfer proof (optional)"
+      }
     }
   }
 }

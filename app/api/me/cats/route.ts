@@ -37,8 +37,7 @@ export async function GET() {
   ] = catIds.length
     ? await Promise.all([
         supabase.from('cat_latest_weight').select('cat_id, recorded_at').in('cat_id', catIds),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (supabase as any)
+        supabase
           .from('health_tickets')
           .select('cat_id')
           .in('cat_id', catIds)
@@ -50,8 +49,7 @@ export async function GET() {
           .gte('recorded_at', startIso)
           .lte('recorded_at', endIso)
           .order('recorded_at', { ascending: false }),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (supabase as any)
+        supabase
           .from('eating_logs')
           .select(`
             id, cat_id, meal_time, feeding_method,
@@ -137,8 +135,7 @@ export async function GET() {
   }
 
   const mealsByCat = new Map<string, TodayMeal[]>();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for (const m of (todayMealsRes.data ?? []) as any[]) {
+  for (const m of todayMealsRes.data ?? []) {
     let totalG = 0;
     let totalEatenG = 0;
     let totalK = 0;
@@ -166,8 +163,7 @@ export async function GET() {
   }
 
   const adHocByCat = new Map<string, TodayAdHoc[]>();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for (const a of (todayAdHocRes.data ?? []) as any[]) {
+  for (const a of todayAdHocRes.data ?? []) {
     const arr = adHocByCat.get(a.cat_id) ?? [];
     arr.push({
       id: a.id,
@@ -181,11 +177,11 @@ export async function GET() {
   }
 
   const confirmedMedsByCat = new Map<string, TodayConfirmedMed[]>();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for (const t of (todayConfirmedMedsRes.data ?? []) as any[]) {
+  for (const t of todayConfirmedMedsRes.data ?? []) {
     const catId = t.medication?.cat_id;
     if (!catId) continue;
     const arr = confirmedMedsByCat.get(catId) ?? [];
+    if (!t.confirmed_at) continue;
     arr.push({
       id: t.id,
       medicine_name: t.medication?.medicine_name ?? '',

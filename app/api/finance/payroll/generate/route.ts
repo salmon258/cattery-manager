@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/current-user';
 import { z } from 'zod';
+import type { Database } from '@/lib/supabase/types';
+
+type PayrollEntryInsert = Database['public']['Tables']['payroll_entries']['Insert'];
+type ProfileSalary = Database['public']['Tables']['profile_salaries']['Row'];
 
 const genSchema = z.object({
   year: z.coerce.number().int().min(2000).max(2100),
@@ -36,8 +40,7 @@ export async function POST(request: Request) {
   const periodStart = new Date(Date.UTC(year, month - 1, 1)).toISOString().slice(0, 10);
   const periodEnd = new Date(Date.UTC(year, month, 0)).toISOString().slice(0, 10);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = createClient() as any;
+  const supabase = createClient();
 
   // Pull the latest effective salary for each candidate profile.
   let profQ = supabase
@@ -54,13 +57,8 @@ export async function POST(request: Request) {
     .lte('effective_from', periodEnd)
     .order('effective_from', { ascending: false });
   // Latest-wins per profile.
-  const latest = new Map<string, typeof salariesAll[number]>();
-  for (const s of (salariesAll ?? []) as Array<{
-    profile_id: string;
-    effective_from: string;
-    monthly_salary: number;
-    currency: string;
-  }>) {
+  const latest = new Map<string, ProfileSalary>();
+  for (const s of salariesAll ?? []) {
     if (!latest.has(s.profile_id)) latest.set(s.profile_id, s);
   }
 
@@ -69,14 +67,11 @@ export async function POST(request: Request) {
     .select('profile_id')
     .eq('period_start', periodStart)
     .eq('period_end', periodEnd);
-  const alreadyHas = new Set(
-    ((existing ?? []) as Array<{ profile_id: string }>).map((e) => e.profile_id)
-  );
+  const alreadyHas = new Set((existing ?? []).map((e) => e.profile_id));
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rows: any[] = [];
+  const rows: PayrollEntryInsert[] = [];
   const skipped: Array<{ profile_id: string; reason: string }> = [];
-  for (const p of (profiles ?? []) as Array<{ id: string }>) {
+  for (const p of profiles ?? []) {
     if (alreadyHas.has(p.id)) {
       skipped.push({ profile_id: p.id, reason: 'exists' });
       continue;

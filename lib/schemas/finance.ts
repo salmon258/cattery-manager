@@ -141,3 +141,78 @@ export const payrollEntryUpdateSchema = z
     { message: 'Period end must be on or after period start', path: ['period_end'] }
   );
 export type PayrollEntryUpdateInput = z.infer<typeof payrollEntryUpdateSchema>;
+
+// ─── Reimbursements ──────────────────────────────────────────────────────────
+export const reimbursementStatusSchema = z.enum([
+  'pending',
+  'approved',
+  'rejected',
+  'paid',
+  'cancelled'
+]);
+export type ReimbursementStatus = z.infer<typeof reimbursementStatusSchema>;
+
+export const reimbursementCategorySchema = z.object({
+  name: z.string().min(1).max(120),
+  slug: nullableString(60).optional(),
+  icon: nullableString(40).optional(),
+  finance_category_id: z.string().uuid().nullable().optional(),
+  sort_order: z.coerce.number().int().min(0).max(9999).default(500),
+  is_active: z.boolean().optional()
+});
+export type ReimbursementCategoryInput = z.infer<typeof reimbursementCategorySchema>;
+
+export const reimbursementCategoryUpdateSchema = reimbursementCategorySchema.partial();
+export type ReimbursementCategoryUpdateInput = z.infer<typeof reimbursementCategoryUpdateSchema>;
+
+// Sitter-side: only the data needed to propose a request.
+export const reimbursementProposeSchema = z.object({
+  category_id: z.string().uuid().nullable().optional(),
+  amount: z.coerce.number().min(0).max(1_000_000_000_000),
+  currency: z.string().length(3),
+  expense_date: dateStr,
+  description: nullableString(2000).optional()
+});
+export type ReimbursementProposeInput = z.infer<typeof reimbursementProposeSchema>;
+
+// Admin-side: review/edit; status transitions, payment fields.
+export const reimbursementUpdateSchema = z.object({
+  category_id: z.string().uuid().nullable().optional(),
+  amount: z.coerce.number().min(0).optional(),
+  currency: z.string().length(3).optional(),
+  expense_date: dateStr.optional(),
+  description: nullableString(2000).optional(),
+  status: reimbursementStatusSchema.optional(),
+  review_notes: nullableString(2000).optional(),
+  payment_date: nullableDate.optional(),
+  payment_method: financialPaymentMethodSchema.nullable().optional(),
+  payment_reference: nullableString(120).optional(),
+  payment_proof_url: nullableString(2000).optional(),
+  payment_proof_path: nullableString(500).optional()
+});
+export type ReimbursementUpdateInput = z.infer<typeof reimbursementUpdateSchema>;
+
+// ─── Ad-hoc payments ─────────────────────────────────────────────────────────
+export const adhocPaymentStatusSchema = z.enum(['pending', 'paid', 'cancelled']);
+export type AdhocPaymentStatus = z.infer<typeof adhocPaymentStatusSchema>;
+
+export const adhocPaymentSchema = z.object({
+  profile_id: z.string().uuid(),
+  kind: z.string().min(1).max(120),
+  finance_category_id: z.string().uuid().nullable().optional(),
+  amount: z.coerce.number().min(0).max(1_000_000_000_000),
+  currency: z.string().length(3),
+  payment_date: dateStr,
+  description: nullableString(2000).optional(),
+  status: adhocPaymentStatusSchema.default('pending'),
+  payment_method: financialPaymentMethodSchema.nullable().optional(),
+  payment_reference: nullableString(120).optional(),
+  payment_proof_url: nullableString(2000).optional(),
+  payment_proof_path: nullableString(500).optional()
+});
+export type AdhocPaymentInput = z.infer<typeof adhocPaymentSchema>;
+
+export const adhocPaymentUpdateSchema = adhocPaymentSchema
+  .omit({ profile_id: true })
+  .partial();
+export type AdhocPaymentUpdateInput = z.infer<typeof adhocPaymentUpdateSchema>;

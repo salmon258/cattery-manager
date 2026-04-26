@@ -462,7 +462,8 @@
     "viewDetails": "Lihat detail",
     "from": "Dari",
     "to": "Hingga",
-    "export": "Ekspor"
+    "export": "Ekspor",
+    "add": "Tambah"
   },
   "catDetail": {
     "dailyKcalOverRange": "Kalori harian dalam rentang",
@@ -1195,6 +1196,11 @@
       "subtitle": "Kelola gaji, buat slip gaji bulanan, dan catat pembayaran.",
       "noProfiles": "Belum ada pengguna aktif.",
       "generated": "{count} slip gaji dibuat.",
+      "tabs": {
+        "salary": "Gaji",
+        "reimbursements": "Reimburse",
+        "adhoc": "Pembayaran adhoc"
+      },
       "role": {
         "admin": "Administrator",
         "sitter": "Penjaga kucing"
@@ -1274,13 +1280,142 @@
     },
     "myPayroll": {
       "title": "Gaji Saya",
-      "subtitle": "Riwayat gaji dan pembayaran bulanan Anda.",
+      "subtitle": "Gaji, reimburse, dan pembayaran satu kali Anda.",
       "currentSalary": "Gaji bulanan saat ini",
       "since": "berlaku {date}",
       "empty": "Belum ada slip gaji.",
       "pending": "Pembayaran tertunda",
       "paidOn": "Dibayar pada {date}",
-      "viewProof": "Lihat bukti transfer"
+      "viewProof": "Lihat bukti transfer",
+      "payrollSection": "Slip gaji bulanan"
+    },
+    "reimbursement": {
+      "myTitle": "Reimburse saya",
+      "adminTitle": "Permintaan reimburse",
+      "empty": "Belum ada permintaan reimburse.",
+      "emptyAdmin": "Tidak ada permintaan reimburse pada filter ini.",
+      "uncategorized": "Tanpa kategori",
+      "propose": "Ajukan reimburse",
+      "proposeTitle": "Ajukan reimbursement",
+      "proposeSubtitle": "Kirim pengeluaran agar admin meninjau dan menyetujuinya.",
+      "proposed": "Permintaan reimburse terkirim.",
+      "submit": "Kirim permintaan",
+      "review": "Tinjau",
+      "reviewTitle": "Tinjau reimburse",
+      "approve": "Setujui",
+      "reject": "Tolak",
+      "approved": "Reimburse disetujui.",
+      "rejected": "Reimburse ditolak.",
+      "updated": "Reimburse diperbarui.",
+      "deleted": "Reimburse dihapus.",
+      "cancelled": "Reimburse dibatalkan.",
+      "markPaid": "Tandai dibayar",
+      "payTitle": "Tandai reimburse dibayar",
+      "confirmPaid": "Konfirmasi pembayaran",
+      "paidSuccess": "Reimburse dibayar dan ditambahkan ke keuangan.",
+      "paidOn": "dibayar pada {date}",
+      "expenseDate": "Tanggal pengeluaran",
+      "viewReceipt": "Lihat kuitansi",
+      "viewPaymentProof": "Lihat bukti pembayaran",
+      "reviewNotes": "Catatan admin",
+      "confirmDelete": "Hapus permintaan reimburse ini? Entri keuangan terkait juga akan dihapus.",
+      "confirmCancel": "Batalkan permintaan reimburse ini?",
+      "manageCategories": "Kategori",
+      "categoriesTitle": "Kategori reimburse",
+      "errors": {
+        "amountInvalid": "Jumlah harus lebih besar dari 0",
+        "proofRequired": "Bukti pembayaran wajib diunggah"
+      },
+      "filter": {
+        "all": "Semua status"
+      },
+      "status": {
+        "pending": "Menunggu",
+        "approved": "Disetujui",
+        "rejected": "Ditolak",
+        "paid": "Dibayar",
+        "cancelled": "Dibatalkan"
+      },
+      "method": {
+        "cash": "Tunai",
+        "bank_transfer": "Transfer bank",
+        "card": "Kartu",
+        "e_wallet": "E-wallet",
+        "other": "Lainnya"
+      },
+      "fields": {
+        "category": "Kategori",
+        "pickCategory": "Pilih kategori",
+        "amount": "Jumlah",
+        "currency": "Mata uang",
+        "expenseDate": "Tanggal pengeluaran",
+        "description": "Untuk apa pengeluaran ini?",
+        "descriptionHint": "mis. Grab ke klinik untuk Mochi",
+        "receipt": "Tangkapan layar kuitansi (gambar/PDF)",
+        "reviewNotes": "Catatan (opsional)",
+        "reviewNotesHint": "Alasan disetujui/ditolak — terlihat oleh sitter",
+        "paymentDate": "Tanggal pembayaran",
+        "paymentMethod": "Metode pembayaran",
+        "paymentReference": "Referensi / ID transaksi",
+        "paymentProof": "Bukti transfer (gambar/PDF)"
+      },
+      "category": {
+        "name": "Nama kategori",
+        "created": "Kategori ditambahkan.",
+        "deleted": "Kategori dihapus.",
+        "system": "Sistem",
+        "confirmDelete": "Nonaktifkan kategori ini? Permintaan lama tetap memakai labelnya."
+      }
+    },
+    "adhoc": {
+      "myTitle": "Pembayaran adhoc",
+      "adminTitle": "Pembayaran adhoc",
+      "empty": "Belum ada pembayaran adhoc.",
+      "emptyAdmin": "Tidak ada pembayaran adhoc pada filter ini.",
+      "new": "Pembayaran adhoc baru",
+      "edit": "Ubah pembayaran adhoc",
+      "created": "Pembayaran adhoc dibuat.",
+      "updated": "Pembayaran adhoc diperbarui.",
+      "deleted": "Pembayaran adhoc dihapus.",
+      "markPaid": "Tandai dibayar",
+      "payTitle": "Tandai pembayaran adhoc dibayar",
+      "confirmPaid": "Konfirmasi pembayaran",
+      "paidSuccess": "Pembayaran tercatat dan ditambahkan ke keuangan.",
+      "viewPaymentProof": "Lihat bukti pembayaran",
+      "confirmDelete": "Hapus pembayaran adhoc ini? Entri keuangan terkait juga akan dihapus.",
+      "errors": {
+        "amountInvalid": "Jumlah harus lebih besar dari 0",
+        "kindRequired": "Jenis / label wajib diisi"
+      },
+      "filter": {
+        "all": "Semua status"
+      },
+      "status": {
+        "pending": "Menunggu",
+        "paid": "Dibayar",
+        "cancelled": "Dibatalkan"
+      },
+      "method": {
+        "cash": "Tunai",
+        "bank_transfer": "Transfer bank",
+        "card": "Kartu",
+        "e_wallet": "E-wallet",
+        "other": "Lainnya"
+      },
+      "fields": {
+        "profile": "Anggota staf",
+        "kind": "Jenis / label",
+        "kindHint": "mis. Uang makan, Lembur, Bonus hari raya",
+        "financeCategory": "Kategori keuangan",
+        "financeCategoryHint": "Default ke Penggajian Staf",
+        "amount": "Jumlah",
+        "currency": "Mata uang",
+        "paymentDate": "Tanggal pembayaran",
+        "description": "Catatan",
+        "paymentMethod": "Metode pembayaran",
+        "paymentReference": "Referensi / ID transaksi",
+        "paymentProof": "Bukti transfer (opsional)"
+      }
     }
   }
 }

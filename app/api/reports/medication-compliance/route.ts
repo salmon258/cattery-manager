@@ -18,8 +18,7 @@ export async function GET(req: Request) {
   const supabase = createClient();
 
   // Pull all medications in scope (active + inactive)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: meds, error: medErr } = await (supabase as any)
+  const { data: meds, error: medErr } = await supabase
     .from('medications')
     .select(`
       id, medicine_name, dose, route, start_date, end_date, is_active,
@@ -29,8 +28,7 @@ export async function GET(req: Request) {
   if (medErr) return NextResponse.json({ error: medErr.message }, { status: 500 });
 
   // Pull tasks in date range and group counts by medication_id
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let taskQ = (supabase as any)
+  let taskQ = supabase
     .from('medication_tasks')
     .select('medication_id, due_at, confirmed_at, skipped');
   if (from) taskQ = taskQ.gte('due_at', from);
@@ -49,8 +47,7 @@ export async function GET(req: Request) {
     stats.set(t.medication_id, e);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rows = (meds ?? []).map((m: any) => {
+  const rows = (meds ?? []).map((m) => {
     const s = stats.get(m.id) ?? { confirmed: 0, missed: 0, pending: 0, skipped: 0 };
     const denom = s.confirmed + s.missed;
     const compliance = denom > 0 ? s.confirmed / denom : null;
