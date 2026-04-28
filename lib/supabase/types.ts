@@ -2742,6 +2742,153 @@ export type Database = {
           },
         ]
       }
+      sicknesses: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          is_active: boolean
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          is_active?: boolean
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          is_active?: boolean
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      medication_templates: {
+        Row: {
+          id: string
+          name: string
+          brand: string | null
+          form: Database["public"]["Enums"]["medication_form"]
+          concentration_amount: number | null
+          dose_unit: string
+          per_unit: string
+          default_route: Database["public"]["Enums"]["med_route"]
+          splittable_into: number
+          notes: string | null
+          is_active: boolean
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          brand?: string | null
+          form?: Database["public"]["Enums"]["medication_form"]
+          concentration_amount?: number | null
+          dose_unit?: string
+          per_unit?: string
+          default_route?: Database["public"]["Enums"]["med_route"]
+          splittable_into?: number
+          notes?: string | null
+          is_active?: boolean
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          brand?: string | null
+          form?: Database["public"]["Enums"]["medication_form"]
+          concentration_amount?: number | null
+          dose_unit?: string
+          per_unit?: string
+          default_route?: Database["public"]["Enums"]["med_route"]
+          splittable_into?: number
+          notes?: string | null
+          is_active?: boolean
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sickness_medications: {
+        Row: {
+          id: string
+          sickness_id: string
+          medication_template_id: string
+          dose_per_kg: number | null
+          flat_dose: number | null
+          min_dose: number | null
+          max_dose: number | null
+          frequency: string | null
+          duration_days: number | null
+          priority: number
+          notes: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          sickness_id: string
+          medication_template_id: string
+          dose_per_kg?: number | null
+          flat_dose?: number | null
+          min_dose?: number | null
+          max_dose?: number | null
+          frequency?: string | null
+          duration_days?: number | null
+          priority?: number
+          notes?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          sickness_id?: string
+          medication_template_id?: string
+          dose_per_kg?: number | null
+          flat_dose?: number | null
+          min_dose?: number | null
+          max_dose?: number | null
+          frequency?: string | null
+          duration_days?: number | null
+          priority?: number
+          notes?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sickness_medications_sickness_id_fkey"
+            columns: ["sickness_id"]
+            isOneToOne: false
+            referencedRelation: "sicknesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sickness_medications_medication_template_id_fkey"
+            columns: ["medication_template_id"]
+            isOneToOne: false
+            referencedRelation: "medication_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       assignee_cat_counts: {
@@ -3081,6 +3228,15 @@ export type Database = {
         | "delivered"
         | "failed"
       med_route: "oral" | "topical" | "injection" | "other"
+      medication_form:
+        | "tablet"
+        | "capsule"
+        | "liquid"
+        | "injection"
+        | "drops"
+        | "powder"
+        | "topical"
+        | "other"
       payroll_status: "pending" | "paid" | "cancelled"
       preventive_treatment_type: "deworming" | "flea" | "combined"
       reimbursement_status:
@@ -3317,6 +3473,16 @@ export const Constants = {
         "failed",
       ],
       med_route: ["oral", "topical", "injection", "other"],
+      medication_form: [
+        "tablet",
+        "capsule",
+        "liquid",
+        "injection",
+        "drops",
+        "powder",
+        "topical",
+        "other",
+      ],
       payroll_status: ["pending", "paid", "cancelled"],
       preventive_treatment_type: ["deworming", "flea", "combined"],
       reimbursement_status: [

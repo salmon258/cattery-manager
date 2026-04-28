@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { ArrowRight, Check, Pause, Pencil, Pill, Play, Plus, Timer, Trash2 } from 'lucide-react';
+import { ArrowRight, Check, Pause, Pencil, Pill, Play, Plus, Sparkles, Timer, Trash2 } from 'lucide-react';
 
 import type { Medication, MedicationTask } from '@/lib/supabase/aliases';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ import { formatDate } from '@/lib/utils';
 import { NewMedicationModal } from '@/components/medications/new-medication-modal';
 import { EditMedicationModal } from '@/components/medications/edit-medication-modal';
 import { LogAdHocMedModal } from '@/components/medications/log-ad-hoc-med-modal';
+import { SuggestMedicationModal } from '@/components/medications/suggest-medication-modal';
 
 type TaskRow = MedicationTask & { medication: Pick<Medication, 'id' | 'medicine_name' | 'dose' | 'route'> };
 
@@ -41,6 +42,7 @@ export function MedicationsCard({ catId }: { catId: string }) {
 
   const [newOpen, setNewOpen] = useState(false);
   const [adHocOpen, setAdHocOpen] = useState(false);
+  const [suggestOpen, setSuggestOpen] = useState(false);
   const [editing, setEditing] = useState<Medication | null>(null);
 
   const { data: meds = [], isLoading } = useQuery({
@@ -157,6 +159,14 @@ export function MedicationsCard({ catId }: { catId: string }) {
             className="bg-violet-500 text-white shadow hover:bg-violet-600"
           >
             <Plus className="h-4 w-4" /> {t('adHoc.log')}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-violet-300 text-violet-700 hover:bg-violet-50 dark:border-violet-800 dark:text-violet-300 dark:hover:bg-violet-950/40"
+            onClick={() => setSuggestOpen(true)}
+          >
+            <Sparkles className="h-4 w-4" /> {t('suggestFromSickness')}
           </Button>
           <Button
             size="sm"
@@ -330,6 +340,7 @@ export function MedicationsCard({ catId }: { catId: string }) {
         medication={editing}
       />
       <LogAdHocMedModal open={adHocOpen} onClose={() => setAdHocOpen(false)} catId={catId} />
+      <SuggestMedicationModal open={suggestOpen} onClose={() => setSuggestOpen(false)} catId={catId} />
     </Card>
   );
 }

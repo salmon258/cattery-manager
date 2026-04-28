@@ -14,6 +14,7 @@ import {
   Dna,
   Stethoscope,
   BarChart3,
+  BookOpen,
   Settings,
   Package,
   Wallet,
@@ -79,6 +80,7 @@ export function AdminSidebar({ profile, brandName, onNavigate }: Props) {
         { href: '/breeding', label: t('breeding'), icon: Dna, iconColor: 'text-pink-500' },
         { href: '/rooms', label: t('rooms'), icon: Home, iconColor: 'text-teal-500' },
         { href: '/food-items', label: t('food'), icon: Utensils, iconColor: 'text-amber-500' },
+        { href: '/medication-notes', label: t('medicationNotes'), icon: BookOpen, iconColor: 'text-rose-500' },
         { href: '/stock', label: t('stock'), icon: Package, iconColor: 'text-lime-500' },
         { href: '/finance', label: t('finance'), icon: Wallet, iconColor: 'text-green-500', exact: true },
         { href: '/finance/payroll', label: t('payroll'), icon: Banknote, iconColor: 'text-cyan-500' }

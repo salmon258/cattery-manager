@@ -11,6 +11,7 @@
     "breeding": "Perkawinan",
     "rooms": "Ruangan",
     "food": "Katalog makanan",
+    "medicationNotes": "Catatan obat",
     "stock": "Stok",
     "finance": "Keuangan",
     "payroll": "Penggajian",
@@ -291,6 +292,7 @@
   "medications": {
     "title": "Obat",
     "newSchedule": "Jadwal baru",
+    "suggestFromSickness": "Saran dari penyakit",
     "ongoing": "Berlangsung",
     "indefinite": "Tanpa batas",
     "indefiniteHint": "berjalan sampai dihentikan manual",
@@ -362,6 +364,139 @@
         "scheduled": "Terjadwal",
         "ad_hoc": "Sekali pakai"
       }
+    }
+  },
+  "medicationNotes": {
+    "title": "Catatan obat",
+    "subtitle": "Bangun formularium cattery agar saran dosis berbasis berat dapat dihitung otomatis.",
+    "tabs": {
+      "sicknesses": "Penyakit",
+      "templates": "Katalog obat"
+    },
+    "inactive": "Nonaktif",
+    "showInactive": "Tampilkan yang nonaktif",
+    "hideInactive": "Sembunyikan yang nonaktif",
+    "forms": {
+      "tablet": "Tablet",
+      "capsule": "Kapsul",
+      "liquid": "Cair",
+      "injection": "Suntik",
+      "drops": "Tetes",
+      "powder": "Bubuk/sachet",
+      "topical": "Oles",
+      "other": "Lainnya"
+    },
+    "routes": {
+      "oral": "Oral",
+      "topical": "Oles",
+      "injection": "Suntik",
+      "other": "Lainnya"
+    },
+    "sicknesses": {
+      "description": "Daftar kondisi yang sering kamu tangani. Setiap kondisi punya daftar obat yang direkomendasikan.",
+      "new": "Penyakit baru",
+      "newTitle": "Penyakit baru",
+      "editTitle": "Ubah penyakit",
+      "empty": "Belum ada penyakit — tambahkan satu untuk mulai membangun formularium.",
+      "created": "Penyakit ditambahkan.",
+      "updated": "Penyakit diperbarui.",
+      "deactivated": "Penyakit dinonaktifkan.",
+      "deactivateConfirm": "Nonaktifkan penyakit ini? Rekomendasi tetap tersimpan tapi penyakit tidak muncul di pemilih saran.",
+      "medCount": "{n} obat",
+      "fields": {
+        "name": "Nama",
+        "description": "Deskripsi",
+        "active": "Aktif"
+      }
+    },
+    "templates": {
+      "description": "Setiap obat yang kamu simpan — setelah ditambahkan, hubungkan dengan satu atau lebih penyakit beserta aturan dosisnya.",
+      "new": "Obat baru",
+      "newTitle": "Obat baru",
+      "editTitle": "Ubah obat",
+      "empty": "Belum ada obat. Tambahkan minimal satu sebelum bisa dihubungkan ke penyakit.",
+      "created": "Obat ditambahkan.",
+      "updated": "Obat diperbarui.",
+      "deactivated": "Obat dinonaktifkan.",
+      "deactivateConfirm": "Nonaktifkan obat ini? Hubungan ke penyakit yang ada tetap tersimpan tapi obat tidak muncul lagi di saran.",
+      "noConcentration": "Konsentrasi belum diisi",
+      "splittableLabel": "bisa dibelah {n}",
+      "splittableValues": {
+        "1": "Hanya utuh",
+        "2": "Boleh ½",
+        "4": "Boleh ¼"
+      },
+      "fields": {
+        "name": "Nama",
+        "brand": "Merek",
+        "form": "Bentuk",
+        "defaultRoute": "Rute default",
+        "concentrationAmount": "Kekuatan per satuan",
+        "concentrationHint": "Bahan aktif per satuan pemberian (mis. 50 untuk 50 mg/ml).",
+        "doseUnit": "Satuan aktif",
+        "perUnit": "Satuan pemberian",
+        "perUnitHint": "ml untuk cair, tablet untuk tablet, drop untuk tetes, …",
+        "splittable": "Bisa dibelah jadi",
+        "splittableHint": "Tablet biasanya bisa dibelah jadi ½ atau ¼; kapsul dan suntikan tidak.",
+        "notes": "Catatan",
+        "active": "Aktif"
+      }
+    },
+    "links": {
+      "title": "Obat yang direkomendasikan",
+      "empty": "Belum ada obat yang dihubungkan.",
+      "add": "Tambahkan obat",
+      "addTitle": "Tambahkan rekomendasi obat",
+      "editTitle": "Ubah rekomendasi obat",
+      "added": "Rekomendasi ditambahkan.",
+      "updated": "Rekomendasi diperbarui.",
+      "removed": "Rekomendasi dihapus.",
+      "removeConfirm": "Hapus obat ini dari penyakit?",
+      "unknownTemplate": "(obat dihapus)",
+      "alt": "alt #{n}",
+      "perKgRule": "{dose} {unit}/kg",
+      "flatRule": "{dose} {unit} flat",
+      "clampRange": "batas {min}–{max} {unit}",
+      "durationDays": "Pengobatan {n}h",
+      "noRule": "Tanpa aturan dosis",
+      "templateInfo": "{form} diukur dalam {doseUnit}",
+      "fields": {
+        "template": "Obat",
+        "templatePlaceholder": "Pilih obat dari katalog",
+        "dosePerKg": "Dosis per kg",
+        "dosePerKgHint": "{unit} bahan aktif per kg berat badan.",
+        "flatDose": "Dosis flat",
+        "flatDoseHint": "Pakai ini bila dosis tetap tanpa peduli berat.",
+        "minDose": "Dosis min",
+        "maxDose": "Dosis maks",
+        "frequency": "Frekuensi",
+        "durationDays": "Durasi (hari)",
+        "priority": "Prioritas",
+        "priorityHint": "1 = lini pertama, 2+ = alternatif.",
+        "notes": "Catatan"
+      }
+    }
+  },
+  "medicationSuggest": {
+    "title": "Saran obat dari penyakit",
+    "pickSickness": "Pilih penyakit",
+    "pickPlaceholder": "Pilih kondisi…",
+    "noSuggestions": "Belum ada obat yang dihubungkan ke penyakit ini.",
+    "latestWeight": "Berat terakhir: {kg} kg (dicatat {date})",
+    "noWeightWarning": "Belum ada data berat — saran berbasis kg tidak bisa dihitung. Catat berat dulu.",
+    "noWeightFlat": "Belum ada data berat. Saran dosis flat tetap bisa digunakan.",
+    "addAsSchedule": "Jadikan jadwal",
+    "scheduled": "Jadwal dibuat.",
+    "cannotCompute": "Tidak bisa dihitung — perlu catatan berat atau dosis flat.",
+    "rawDoseOnly": "Tampil sebagai dosis bahan aktif saja.",
+    "roundedHint": "dibulatkan ke pecahan praktis.",
+    "roundedHeavyWarning": "Dibulatkan {exact} → {rounded} {unit}. Konfirmasi ke dokter sebelum diberikan.",
+    "manageHint": "Kelola penyakit dan obat di",
+    "basis": {
+      "perKg": "{dose} {unit}/kg × berat",
+      "flat": "Dosis flat (tidak tergantung berat)",
+      "clampedMin": "{dose} {unit}/kg × berat, dibatasi min {min}",
+      "clampedMax": "{dose} {unit}/kg × berat, dibatasi maks {max}"
     }
   },
   "askAi": {
