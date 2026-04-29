@@ -74,7 +74,9 @@
       "dosesConfirmedShort": "doses",
       "allCaughtUp": "All caught up ✓",
       "foodDetails": "Food details",
-      "mealFallback": "Meal"
+      "mealFallback": "Meal",
+      "expandAll": "Expand all",
+      "collapseAll": "Collapse all"
     }
   },
   "sitterHome": {

@@ -74,7 +74,9 @@
       "dosesConfirmedShort": "dosis",
       "allCaughtUp": "Semua selesai ✓",
       "foodDetails": "Detail makanan",
-      "mealFallback": "Makan"
+      "mealFallback": "Makan",
+      "expandAll": "Buka semua",
+      "collapseAll": "Tutup semua"
     }
   },
   "sitterHome": {
