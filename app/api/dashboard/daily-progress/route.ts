@@ -12,8 +12,8 @@ import { getCurrentUser } from '@/lib/auth/current-user';
  *   - previous_weight:   { weight_kg, recorded_at } | null   (most recent reading
  *                        strictly BEFORE today, within the last 30 days — used
  *                        by the dashboard to show a day-over-day delta)
- *   - meals:             [{ id, meal_time, feeding_method, total_grams, total_kcal, worst_ratio, food_names,
- *                          items: [{ name, grams, kcal, ratio }] }]
+ *   - meals:             [{ id, meal_time, feeding_method, total_grams, total_eaten_g, total_kcal, worst_ratio, food_names,
+ *                          items: [{ name, food_type, grams, eaten_g, kcal, ratio }] }]
  *   - med_tasks:         [{ id, due_at, confirmed_at, skipped, overdue, medicine_name }]
  *   - open_tickets:      count of open/in_progress tickets
  */
@@ -74,7 +74,7 @@ export async function GET() {
         id, cat_id, meal_time, feeding_method,
         items:eating_log_items(
           quantity_given_g, quantity_eaten, estimated_kcal_consumed,
-          food:food_items(name)
+          food:food_items(name, type)
         )
       `)
       .gte('meal_time', startIso)
@@ -117,9 +117,12 @@ export async function GET() {
 
   // ─── Meals per cat: summarise each session with the worst eaten ratio ──
   type EatenRatio = 'all' | 'most' | 'half' | 'little' | 'none';
+  type FoodType = 'wet' | 'dry' | 'raw' | 'treat' | 'supplement' | 'other';
   type MealItem = {
     name: string;
+    food_type: FoodType;
     grams: number;
+    eaten_g: number;
     kcal: number;
     ratio: EatenRatio;
   };
@@ -128,6 +131,7 @@ export async function GET() {
     meal_time: string;
     feeding_method: 'self' | 'assisted' | 'force_fed';
     total_grams: number;
+    total_eaten_g: number;
     total_kcal: number;
     worst_ratio: EatenRatio;
     food_names: string[];
@@ -137,10 +141,14 @@ export async function GET() {
   const RATIO_RANK: Record<EatenRatio, number> = {
     all: 4, most: 3, half: 2, little: 1, none: 0
   };
+  const RATIO_FACTOR: Record<EatenRatio, number> = {
+    all: 1, most: 0.75, half: 0.5, little: 0.2, none: 0
+  };
 
   const mealsByCat = new Map<string, MealSummary[]>();
   for (const m of mealsRes.data ?? []) {
     let totalG = 0;
+    let totalEaten = 0;
     let totalK = 0;
     let worst: EatenRatio = 'all';
     const foodNames: string[] = [];
@@ -148,19 +156,23 @@ export async function GET() {
     for (const it of m.items ?? []) {
       const grams = Number(it.quantity_given_g ?? 0);
       const kcal = Number(it.estimated_kcal_consumed ?? 0);
-      totalG += grams;
-      totalK += kcal;
       const r = (it.quantity_eaten as EatenRatio) ?? 'all';
+      const eaten = grams * RATIO_FACTOR[r];
+      totalG += grams;
+      totalEaten += eaten;
+      totalK += kcal;
       if (RATIO_RANK[r] < RATIO_RANK[worst]) worst = r;
       const name = it.food?.name ?? '';
+      const type = (it.food?.type as FoodType | undefined) ?? 'other';
       if (name) foodNames.push(name);
-      items.push({ name, grams, kcal, ratio: r });
+      items.push({ name, food_type: type, grams, eaten_g: eaten, kcal, ratio: r });
     }
     const summary: MealSummary = {
       id: m.id,
       meal_time: m.meal_time,
       feeding_method: m.feeding_method,
       total_grams: totalG,
+      total_eaten_g: totalEaten,
       total_kcal: totalK,
       worst_ratio: worst,
       food_names: foodNames,

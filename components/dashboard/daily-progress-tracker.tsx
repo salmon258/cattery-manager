@@ -1,26 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import {
   Check, X, Scale, Utensils, Pill, HeartPulse,
-  ChevronDown, ChevronRight, User, AlertTriangle,
+  ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown,
+  User, AlertTriangle,
   ArrowUp, ArrowDown, Minus
 } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 // ─── Types ────────────────────────────────────────────────────────────────
 type FeedingMethod = 'self' | 'assisted' | 'force_fed';
 type EatenRatio    = 'all' | 'most' | 'half' | 'little' | 'none';
+type FoodType      = 'wet' | 'dry' | 'raw' | 'treat' | 'supplement' | 'other';
 
 type MealItem = {
   name: string;
+  food_type: FoodType;
   grams: number;
+  eaten_g: number;
   kcal: number;
   ratio: EatenRatio;
 };
@@ -30,6 +35,7 @@ type Meal = {
   meal_time: string;
   feeding_method: FeedingMethod;
   total_grams: number;
+  total_eaten_g: number;
   total_kcal: number;
   worst_ratio: EatenRatio;
   food_names: string[];
@@ -158,23 +164,89 @@ function groupTasksByMedicine(tasks: MedTask[]): { name: string; tasks: MedTask[
   return Array.from(map.entries()).map(([name, tasks]) => ({ name, tasks }));
 }
 
-// Ratio → compact badge label + colour class
-function ratioDisplay(r: EatenRatio): { label: string; cls: string } {
-  switch (r) {
-    case 'all':    return { label: '100%', cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' };
-    case 'most':   return { label: '~75%', cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' };
-    case 'half':   return { label: '~50%', cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' };
-    case 'little': return { label: '~20%', cls: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300' };
-    case 'none':   return { label: '0%',   cls: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' };
-  }
+// Mirror the dropdown in log-eating-modal so category labels share the same
+// hue across the app (wet=sky, dry=amber, raw=rose, …).
+const FOOD_TYPE_STYLES: Record<FoodType, { label: string; dot: string }> = {
+  wet:        { label: 'text-sky-700 dark:text-sky-300',       dot: 'bg-sky-500' },
+  dry:        { label: 'text-amber-700 dark:text-amber-300',   dot: 'bg-amber-500' },
+  raw:        { label: 'text-rose-700 dark:text-rose-300',     dot: 'bg-rose-500' },
+  treat:      { label: 'text-pink-700 dark:text-pink-300',     dot: 'bg-pink-500' },
+  supplement: { label: 'text-violet-700 dark:text-violet-300', dot: 'bg-violet-500' },
+  other:      { label: 'text-slate-600 dark:text-slate-300',   dot: 'bg-slate-400' }
+};
+
+// Eaten/given ratio → green/orange/red text class for the xx/xx number.
+// Buckets line up with the EATEN_RATIO_FACTOR breakpoints (0.75 / 0.5).
+function eatenRatioColor(eaten: number, given: number): string {
+  if (given <= 0) return 'text-muted-foreground';
+  const r = eaten / given;
+  if (r >= 0.75) return 'text-emerald-700 dark:text-emerald-300';
+  if (r >= 0.5)  return 'text-amber-700 dark:text-amber-300';
+  return 'text-red-700 dark:text-red-300';
 }
+
+// Flatten all of today's meal items into one row per food item. A single
+// eating session with two foods produces two lines so the dashboard mirrors
+// what was actually logged. Carries the parent meal's time + force-fed flag
+// onto each row for context.
+type ItemRow = {
+  key: string;
+  meal_time: string;
+  forceFed: boolean;
+  name: string;
+  food_type: FoodType;
+  grams: number;
+  eaten_g: number;
+};
+function flattenItems(meals: Meal[]): ItemRow[] {
+  const out: ItemRow[] = [];
+  for (const m of meals) {
+    const force = m.feeding_method === 'force_fed';
+    const items = m.items && m.items.length > 0
+      ? m.items
+      : [{
+          name: '',
+          food_type: 'other' as FoodType,
+          grams: m.total_grams,
+          eaten_g: m.total_eaten_g,
+          kcal: m.total_kcal,
+          ratio: m.worst_ratio
+        }];
+    items.forEach((it, idx) => {
+      out.push({
+        key: `${m.id}-${idx}`,
+        meal_time: m.meal_time,
+        forceFed: force,
+        name: it.name,
+        food_type: it.food_type,
+        grams: it.grams,
+        eaten_g: it.eaten_g
+      });
+    });
+  }
+  return out;
+}
+
+// ─── Expand-all context ───────────────────────────────────────────────────
+// Each MealDetails has its own local open/close state, but the parent can
+// broadcast a "set everything to X" through this context. Bumping `version`
+// signals each MealDetails to resync its local state to `expanded`.
+const STORAGE_KEY = 'cattery.dashboard.foodDetailsExpanded';
+type ExpandAllValue = { expanded: boolean; version: number };
+const ExpandAllContext = createContext<ExpandAllValue>({ expanded: false, version: 0 });
 
 // ─── Collapsible per-meal food breakdown ─────────────────────────────────
 // Mirrors the "Today's activity" box on the sitter's "My cats" page so admins
 // can see what each cat actually ate, not just the totals.
 function MealDetails({ meals }: { meals: Meal[] }) {
   const t = useTranslations('adminDashboard.tracker');
-  const [open, setOpen] = useState(false);
+  const { expanded, version } = useContext(ExpandAllContext);
+  const [open, setOpen] = useState(expanded);
+  // Re-sync local state whenever the parent toggles the global "expand all"
+  // button. Individual toggles inside MealDetails still work between bumps.
+  useEffect(() => {
+    setOpen(expanded);
+  }, [expanded, version]);
 
   if (meals.length === 0) return null;
 
@@ -202,10 +274,18 @@ function MealDetails({ meals }: { meals: Meal[] }) {
             // A single eating session can include multiple foods; render each
             // food as its own line so admins see per-food grams / kcal /
             // eaten ratio rather than just the meal totals.
-            const items = m.items && m.items.length > 0
+            const items: MealItem[] = m.items && m.items.length > 0
               ? m.items
-              : [{ name: '', grams: m.total_grams, kcal: m.total_kcal, ratio: m.worst_ratio }];
+              : [{
+                  name: '',
+                  food_type: 'other',
+                  grams: m.total_grams,
+                  eaten_g: m.total_eaten_g,
+                  kcal: m.total_kcal,
+                  ratio: m.worst_ratio
+                }];
             const showTotals = items.length > 1;
+            const totalCls = eatenRatioColor(m.total_eaten_g, m.total_grams);
             return (
               <li key={m.id} className="py-1 text-[11px] first:pt-0 last:pb-0">
                 <div className="flex items-center justify-between gap-2 text-muted-foreground">
@@ -213,23 +293,32 @@ function MealDetails({ meals }: { meals: Meal[] }) {
                     {formatTime(m.meal_time)} · {m.feeding_method}
                   </span>
                   {showTotals && (
-                    <span className="shrink-0 text-[10px]">
-                      {Math.round(m.total_grams)} g · {Math.round(m.total_kcal)} kcal
+                    <span className={cn('shrink-0 text-[10px] font-medium', totalCls)}>
+                      {Math.round(m.total_eaten_g)}/{Math.round(m.total_grams)} g
+                      <span className="ml-1 font-normal text-muted-foreground">
+                        · {Math.round(m.total_kcal)} kcal
+                      </span>
                     </span>
                   )}
                 </div>
                 <ul className="mt-0.5 space-y-0.5">
                   {items.map((it, idx) => {
-                    const disp = ratioDisplay(it.ratio);
+                    const style = FOOD_TYPE_STYLES[it.food_type] ?? FOOD_TYPE_STYLES.other;
+                    const cls = eatenRatioColor(it.eaten_g, it.grams);
                     return (
                       <li key={idx} className="flex items-center justify-between gap-2">
-                        <span className="min-w-0 truncate font-medium">
-                          {it.name || t('mealFallback')}
+                        <span className="flex min-w-0 items-center gap-1.5 font-medium">
+                          <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', style.dot)} />
+                          <span className={cn('truncate', style.label)}>
+                            {it.name || t('mealFallback')}
+                          </span>
                         </span>
-                        <span className="flex shrink-0 items-center gap-1 text-[10px] text-muted-foreground">
-                          <span>{Math.round(it.grams)} g · {Math.round(it.kcal)} kcal</span>
-                          <span className={cn('rounded px-1 py-0.5 font-medium', disp.cls)}>
-                            {disp.label}
+                        <span className="flex shrink-0 items-center gap-1 text-[10px]">
+                          <span className={cn('font-medium', cls)}>
+                            {Math.round(it.eaten_g)}/{Math.round(it.grams)} g
+                          </span>
+                          <span className="text-muted-foreground">
+                            · {Math.round(it.kcal)} kcal
                           </span>
                         </span>
                       </li>
@@ -253,9 +342,12 @@ function CatRowItem({ cat }: { cat: CatRow }) {
   const medTotal = cat.med_tasks.length;
   const medOverdue = cat.med_tasks.some((m) => m.overdue);
   const totalGrams = cat.meals.reduce((s, m) => s + m.total_grams, 0);
+  const totalEaten = cat.meals.reduce((s, m) => s + m.total_eaten_g, 0);
   const totalKcal  = cat.meals.reduce((s, m) => s + m.total_kcal, 0);
   const foodWarn = hasFoodWarning(cat);
   const weightDelta = computeWeightDelta(cat.latest_weight, cat.previous_weight);
+  const itemRows = flattenItems(cat.meals);
+  const totalsCls = eatenRatioColor(totalEaten, totalGrams);
 
   return (
     <Link
@@ -328,25 +420,42 @@ function CatRowItem({ cat }: { cat: CatRow }) {
         ) : (
           <div className="min-w-0 flex-1">
             <div className="font-medium">
-              {Math.round(totalGrams)}g · {Math.round(totalKcal)} kcal
-              <span className="text-muted-foreground ml-1">({cat.meals.length} meal{cat.meals.length > 1 ? 's' : ''})</span>
+              <span className={totalsCls}>
+                {Math.round(totalEaten)}/{Math.round(totalGrams)} g
+              </span>
+              <span className="text-muted-foreground ml-1 font-normal">
+                · {Math.round(totalKcal)} kcal · {cat.meals.length} meal{cat.meals.length > 1 ? 's' : ''}
+              </span>
             </div>
-            <div className="flex flex-wrap gap-1 mt-0.5">
-              {cat.meals.map((m) => {
-                const disp = ratioDisplay(m.worst_ratio);
-                const isForce = m.feeding_method === 'force_fed';
-                return (
-                  <span
-                    key={m.id}
-                    className={cn('inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-[10px] font-medium', disp.cls)}
-                    title={`${formatTime(m.meal_time)} — ${m.total_grams}g — ${m.feeding_method}`}
-                  >
-                    {formatTime(m.meal_time)} {disp.label}
-                    {isForce && <AlertTriangle className="h-2.5 w-2.5" />}
-                  </span>
-                );
-              })}
-            </div>
+            {itemRows.length > 0 && (
+              <ul className="mt-0.5 space-y-0.5">
+                {itemRows.map((row) => {
+                  const style = FOOD_TYPE_STYLES[row.food_type] ?? FOOD_TYPE_STYLES.other;
+                  const cls = eatenRatioColor(row.eaten_g, row.grams);
+                  return (
+                    <li
+                      key={row.key}
+                      className="flex items-center gap-1.5 text-[10px]"
+                      title={`${row.food_type} — ${formatTime(row.meal_time)}`}
+                    >
+                      <span className="shrink-0 tabular-nums text-muted-foreground">
+                        {formatTime(row.meal_time)}
+                      </span>
+                      <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', style.dot)} />
+                      <span className={cn('min-w-0 flex-1 truncate font-medium', style.label)}>
+                        {row.name || t('mealFallback')}
+                      </span>
+                      <span className={cn('shrink-0 font-medium', cls)}>
+                        {Math.round(row.eaten_g)}/{Math.round(row.grams)} g
+                      </span>
+                      {row.forceFed && (
+                        <AlertTriangle className="h-2.5 w-2.5 shrink-0 text-amber-600 dark:text-amber-400" />
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
             <MealDetails meals={cat.meals} />
           </div>
         )}
@@ -468,6 +577,29 @@ function SitterGroup({
 export function DailyProgressTracker() {
   const t = useTranslations('adminDashboard.tracker');
 
+  // Persist the "expand all food details" preference across reloads. Read
+  // synchronously on first render so we don't flash the wrong state, then
+  // skip persisting on the very first effect run (the initial value already
+  // came from storage).
+  const [expandAll, setExpandAll] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return window.localStorage.getItem(STORAGE_KEY) === 'true';
+  });
+  const [expandVersion, setExpandVersion] = useState(0);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(STORAGE_KEY, expandAll ? 'true' : 'false');
+  }, [expandAll]);
+
+  const expandValue = useMemo<ExpandAllValue>(
+    () => ({ expanded: expandAll, version: expandVersion }),
+    [expandAll, expandVersion]
+  );
+  const toggleExpandAll = () => {
+    setExpandAll((v) => !v);
+    setExpandVersion((v) => v + 1);
+  };
+
   const { data, isLoading, error } = useQuery<DailyProgress>({
     queryKey: ['daily-progress'],
     queryFn: async () => {
@@ -479,31 +611,52 @@ export function DailyProgressTracker() {
   });
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base flex items-center gap-2">
-          <Check className="h-4 w-4 text-muted-foreground" />
-          {t('title')}
-        </CardTitle>
-        <p className="text-xs text-muted-foreground">{t('subtitle')}</p>
-      </CardHeader>
-      <CardContent className="space-y-5">
-        {isLoading && <p className="text-sm text-muted-foreground">Loading...</p>}
-        {error && <p className="text-sm text-destructive">Failed to load tracker.</p>}
-        {data && (
-          <>
-            {data.sitters.length === 0 && data.unassigned.length === 0 && (
-              <p className="text-sm text-muted-foreground">{t('noCats')}</p>
-            )}
-            {data.sitters.map((s) => (
-              <SitterGroup key={s.id} name={s.full_name} cats={s.cats} />
-            ))}
-            {data.unassigned.length > 0 && (
-              <SitterGroup name={t('unassigned')} cats={data.unassigned} defaultOpen={false} />
-            )}
-          </>
-        )}
-      </CardContent>
-    </Card>
+    <ExpandAllContext.Provider value={expandValue}>
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Check className="h-4 w-4 text-muted-foreground" />
+                {t('title')}
+              </CardTitle>
+              <p className="text-xs text-muted-foreground">{t('subtitle')}</p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={toggleExpandAll}
+              className="shrink-0 h-7 gap-1 px-2 text-xs"
+              aria-pressed={expandAll}
+            >
+              {expandAll ? (
+                <ChevronsDownUp className="h-3.5 w-3.5" />
+              ) : (
+                <ChevronsUpDown className="h-3.5 w-3.5" />
+              )}
+              {expandAll ? t('collapseAll') : t('expandAll')}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          {isLoading && <p className="text-sm text-muted-foreground">Loading...</p>}
+          {error && <p className="text-sm text-destructive">Failed to load tracker.</p>}
+          {data && (
+            <>
+              {data.sitters.length === 0 && data.unassigned.length === 0 && (
+                <p className="text-sm text-muted-foreground">{t('noCats')}</p>
+              )}
+              {data.sitters.map((s) => (
+                <SitterGroup key={s.id} name={s.full_name} cats={s.cats} />
+              ))}
+              {data.unassigned.length > 0 && (
+                <SitterGroup name={t('unassigned')} cats={data.unassigned} defaultOpen={false} />
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </ExpandAllContext.Provider>
   );
 }
