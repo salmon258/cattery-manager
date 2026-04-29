@@ -166,7 +166,6 @@ function groupTasksByMedicine(tasks: MedTask[]): { name: string; tasks: MedTask[
 
 // Mirror the dropdown in log-eating-modal so category labels share the same
 // hue across the app (wet=sky, dry=amber, raw=rose, …).
-const FOOD_TYPE_ORDER: FoodType[] = ['wet', 'dry', 'raw', 'treat', 'supplement', 'other'];
 const FOOD_TYPE_STYLES: Record<FoodType, { label: string; dot: string }> = {
   wet:        { label: 'text-sky-700 dark:text-sky-300',       dot: 'bg-sky-500' },
   dry:        { label: 'text-amber-700 dark:text-amber-300',   dot: 'bg-amber-500' },
@@ -186,29 +185,46 @@ function eatenRatioColor(eaten: number, given: number): string {
   return 'text-red-700 dark:text-red-300';
 }
 
-// Per-cat aggregation: collapse all of today's meal items down to one row per
-// food type so the dashboard shows e.g. "wet 200/300 g" instead of one badge
-// per meal time. Force-fed flag is OR-ed across the type's items.
-type CategorySummary = {
-  type: FoodType;
-  given: number;
-  eaten: number;
+// Flatten all of today's meal items into one row per food item. A single
+// eating session with two foods produces two lines so the dashboard mirrors
+// what was actually logged. Carries the parent meal's time + force-fed flag
+// onto each row for context.
+type ItemRow = {
+  key: string;
+  meal_time: string;
   forceFed: boolean;
+  name: string;
+  food_type: FoodType;
+  grams: number;
+  eaten_g: number;
 };
-function aggregateByFoodType(meals: Meal[]): CategorySummary[] {
-  const map = new Map<FoodType, CategorySummary>();
+function flattenItems(meals: Meal[]): ItemRow[] {
+  const out: ItemRow[] = [];
   for (const m of meals) {
     const force = m.feeding_method === 'force_fed';
-    for (const it of m.items ?? []) {
-      const t = it.food_type ?? 'other';
-      const cur = map.get(t) ?? { type: t, given: 0, eaten: 0, forceFed: false };
-      cur.given += it.grams;
-      cur.eaten += it.eaten_g;
-      cur.forceFed = cur.forceFed || force;
-      map.set(t, cur);
-    }
+    const items = m.items && m.items.length > 0
+      ? m.items
+      : [{
+          name: '',
+          food_type: 'other' as FoodType,
+          grams: m.total_grams,
+          eaten_g: m.total_eaten_g,
+          kcal: m.total_kcal,
+          ratio: m.worst_ratio
+        }];
+    items.forEach((it, idx) => {
+      out.push({
+        key: `${m.id}-${idx}`,
+        meal_time: m.meal_time,
+        forceFed: force,
+        name: it.name,
+        food_type: it.food_type,
+        grams: it.grams,
+        eaten_g: it.eaten_g
+      });
+    });
   }
-  return FOOD_TYPE_ORDER.map((t) => map.get(t)).filter((x): x is CategorySummary => !!x);
+  return out;
 }
 
 // ─── Expand-all context ───────────────────────────────────────────────────
@@ -330,7 +346,7 @@ function CatRowItem({ cat }: { cat: CatRow }) {
   const totalKcal  = cat.meals.reduce((s, m) => s + m.total_kcal, 0);
   const foodWarn = hasFoodWarning(cat);
   const weightDelta = computeWeightDelta(cat.latest_weight, cat.previous_weight);
-  const byType = aggregateByFoodType(cat.meals);
+  const itemRows = flattenItems(cat.meals);
   const totalsCls = eatenRatioColor(totalEaten, totalGrams);
 
   return (
@@ -411,29 +427,34 @@ function CatRowItem({ cat }: { cat: CatRow }) {
                 · {Math.round(totalKcal)} kcal · {cat.meals.length} meal{cat.meals.length > 1 ? 's' : ''}
               </span>
             </div>
-            {byType.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-0.5">
-                {byType.map((c) => {
-                  const style = FOOD_TYPE_STYLES[c.type];
-                  const cls = eatenRatioColor(c.eaten, c.given);
+            {itemRows.length > 0 && (
+              <ul className="mt-0.5 space-y-0.5">
+                {itemRows.map((row) => {
+                  const style = FOOD_TYPE_STYLES[row.food_type] ?? FOOD_TYPE_STYLES.other;
+                  const cls = eatenRatioColor(row.eaten_g, row.grams);
                   return (
-                    <span
-                      key={c.type}
-                      className="inline-flex items-center gap-1 rounded border bg-background/60 px-1.5 py-0.5 text-[10px] dark:bg-slate-900/40"
-                      title={`${c.type} — ${Math.round(c.eaten)}/${Math.round(c.given)} g`}
+                    <li
+                      key={row.key}
+                      className="flex items-center gap-1.5 text-[10px]"
+                      title={`${row.food_type} — ${formatTime(row.meal_time)}`}
                     >
-                      <span className={cn('h-1.5 w-1.5 rounded-full', style.dot)} />
-                      <span className={cn('font-medium capitalize', style.label)}>
-                        {c.type}
+                      <span className="shrink-0 tabular-nums text-muted-foreground">
+                        {formatTime(row.meal_time)}
                       </span>
-                      <span className={cn('font-medium', cls)}>
-                        {Math.round(c.eaten)}/{Math.round(c.given)} g
+                      <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', style.dot)} />
+                      <span className={cn('min-w-0 flex-1 truncate font-medium', style.label)}>
+                        {row.name || t('mealFallback')}
                       </span>
-                      {c.forceFed && <AlertTriangle className="h-2.5 w-2.5 text-amber-600 dark:text-amber-400" />}
-                    </span>
+                      <span className={cn('shrink-0 font-medium', cls)}>
+                        {Math.round(row.eaten_g)}/{Math.round(row.grams)} g
+                      </span>
+                      {row.forceFed && (
+                        <AlertTriangle className="h-2.5 w-2.5 shrink-0 text-amber-600 dark:text-amber-400" />
+                      )}
+                    </li>
                   );
                 })}
-              </div>
+              </ul>
             )}
             <MealDetails meals={cat.meals} />
           </div>
