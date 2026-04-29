@@ -24,6 +24,9 @@ export type PushSubscription    = Database['public']['Tables']['push_subscriptio
 export type BackgroundSyncQueue = Database['public']['Tables']['background_sync_queue']['Row']
 export type HealthTicket        = Database['public']['Tables']['health_tickets']['Row']
 export type HealthTicketEvent   = Database['public']['Tables']['health_ticket_events']['Row']
+export type Sickness            = Database['public']['Tables']['sicknesses']['Row']
+export type MedicationTemplate  = Database['public']['Tables']['medication_templates']['Row']
+export type SicknessMedication  = Database['public']['Tables']['sickness_medications']['Row']
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
 export type UserRole      = Database['public']['Enums']['user_role']
@@ -39,6 +42,7 @@ export type EatenRatio    = Database['public']['Enums']['eaten_ratio']
 export type VaccineType   = Database['public']['Enums']['vaccine_type']
 export type PreventiveType  = Database['public']['Enums']['preventive_treatment_type']
 export type MedRoute      = Database['public']['Enums']['med_route']
+export type MedicationForm = Database['public']['Enums']['medication_form']
 export type TicketSeverity  = Database['public']['Enums']['ticket_severity']
 export type TicketStatus    = Database['public']['Enums']['ticket_status']
 export type TicketEventType = Database['public']['Enums']['ticket_event_type']

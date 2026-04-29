@@ -1347,6 +1347,72 @@ export type Database = {
           },
         ]
       }
+      medication_templates: {
+        Row: {
+          brand: string | null
+          concentration_amount: number | null
+          created_at: string
+          created_by: string | null
+          default_route: Database["public"]["Enums"]["med_route"]
+          dose_unit: string
+          form: Database["public"]["Enums"]["medication_form"]
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          per_unit: string
+          splittable_into: number
+          updated_at: string
+        }
+        Insert: {
+          brand?: string | null
+          concentration_amount?: number | null
+          created_at?: string
+          created_by?: string | null
+          default_route?: Database["public"]["Enums"]["med_route"]
+          dose_unit?: string
+          form?: Database["public"]["Enums"]["medication_form"]
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          per_unit?: string
+          splittable_into?: number
+          updated_at?: string
+        }
+        Update: {
+          brand?: string | null
+          concentration_amount?: number | null
+          created_at?: string
+          created_by?: string | null
+          default_route?: Database["public"]["Enums"]["med_route"]
+          dose_unit?: string
+          form?: Database["public"]["Enums"]["medication_form"]
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          per_unit?: string
+          splittable_into?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medication_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "medication_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       medications: {
         Row: {
           cat_id: string
@@ -2021,6 +2087,131 @@ export type Database = {
           },
           {
             foreignKeyName: "rooms_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sickness_medications: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          dose_per_kg: number | null
+          duration_days: number | null
+          flat_dose: number | null
+          frequency: string | null
+          id: string
+          max_dose: number | null
+          medication_template_id: string
+          min_dose: number | null
+          notes: string | null
+          priority: number
+          sickness_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          dose_per_kg?: number | null
+          duration_days?: number | null
+          flat_dose?: number | null
+          frequency?: string | null
+          id?: string
+          max_dose?: number | null
+          medication_template_id: string
+          min_dose?: number | null
+          notes?: string | null
+          priority?: number
+          sickness_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          dose_per_kg?: number | null
+          duration_days?: number | null
+          flat_dose?: number | null
+          frequency?: string | null
+          id?: string
+          max_dose?: number | null
+          medication_template_id?: string
+          min_dose?: number | null
+          notes?: string | null
+          priority?: number
+          sickness_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sickness_medications_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "sickness_medications_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sickness_medications_medication_template_id_fkey"
+            columns: ["medication_template_id"]
+            isOneToOne: false
+            referencedRelation: "medication_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sickness_medications_sickness_id_fkey"
+            columns: ["sickness_id"]
+            isOneToOne: false
+            referencedRelation: "sicknesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sicknesses: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sicknesses_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "assignee_cat_counts"
+            referencedColumns: ["assignee_id"]
+          },
+          {
+            foreignKeyName: "sicknesses_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -3081,6 +3272,15 @@ export type Database = {
         | "delivered"
         | "failed"
       med_route: "oral" | "topical" | "injection" | "other"
+      medication_form:
+        | "tablet"
+        | "capsule"
+        | "liquid"
+        | "injection"
+        | "drops"
+        | "powder"
+        | "topical"
+        | "other"
       payroll_status: "pending" | "paid" | "cancelled"
       preventive_treatment_type: "deworming" | "flea" | "combined"
       reimbursement_status:
@@ -3317,6 +3517,16 @@ export const Constants = {
         "failed",
       ],
       med_route: ["oral", "topical", "injection", "other"],
+      medication_form: [
+        "tablet",
+        "capsule",
+        "liquid",
+        "injection",
+        "drops",
+        "powder",
+        "topical",
+        "other",
+      ],
       payroll_status: ["pending", "paid", "cancelled"],
       preventive_treatment_type: ["deworming", "flea", "combined"],
       reimbursement_status: [

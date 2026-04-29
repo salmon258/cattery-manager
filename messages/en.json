@@ -11,6 +11,7 @@
     "breeding": "Breeding",
     "rooms": "Rooms",
     "food": "Food catalogue",
+    "medicationNotes": "Medication notes",
     "stock": "Stock",
     "finance": "Finance",
     "payroll": "Payroll",
@@ -291,6 +292,7 @@
   "medications": {
     "title": "Medications",
     "newSchedule": "New schedule",
+    "suggestFromSickness": "Suggest from sickness",
     "ongoing": "Ongoing",
     "indefinite": "Indefinite",
     "indefiniteHint": "runs until stopped manually",
@@ -362,6 +364,139 @@
         "scheduled": "Scheduled",
         "ad_hoc": "Ad hoc"
       }
+    }
+  },
+  "medicationNotes": {
+    "title": "Medication notes",
+    "subtitle": "Build the cattery formulary so suggestions can compute weight-based doses.",
+    "tabs": {
+      "sicknesses": "Sicknesses",
+      "templates": "Medication catalogue"
+    },
+    "inactive": "Inactive",
+    "showInactive": "Show inactive",
+    "hideInactive": "Hide inactive",
+    "forms": {
+      "tablet": "Tablet",
+      "capsule": "Capsule",
+      "liquid": "Liquid",
+      "injection": "Injection",
+      "drops": "Drops",
+      "powder": "Powder/sachet",
+      "topical": "Topical",
+      "other": "Other"
+    },
+    "routes": {
+      "oral": "Oral",
+      "topical": "Topical",
+      "injection": "Injection",
+      "other": "Other"
+    },
+    "sicknesses": {
+      "description": "List of conditions you treat. Each one carries its own list of recommended meds.",
+      "new": "New sickness",
+      "newTitle": "New sickness",
+      "editTitle": "Edit sickness",
+      "empty": "No sicknesses yet — add the first to start building your formulary.",
+      "created": "Sickness added.",
+      "updated": "Sickness updated.",
+      "deactivated": "Sickness deactivated.",
+      "deactivateConfirm": "Deactivate this sickness? Existing recommendations stay but it stops appearing in the suggestion picker.",
+      "medCount": "{n} med(s)",
+      "fields": {
+        "name": "Name",
+        "description": "Description",
+        "active": "Active"
+      }
+    },
+    "templates": {
+      "description": "Each medicine you keep in stock — once added, link it to one or more sicknesses with a dosing rule.",
+      "new": "New medicine",
+      "newTitle": "New medicine",
+      "editTitle": "Edit medicine",
+      "empty": "No medicines yet. Add at least one before you can link it to a sickness.",
+      "created": "Medicine added.",
+      "updated": "Medicine updated.",
+      "deactivated": "Medicine deactivated.",
+      "deactivateConfirm": "Deactivate this medicine? Existing sickness links remain but it stops appearing in suggestions.",
+      "noConcentration": "No concentration set",
+      "splittableLabel": "splits into {n}",
+      "splittableValues": {
+        "1": "Whole units only",
+        "2": "Halves OK",
+        "4": "Quarters OK"
+      },
+      "fields": {
+        "name": "Name",
+        "brand": "Brand",
+        "form": "Form",
+        "defaultRoute": "Default route",
+        "concentrationAmount": "Strength per unit",
+        "concentrationHint": "Active ingredient per administration unit (e.g. 50 for 50 mg/ml).",
+        "doseUnit": "Active unit",
+        "perUnit": "Administration unit",
+        "perUnitHint": "ml for liquids, tablet for tablets, drop for drops, …",
+        "splittable": "Splittable into",
+        "splittableHint": "Tablets often split into halves or quarters; capsules and injections do not.",
+        "notes": "Notes",
+        "active": "Active"
+      }
+    },
+    "links": {
+      "title": "Recommended medications",
+      "empty": "No medicines linked yet.",
+      "add": "Add medication",
+      "addTitle": "Add medication recommendation",
+      "editTitle": "Edit medication recommendation",
+      "added": "Recommendation added.",
+      "updated": "Recommendation updated.",
+      "removed": "Recommendation removed.",
+      "removeConfirm": "Remove this medication from the sickness?",
+      "unknownTemplate": "(deleted medicine)",
+      "alt": "alt #{n}",
+      "perKgRule": "{dose} {unit}/kg",
+      "flatRule": "{dose} {unit} flat",
+      "clampRange": "clamp {min}–{max} {unit}",
+      "durationDays": "{n}d course",
+      "noRule": "No dose rule",
+      "templateInfo": "{form} measured in {doseUnit}",
+      "fields": {
+        "template": "Medicine",
+        "templatePlaceholder": "Pick a medicine from the catalogue",
+        "dosePerKg": "Dose per kg",
+        "dosePerKgHint": "{unit} of active ingredient per kg of body weight.",
+        "flatDose": "Flat dose",
+        "flatDoseHint": "Use instead of per-kg when the dose is fixed regardless of weight.",
+        "minDose": "Min dose",
+        "maxDose": "Max dose",
+        "frequency": "Frequency",
+        "durationDays": "Duration (days)",
+        "priority": "Priority",
+        "priorityHint": "1 = first-line, 2+ = alternatives.",
+        "notes": "Notes"
+      }
+    }
+  },
+  "medicationSuggest": {
+    "title": "Suggest medications from sickness",
+    "pickSickness": "Pick a sickness",
+    "pickPlaceholder": "Choose a condition…",
+    "noSuggestions": "No medicines linked to this sickness yet.",
+    "latestWeight": "Latest weight: {kg} kg (recorded {date})",
+    "noWeightWarning": "No weight on file — per-kg suggestions cannot be computed. Log a weight first.",
+    "noWeightFlat": "No weight on file. Flat-dose suggestions still work.",
+    "addAsSchedule": "Add to schedule",
+    "scheduled": "Schedule created.",
+    "cannotCompute": "Cannot compute — needs a weight reading or a flat dose.",
+    "rawDoseOnly": "Show as active-ingredient dose only.",
+    "roundedHint": "rounded to a practical fraction.",
+    "roundedHeavyWarning": "Rounded {exact} → {rounded} {unit}. Confirm with a vet before dispensing.",
+    "manageHint": "Manage sicknesses and medicines in",
+    "basis": {
+      "perKg": "{dose} {unit}/kg × weight",
+      "flat": "Flat dose (weight-independent)",
+      "clampedMin": "{dose} {unit}/kg × weight, clamped at min {min}",
+      "clampedMax": "{dose} {unit}/kg × weight, clamped at max {max}"
     }
   },
   "askAi": {
