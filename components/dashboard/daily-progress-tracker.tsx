@@ -1,19 +1,17 @@
 'use client';
 
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import {
   Check, X, Scale, Utensils, Pill, HeartPulse,
-  ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown,
-  User, AlertTriangle,
+  ChevronDown, ChevronRight, User, AlertTriangle,
   ArrowUp, ArrowDown, Minus
 } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 // ─── Types ────────────────────────────────────────────────────────────────
@@ -187,12 +185,12 @@ function eatenRatioColor(eaten: number, given: number): string {
 
 // Flatten all of today's meal items into one row per food item. A single
 // eating session with two foods produces two lines so the dashboard mirrors
-// what was actually logged. Carries the parent meal's time + force-fed flag
-// onto each row for context.
+// what was actually logged. Carries the parent meal's time + feeding method
+// onto each row for the per-row icon indicator.
 type ItemRow = {
   key: string;
   meal_time: string;
-  forceFed: boolean;
+  feeding_method: FeedingMethod;
   name: string;
   food_type: FoodType;
   grams: number;
@@ -201,7 +199,6 @@ type ItemRow = {
 function flattenItems(meals: Meal[]): ItemRow[] {
   const out: ItemRow[] = [];
   for (const m of meals) {
-    const force = m.feeding_method === 'force_fed';
     const items = m.items && m.items.length > 0
       ? m.items
       : [{
@@ -216,7 +213,7 @@ function flattenItems(meals: Meal[]): ItemRow[] {
       out.push({
         key: `${m.id}-${idx}`,
         meal_time: m.meal_time,
-        forceFed: force,
+        feeding_method: m.feeding_method,
         name: it.name,
         food_type: it.food_type,
         grams: it.grams,
@@ -225,113 +222,6 @@ function flattenItems(meals: Meal[]): ItemRow[] {
     });
   }
   return out;
-}
-
-// ─── Expand-all context ───────────────────────────────────────────────────
-// Each MealDetails has its own local open/close state, but the parent can
-// broadcast a "set everything to X" through this context. Bumping `version`
-// signals each MealDetails to resync its local state to `expanded`.
-const STORAGE_KEY = 'cattery.dashboard.foodDetailsExpanded';
-type ExpandAllValue = { expanded: boolean; version: number };
-const ExpandAllContext = createContext<ExpandAllValue>({ expanded: false, version: 0 });
-
-// ─── Collapsible per-meal food breakdown ─────────────────────────────────
-// Mirrors the "Today's activity" box on the sitter's "My cats" page so admins
-// can see what each cat actually ate, not just the totals.
-function MealDetails({ meals }: { meals: Meal[] }) {
-  const t = useTranslations('adminDashboard.tracker');
-  const { expanded, version } = useContext(ExpandAllContext);
-  const [open, setOpen] = useState(expanded);
-  // Re-sync local state whenever the parent toggles the global "expand all"
-  // button. Individual toggles inside MealDetails still work between bumps.
-  useEffect(() => {
-    setOpen(expanded);
-  }, [expanded, version]);
-
-  if (meals.length === 0) return null;
-
-  return (
-    <div className="mt-1 overflow-hidden rounded-md border border-slate-200 bg-white/60 dark:border-slate-800 dark:bg-slate-900/40">
-      <button
-        type="button"
-        onClick={(e) => {
-          // Cat row is a Link; don't navigate when toggling details.
-          e.preventDefault();
-          e.stopPropagation();
-          setOpen((v) => !v);
-        }}
-        aria-expanded={open}
-        className="flex w-full items-center justify-between gap-2 px-2 py-1 text-left text-[11px] font-medium hover:bg-slate-50 dark:hover:bg-slate-800/60"
-      >
-        <span className="text-muted-foreground">{t('foodDetails')}</span>
-        <ChevronDown
-          className={cn('h-3 w-3 text-muted-foreground transition-transform', open && 'rotate-180')}
-        />
-      </button>
-      {open && (
-        <ul className="divide-y divide-amber-100 bg-amber-50/50 px-2 py-1.5 dark:divide-amber-900/40 dark:bg-amber-950/20">
-          {meals.map((m) => {
-            // A single eating session can include multiple foods; render each
-            // food as its own line so admins see per-food grams / kcal /
-            // eaten ratio rather than just the meal totals.
-            const items: MealItem[] = m.items && m.items.length > 0
-              ? m.items
-              : [{
-                  name: '',
-                  food_type: 'other',
-                  grams: m.total_grams,
-                  eaten_g: m.total_eaten_g,
-                  kcal: m.total_kcal,
-                  ratio: m.worst_ratio
-                }];
-            const showTotals = items.length > 1;
-            const totalCls = eatenRatioColor(m.total_eaten_g, m.total_grams);
-            return (
-              <li key={m.id} className="py-1 text-[11px] first:pt-0 last:pb-0">
-                <div className="flex items-center justify-between gap-2 text-muted-foreground">
-                  <span className="text-[10px] font-medium uppercase tracking-wide">
-                    {formatTime(m.meal_time)} · {m.feeding_method}
-                  </span>
-                  {showTotals && (
-                    <span className={cn('shrink-0 text-[10px] font-medium', totalCls)}>
-                      {Math.round(m.total_eaten_g)}/{Math.round(m.total_grams)} g
-                      <span className="ml-1 font-normal text-muted-foreground">
-                        · {Math.round(m.total_kcal)} kcal
-                      </span>
-                    </span>
-                  )}
-                </div>
-                <ul className="mt-0.5 space-y-0.5">
-                  {items.map((it, idx) => {
-                    const style = FOOD_TYPE_STYLES[it.food_type] ?? FOOD_TYPE_STYLES.other;
-                    const cls = eatenRatioColor(it.eaten_g, it.grams);
-                    return (
-                      <li key={idx} className="flex items-center justify-between gap-2">
-                        <span className="flex min-w-0 items-center gap-1.5 font-medium">
-                          <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', style.dot)} />
-                          <span className={cn('truncate', style.label)}>
-                            {it.name || t('mealFallback')}
-                          </span>
-                        </span>
-                        <span className="flex shrink-0 items-center gap-1 text-[10px]">
-                          <span className={cn('font-medium', cls)}>
-                            {Math.round(it.eaten_g)}/{Math.round(it.grams)} g
-                          </span>
-                          <span className="text-muted-foreground">
-                            · {Math.round(it.kcal)} kcal
-                          </span>
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </div>
-  );
 }
 
 // ─── Cat row (rich) ───────────────────────────────────────────────────────
@@ -436,7 +326,7 @@ function CatRowItem({ cat }: { cat: CatRow }) {
                     <li
                       key={row.key}
                       className="flex items-center gap-1.5 text-[10px]"
-                      title={`${row.food_type} — ${formatTime(row.meal_time)}`}
+                      title={`${row.food_type} — ${formatTime(row.meal_time)} · ${row.feeding_method}`}
                     >
                       <span className="shrink-0 tabular-nums text-muted-foreground">
                         {formatTime(row.meal_time)}
@@ -448,15 +338,23 @@ function CatRowItem({ cat }: { cat: CatRow }) {
                       <span className={cn('shrink-0 font-medium', cls)}>
                         {Math.round(row.eaten_g)}/{Math.round(row.grams)} g
                       </span>
-                      {row.forceFed && (
-                        <AlertTriangle className="h-2.5 w-2.5 shrink-0 text-amber-600 dark:text-amber-400" />
+                      {row.feeding_method === 'assisted' && (
+                        <AlertTriangle
+                          className="h-2.5 w-2.5 shrink-0 text-amber-600 dark:text-amber-400"
+                          aria-label="assisted"
+                        />
+                      )}
+                      {row.feeding_method === 'force_fed' && (
+                        <X
+                          className="h-2.5 w-2.5 shrink-0 text-red-600 dark:text-red-400"
+                          aria-label="force fed"
+                        />
                       )}
                     </li>
                   );
                 })}
               </ul>
             )}
-            <MealDetails meals={cat.meals} />
           </div>
         )}
       </div>
@@ -577,29 +475,6 @@ function SitterGroup({
 export function DailyProgressTracker() {
   const t = useTranslations('adminDashboard.tracker');
 
-  // Persist the "expand all food details" preference across reloads. Read
-  // synchronously on first render so we don't flash the wrong state, then
-  // skip persisting on the very first effect run (the initial value already
-  // came from storage).
-  const [expandAll, setExpandAll] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    return window.localStorage.getItem(STORAGE_KEY) === 'true';
-  });
-  const [expandVersion, setExpandVersion] = useState(0);
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    window.localStorage.setItem(STORAGE_KEY, expandAll ? 'true' : 'false');
-  }, [expandAll]);
-
-  const expandValue = useMemo<ExpandAllValue>(
-    () => ({ expanded: expandAll, version: expandVersion }),
-    [expandAll, expandVersion]
-  );
-  const toggleExpandAll = () => {
-    setExpandAll((v) => !v);
-    setExpandVersion((v) => v + 1);
-  };
-
   const { data, isLoading, error } = useQuery<DailyProgress>({
     queryKey: ['daily-progress'],
     queryFn: async () => {
@@ -611,52 +486,31 @@ export function DailyProgressTracker() {
   });
 
   return (
-    <ExpandAllContext.Provider value={expandValue}>
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Check className="h-4 w-4 text-muted-foreground" />
-                {t('title')}
-              </CardTitle>
-              <p className="text-xs text-muted-foreground">{t('subtitle')}</p>
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={toggleExpandAll}
-              className="shrink-0 h-7 gap-1 px-2 text-xs"
-              aria-pressed={expandAll}
-            >
-              {expandAll ? (
-                <ChevronsDownUp className="h-3.5 w-3.5" />
-              ) : (
-                <ChevronsUpDown className="h-3.5 w-3.5" />
-              )}
-              {expandAll ? t('collapseAll') : t('expandAll')}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          {isLoading && <p className="text-sm text-muted-foreground">Loading...</p>}
-          {error && <p className="text-sm text-destructive">Failed to load tracker.</p>}
-          {data && (
-            <>
-              {data.sitters.length === 0 && data.unassigned.length === 0 && (
-                <p className="text-sm text-muted-foreground">{t('noCats')}</p>
-              )}
-              {data.sitters.map((s) => (
-                <SitterGroup key={s.id} name={s.full_name} cats={s.cats} />
-              ))}
-              {data.unassigned.length > 0 && (
-                <SitterGroup name={t('unassigned')} cats={data.unassigned} defaultOpen={false} />
-              )}
-            </>
-          )}
-        </CardContent>
-      </Card>
-    </ExpandAllContext.Provider>
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base flex items-center gap-2">
+          <Check className="h-4 w-4 text-muted-foreground" />
+          {t('title')}
+        </CardTitle>
+        <p className="text-xs text-muted-foreground">{t('subtitle')}</p>
+      </CardHeader>
+      <CardContent className="space-y-5">
+        {isLoading && <p className="text-sm text-muted-foreground">Loading...</p>}
+        {error && <p className="text-sm text-destructive">Failed to load tracker.</p>}
+        {data && (
+          <>
+            {data.sitters.length === 0 && data.unassigned.length === 0 && (
+              <p className="text-sm text-muted-foreground">{t('noCats')}</p>
+            )}
+            {data.sitters.map((s) => (
+              <SitterGroup key={s.id} name={s.full_name} cats={s.cats} />
+            ))}
+            {data.unassigned.length > 0 && (
+              <SitterGroup name={t('unassigned')} cats={data.unassigned} defaultOpen={false} />
+            )}
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 }
