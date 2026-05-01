@@ -281,6 +281,11 @@ export function EatingCard({ catId, role, currentUserId }: Props) {
                           );
                         })}
                       </ul>
+                      {m.notes && (
+                        <p className="mt-1 whitespace-pre-wrap text-xs italic text-muted-foreground">
+                          {m.notes}
+                        </p>
+                      )}
                     </li>
                   );
                 })}
