@@ -73,10 +73,7 @@
       "medsConfirmed": "{done}/{total} doses confirmed",
       "dosesConfirmedShort": "doses",
       "allCaughtUp": "All caught up ✓",
-      "foodDetails": "Food details",
-      "mealFallback": "Meal",
-      "expandAll": "Expand all",
-      "collapseAll": "Collapse all"
+      "mealFallback": "Meal"
     }
   },
   "sitterHome": {

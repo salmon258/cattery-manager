@@ -73,10 +73,7 @@
       "medsConfirmed": "{done}/{total} dosis dikonfirmasi",
       "dosesConfirmedShort": "dosis",
       "allCaughtUp": "Semua selesai ✓",
-      "foodDetails": "Detail makanan",
-      "mealFallback": "Makan",
-      "expandAll": "Buka semua",
-      "collapseAll": "Tutup semua"
+      "mealFallback": "Makan"
     }
   },
   "sitterHome": {
