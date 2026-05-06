@@ -250,7 +250,16 @@ export function LogEatingModal({ open, onClose, catId, catName, editLog }: Props
             : t('title')
       }
     >
-      <form onSubmit={form.handleSubmit((v) => m.mutate(v))} className="space-y-3 py-2">
+      <form
+        onSubmit={form.handleSubmit((v) => {
+          // Belt-and-braces guard against a double-tap firing two mutations
+          // before the Save button's `disabled={m.isPending}` re-renders.
+          // Mobile drawers in particular don't always swallow the second tap.
+          if (m.isPending) return;
+          m.mutate(v);
+        })}
+        className="space-y-3 py-2"
+      >
         <div className="space-y-2">
           <Label>{t('fields.feedingMethod')}</Label>
           <Select

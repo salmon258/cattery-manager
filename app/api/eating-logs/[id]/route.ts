@@ -10,8 +10,9 @@ import { eatingLogSchema } from '@/lib/schemas/eating';
  * edit anything (RLS enforces this — owner policies were added in the
  * 20260429 migration). The request body uses the same shape as the POST
  * route on /api/cats/[id]/eating: feeding_method + notes + a full items
- * array. Items are replaced atomically (delete existing children, insert
- * the new set) so the caller doesn't have to diff.
+ * array. The actual UPDATE + child replacement happens inside the
+ * `update_eating_log` Postgres function so it's one transaction — see
+ * 20260518 migration for the rationale.
  */
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   const user = await getCurrentUser();
@@ -58,38 +59,18 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     }
   }
 
-  // Update parent fields first. We don't touch cat_id / submitted_by /
-  // meal_time here — changing meal_time would shift day buckets in reports
-  // and is out of scope for a simple "fix a typo" edit.
-  const { error: updateErr } = await supabase
-    .from('eating_logs')
-    .update({
-      feeding_method: parsed.data.feeding_method,
-      notes: parsed.data.notes ?? null
-    })
-    .eq('id', params.id);
-  if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 });
-
-  // Replace children. eating_log_items.estimated_kcal_consumed is a stored
-  // generated column, so we can't UPDATE an existing row to change the food
-  // or the eaten ratio without Postgres recomputing — safer to wipe and
-  // re-insert, which also keeps snapshots in sync with the current
-  // calories_per_gram.
-  const { error: deleteErr } = await supabase
-    .from('eating_log_items')
-    .delete()
-    .eq('eating_log_id', params.id);
-  if (deleteErr) return NextResponse.json({ error: deleteErr.message }, { status: 500 });
-
-  const itemsToInsert = parsed.data.items.map((i) => ({
-    eating_log_id: params.id,
-    food_item_id: i.food_item_id,
-    quantity_given_g: i.quantity_given_g,
-    quantity_eaten: i.quantity_eaten,
-    calories_per_gram_snapshot: foodMap.get(i.food_item_id)!.calories_per_gram
-  }));
-  const { error: insertErr } = await supabase.from('eating_log_items').insert(itemsToInsert);
-  if (insertErr) return NextResponse.json({ error: insertErr.message }, { status: 500 });
+  // Run the parent UPDATE + items DELETE + items INSERT inside one Postgres
+  // function so the whole edit is a single transaction. Two rapid-fire saves
+  // (mobile double-tap, retry after a slow network) used to interleave on
+  // the server and leave the meal with two copies of every item; serializing
+  // on the parent row's update lock fixes that.
+  const { error: rpcErr } = await supabase.rpc('update_eating_log', {
+    p_log_id: params.id,
+    p_feeding_method: parsed.data.feeding_method,
+    p_notes: parsed.data.notes ?? null,
+    p_items: parsed.data.items
+  });
+  if (rpcErr) return NextResponse.json({ error: rpcErr.message }, { status: 500 });
 
   return NextResponse.json({ id: params.id });
 }
