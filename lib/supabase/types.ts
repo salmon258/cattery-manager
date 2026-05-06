@@ -3228,6 +3228,15 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      update_eating_log: {
+        Args: {
+          p_log_id: string
+          p_feeding_method: Database["public"]["Enums"]["feeding_method"]
+          p_notes: string | null
+          p_items: Json
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       adhoc_payment_status: "pending" | "paid" | "cancelled"
