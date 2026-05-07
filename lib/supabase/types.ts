@@ -596,6 +596,7 @@ export type Database = {
           food_item_id: string
           id: string
           quantity_eaten: Database["public"]["Enums"]["eaten_ratio"]
+          quantity_eaten_g: number
           quantity_given_g: number
         }
         Insert: {
@@ -606,6 +607,7 @@ export type Database = {
           food_item_id: string
           id?: string
           quantity_eaten?: Database["public"]["Enums"]["eaten_ratio"]
+          quantity_eaten_g: number
           quantity_given_g: number
         }
         Update: {
@@ -616,6 +618,7 @@ export type Database = {
           food_item_id?: string
           id?: string
           quantity_eaten?: Database["public"]["Enums"]["eaten_ratio"]
+          quantity_eaten_g?: number
           quantity_given_g?: number
         }
         Relationships: [

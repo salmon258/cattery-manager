@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { EATEN_RATIO_FACTOR } from '@/lib/schemas/eating';
 import { LogEatingModal, type EditableEatingLog } from '@/components/eating/log-eating-modal';
 
 type CalorieSummary = {
@@ -41,6 +40,7 @@ type EatingLogRow = {
     food_item_id: string;
     estimated_kcal_consumed: number | null;
     quantity_given_g: number;
+    quantity_eaten_g: number;
     quantity_eaten: EatenRatio;
     food?: { name: string } | null;
   }[];
@@ -112,6 +112,7 @@ export function EatingCard({ catId, role, currentUserId }: Props) {
       items: log.items.map((it) => ({
         food_item_id: it.food_item_id,
         quantity_given_g: it.quantity_given_g,
+        quantity_eaten_g: it.quantity_eaten_g,
         quantity_eaten: it.quantity_eaten
       }))
     });
@@ -212,10 +213,7 @@ export function EatingCard({ catId, role, currentUserId }: Props) {
                     0
                   );
                   const eatenGrams = m.items.reduce(
-                    (acc, it) =>
-                      acc +
-                      (Number(it.quantity_given_g) || 0) *
-                        (EATEN_RATIO_FACTOR[it.quantity_eaten] ?? 1),
+                    (acc, it) => acc + (Number(it.quantity_eaten_g) || 0),
                     0
                   );
                   const editable = canEdit(m);
@@ -261,7 +259,7 @@ export function EatingCard({ catId, role, currentUserId }: Props) {
                       <ul className="mt-1 space-y-0.5">
                         {m.items.map((it) => {
                           const given = Number(it.quantity_given_g) || 0;
-                          const eaten = given * (EATEN_RATIO_FACTOR[it.quantity_eaten] ?? 1);
+                          const eaten = Number(it.quantity_eaten_g) || 0;
                           const kcal = Number(it.estimated_kcal_consumed) || 0;
                           const disp = ratioDisplay(it.quantity_eaten);
                           return (

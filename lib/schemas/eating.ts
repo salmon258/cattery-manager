@@ -3,14 +3,23 @@ import { z } from 'zod';
 export const feedingMethodSchema = z.enum(['self', 'assisted', 'force_fed']);
 export const eatenRatioSchema = z.enum(['all', 'most', 'half', 'little', 'none']);
 
-export const eatingLogItemInputSchema = z.object({
-  food_item_id: z.string().uuid(),
-  quantity_given_g: z.coerce
-    .number({ invalid_type_error: 'Enter a number' })
-    .min(0, 'Must be ≥ 0')
-    .max(10000, 'Too large'),
-  quantity_eaten: eatenRatioSchema.default('all')
-});
+export const eatingLogItemInputSchema = z
+  .object({
+    food_item_id: z.string().uuid(),
+    quantity_given_g: z.coerce
+      .number({ invalid_type_error: 'Enter a number' })
+      .min(0, 'Must be ≥ 0')
+      .max(10000, 'Too large'),
+    quantity_eaten_g: z.coerce
+      .number({ invalid_type_error: 'Enter a number' })
+      .min(0, 'Must be ≥ 0')
+      .max(10000, 'Too large'),
+    quantity_eaten: eatenRatioSchema.default('all')
+  })
+  .refine((v) => v.quantity_eaten_g <= v.quantity_given_g, {
+    message: 'Eaten cannot exceed given',
+    path: ['quantity_eaten_g']
+  });
 export type EatingLogItemInput = z.infer<typeof eatingLogItemInputSchema>;
 
 export const eatingLogSchema = z.object({

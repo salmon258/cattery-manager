@@ -19,7 +19,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
       `*,
        submitter:profiles!eating_logs_submitted_by_fkey(id, full_name),
        items:eating_log_items(
-         id, food_item_id, quantity_given_g, quantity_eaten,
+         id, food_item_id, quantity_given_g, quantity_eaten, quantity_eaten_g,
          calories_per_gram_snapshot, estimated_kcal_consumed,
          food:food_items(id, name, brand, type, unit)
        )`
@@ -82,6 +82,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     food_item_id: i.food_item_id,
     quantity_given_g: i.quantity_given_g,
     quantity_eaten: i.quantity_eaten,
+    quantity_eaten_g: i.quantity_eaten_g,
     calories_per_gram_snapshot: foodMap.get(i.food_item_id)!.calories_per_gram
   }));
 

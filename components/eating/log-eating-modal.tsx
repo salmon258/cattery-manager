@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { Plus, Trash2 } from 'lucide-react';
 
 import type { EatenRatio, FeedingMethod, FoodItem, FoodType } from '@/lib/supabase/aliases';
-import { EATEN_RATIO_FACTOR, type EatingLogInput } from '@/lib/schemas/eating';
+import type { EatingLogInput } from '@/lib/schemas/eating';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -102,6 +102,7 @@ export type EditableEatingLog = {
   items: Array<{
     food_item_id: string;
     quantity_given_g: number | string;
+    quantity_eaten_g: number | string;
     quantity_eaten: EatenRatio;
   }>;
 };
@@ -151,24 +152,19 @@ export function LogEatingModal({ open, onClose, catId, catName, editLog }: Props
     items: [emptyItem]
   };
 
-  // Translate an existing log back into form state. `given_g` comes directly
-  // from the stored column; `eaten_g` is reconstructed from the eaten-ratio
-  // enum × given so the edit view mirrors what the sitter originally entered.
-  // There's inherent precision loss here (the ratio is bucketed), but that's
-  // intentional — sitters rarely care about the exact pre-edit gram value.
+  // Translate an existing log back into form state. Both gram fields are
+  // stored verbatim now, so the edit view shows exactly the numbers the
+  // sitter originally entered — no bucketing through the ratio enum.
   function editDefaults(log: EditableEatingLog): EatingFormInput {
     return {
       feeding_method: log.feeding_method,
       notes: log.notes ?? '',
       items: log.items.length
-        ? log.items.map((it) => {
-            const given = Number(it.quantity_given_g ?? 0);
-            return {
-              food_item_id: it.food_item_id,
-              given_g: given,
-              eaten_g: given * (EATEN_RATIO_FACTOR[it.quantity_eaten] ?? 1)
-            };
-          })
+        ? log.items.map((it) => ({
+            food_item_id: it.food_item_id,
+            given_g: Number(it.quantity_given_g ?? 0),
+            eaten_g: Number(it.quantity_eaten_g ?? 0)
+          }))
         : [emptyItem]
     };
   }
@@ -211,6 +207,7 @@ export function LogEatingModal({ open, onClose, catId, catName, editLog }: Props
         items: v.items.map((it) => ({
           food_item_id: it.food_item_id,
           quantity_given_g: Number(it.given_g),
+          quantity_eaten_g: Number(it.eaten_g),
           quantity_eaten: ratioToEnum(Number(it.given_g), Number(it.eaten_g))
         }))
       };
