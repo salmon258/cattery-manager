@@ -9,7 +9,10 @@ import { createClient } from '@/lib/supabase/client';
 
 // Bump to invalidate every persisted cache on the device (e.g. after a
 // breaking query-shape change). Unrelated to app version / deploy hash.
-const CACHE_BUSTER = 'v1';
+// v2: eating_log_items gained `quantity_eaten_g`. Pre-bump caches
+// don't have the field, so meal lists rendered straight from IDB
+// without a refetch (30-min staleTime) showed eaten = 0 / given.
+const CACHE_BUSTER = 'v2';
 
 const ONE_MIN = 60_000;
 const ONE_HOUR = 60 * ONE_MIN;
