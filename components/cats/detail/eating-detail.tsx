@@ -8,7 +8,6 @@ import { Utensils } from 'lucide-react';
 import type { EatenRatio, FeedingMethod, UserRole } from '@/lib/supabase/aliases';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { EATEN_RATIO_FACTOR } from '@/lib/schemas/eating';
 import { CatDetailHeader } from '@/components/cats/detail/cat-detail-header';
 import {
   DateRangeFilter,
@@ -30,6 +29,7 @@ type EatingLogRow = {
     food_item_id: string;
     estimated_kcal_consumed: number | null;
     quantity_given_g: number;
+    quantity_eaten_g: number;
     quantity_eaten: EatenRatio;
     food?: { name: string } | null;
   }[];
@@ -121,9 +121,8 @@ export function EatingDetail({ catId, catName, profilePhotoUrl }: Props) {
       map.set(k, (map.get(k) ?? 0) + kcal);
       totalKcal += kcal;
       for (const it of m.items) {
-        const given = Number(it.quantity_given_g) || 0;
-        totalGivenG += given;
-        totalEatenG += given * (EATEN_RATIO_FACTOR[it.quantity_eaten] ?? 1);
+        totalGivenG += Number(it.quantity_given_g) || 0;
+        totalEatenG += Number(it.quantity_eaten_g) || 0;
       }
     }
     return {
@@ -203,10 +202,7 @@ export function EatingDetail({ catId, catName, profilePhotoUrl }: Props) {
                   0
                 );
                 const eaten = m.items.reduce(
-                  (acc, it) =>
-                    acc +
-                    (Number(it.quantity_given_g) || 0) *
-                      (EATEN_RATIO_FACTOR[it.quantity_eaten] ?? 1),
+                  (acc, it) => acc + (Number(it.quantity_eaten_g) || 0),
                   0
                 );
                 const showTotals = m.items.length > 1;
@@ -227,7 +223,7 @@ export function EatingDetail({ catId, catName, profilePhotoUrl }: Props) {
                     <ul className="mt-1 space-y-0.5">
                       {m.items.map((it) => {
                         const itGiven = Number(it.quantity_given_g) || 0;
-                        const itEaten = itGiven * (EATEN_RATIO_FACTOR[it.quantity_eaten] ?? 1);
+                        const itEaten = Number(it.quantity_eaten_g) || 0;
                         const itKcal = Number(it.estimated_kcal_consumed) || 0;
                         const disp = ratioDisplay(it.quantity_eaten);
                         return (

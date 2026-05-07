@@ -73,7 +73,7 @@ export async function GET() {
       .select(`
         id, cat_id, meal_time, feeding_method,
         items:eating_log_items(
-          quantity_given_g, quantity_eaten, estimated_kcal_consumed,
+          quantity_given_g, quantity_eaten, quantity_eaten_g, estimated_kcal_consumed,
           food:food_items(name, type)
         )
       `)
@@ -141,9 +141,6 @@ export async function GET() {
   const RATIO_RANK: Record<EatenRatio, number> = {
     all: 4, most: 3, half: 2, little: 1, none: 0
   };
-  const RATIO_FACTOR: Record<EatenRatio, number> = {
-    all: 1, most: 0.75, half: 0.5, little: 0.2, none: 0
-  };
 
   const mealsByCat = new Map<string, MealSummary[]>();
   for (const m of mealsRes.data ?? []) {
@@ -155,9 +152,9 @@ export async function GET() {
     const items: MealItem[] = [];
     for (const it of m.items ?? []) {
       const grams = Number(it.quantity_given_g ?? 0);
+      const eaten = Number(it.quantity_eaten_g ?? 0);
       const kcal = Number(it.estimated_kcal_consumed ?? 0);
       const r = (it.quantity_eaten as EatenRatio) ?? 'all';
-      const eaten = grams * RATIO_FACTOR[r];
       totalG += grams;
       totalEaten += eaten;
       totalK += kcal;

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/current-user';
-import { EATEN_RATIO_FACTOR } from '@/lib/schemas/eating';
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -54,7 +53,7 @@ export async function GET() {
           .select(`
             id, cat_id, meal_time, feeding_method,
             items:eating_log_items(
-              quantity_given_g, quantity_eaten, estimated_kcal_consumed,
+              quantity_given_g, quantity_eaten, quantity_eaten_g, estimated_kcal_consumed,
               food:food_items(name)
             )
           `)
@@ -141,10 +140,8 @@ export async function GET() {
     let totalK = 0;
     const foodNames: string[] = [];
     for (const it of m.items ?? []) {
-      const given = Number(it.quantity_given_g ?? 0);
-      const factor = EATEN_RATIO_FACTOR[it.quantity_eaten as keyof typeof EATEN_RATIO_FACTOR] ?? 1;
-      totalG += given;
-      totalEatenG += given * factor;
+      totalG += Number(it.quantity_given_g ?? 0);
+      totalEatenG += Number(it.quantity_eaten_g ?? 0);
       totalK += Number(it.estimated_kcal_consumed ?? 0);
       if (it.food?.name) foodNames.push(it.food.name);
     }
