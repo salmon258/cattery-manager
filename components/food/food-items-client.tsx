@@ -10,6 +10,7 @@ import { Edit, Plus, Trash2, Utensils } from 'lucide-react';
 
 import type { FoodItem, FoodType, FoodUnit } from '@/lib/supabase/aliases';
 import { foodItemSchema, type FoodItemInput } from '@/lib/schemas/food';
+import { useUrlBoolState } from '@/lib/hooks/use-url-state';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,7 +37,7 @@ export function FoodItemsClient() {
   const qc = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<FoodItem | null>(null);
-  const [showInactive, setShowInactive] = useState(false);
+  const [showInactive, setShowInactive] = useUrlBoolState('inactive');
 
   const { data: items = [], isLoading, error, refetch } = useQuery({
     queryKey: ['food-items', showInactive],
@@ -60,7 +61,7 @@ export function FoodItemsClient() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-semibold">{t('title')}</h1>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => setShowInactive((v) => !v)}>
+          <Button variant="outline" size="sm" onClick={() => setShowInactive(!showInactive)}>
             {showInactive ? t('hideInactive') : t('showInactive')}
           </Button>
           <Button onClick={() => setCreateOpen(true)}><Plus className="h-4 w-4" /> {t('new')}</Button>
