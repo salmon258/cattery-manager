@@ -14,12 +14,15 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useUrlBoolState, useUrlState } from '@/lib/hooks/use-url-state';
 
 import { StockCheckoutModal } from './stock-checkout-modal';
 import type {
   StockCategory, StockItemStatus, StockExpiringBatch
 } from './stock-types';
 import { STOCK_CATEGORIES } from './stock-types';
+
+const CATEGORY_FILTER_VALUES = ['all', ...STOCK_CATEGORIES] as const;
 
 interface Props {
   isAdmin: boolean;
@@ -42,9 +45,13 @@ export function StockOverviewClient({ isAdmin }: Props) {
   const tc = useTranslations('common');
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [preselectItemId, setPreselectItemId] = useState<string | null>(null);
-  const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<StockCategory | 'all'>('all');
-  const [onlyLow, setOnlyLow] = useState(false);
+  const [search, setSearch] = useUrlState('q', '');
+  const [categoryFilter, setCategoryFilter] = useUrlState<StockCategory | 'all'>(
+    'category',
+    'all',
+    { allowed: CATEGORY_FILTER_VALUES }
+  );
+  const [onlyLow, setOnlyLow] = useUrlBoolState('low');
 
   const { data: status = [], isLoading } = useQuery({
     queryKey: ['stock-status'],
@@ -159,7 +166,7 @@ export function StockOverviewClient({ isAdmin }: Props) {
         <Button
           variant={onlyLow ? 'default' : 'outline'}
           size="sm"
-          onClick={() => setOnlyLow((v) => !v)}
+          onClick={() => setOnlyLow(!onlyLow)}
         >
           {onlyLow ? t('filters.lowOnlyOn') : t('filters.lowOnlyOff')}
         </Button>

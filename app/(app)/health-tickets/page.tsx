@@ -5,6 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { HeartPulse } from 'lucide-react';
 
+import { useUrlState } from '@/lib/hooks/use-url-state';
+
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -59,7 +61,11 @@ export default function HealthTicketsPage() {
   const t  = useTranslations('healthTickets');
   const tc = useTranslations('common');
 
-  const [severity, setSeverity] = useState('all');
+  const [severity, setSeverity] = useUrlState<'all' | 'critical' | 'high' | 'medium' | 'low'>(
+    'severity',
+    'all',
+    { allowed: ['all', 'critical', 'high', 'medium', 'low'] as const }
+  );
   const [viewTicketId, setViewTicketId] = useState<string | null>(null);
 
   const { data: tickets = [], isLoading, error } = useQuery({
@@ -78,7 +84,7 @@ export default function HealthTicketsPage() {
           <HeartPulse className="h-5 w-5 text-muted-foreground" />
           {t('allTickets')}
         </h1>
-        <Select value={severity} onValueChange={setSeverity}>
+        <Select value={severity} onValueChange={(v) => setSeverity(v as typeof severity)}>
           <SelectTrigger className="w-44">
             <SelectValue />
           </SelectTrigger>

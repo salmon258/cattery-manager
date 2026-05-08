@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import type { Cat } from '@/lib/supabase/aliases';
+import { useUrlState } from '@/lib/hooks/use-url-state';
 import { LogWeightModal } from '@/components/weight/log-weight-modal';
 import { LogEatingModal } from '@/components/eating/log-eating-modal';
 import { LogAdHocMedModal } from '@/components/medications/log-ad-hoc-med-modal';
@@ -112,6 +113,9 @@ async function fetchMyTasks(): Promise<MyTask[]> {
 type SortKey = 'name_asc' | 'name_desc' | 'pending_desc' | 'tickets_desc' | 'room_asc';
 type StatusFilter = 'all' | 'pending' | 'tickets' | 'clean';
 
+const SORT_KEYS = ['name_asc', 'name_desc', 'pending_desc', 'tickets_desc', 'room_asc'] as const;
+const STATUS_FILTERS = ['all', 'pending', 'tickets', 'clean'] as const;
+
 export function MyCatsClient({ firstName }: { firstName: string }) {
   const ts = useTranslations('sitterHome');
   const tc = useTranslations('common');
@@ -125,11 +129,18 @@ export function MyCatsClient({ firstName }: { firstName: string }) {
   const [medTarget, setMedTarget] = useState<{ id: string; name: string } | null>(null);
   const [reportTarget, setReportTarget] = useState<{ id: string; name: string } | null>(null);
 
-  // Filter / sort state for the cat list.
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
-  const [roomFilter, setRoomFilter] = useState<string>('all');
-  const [sortKey, setSortKey] = useState<SortKey>('name_asc');
+  // Filter / sort state for the cat list, mirrored to the URL so navigating
+  // away (e.g. into a cat detail page) and back restores the same view.
+  const [search, setSearch] = useUrlState('q', '');
+  const [statusFilter, setStatusFilter] = useUrlState<StatusFilter>(
+    'status',
+    'all',
+    { allowed: STATUS_FILTERS }
+  );
+  const [roomFilter, setRoomFilter] = useUrlState('room', 'all');
+  const [sortKey, setSortKey] = useUrlState<SortKey>('sort', 'name_asc', {
+    allowed: SORT_KEYS
+  });
 
   const { data: cats = [], isLoading, error, refetch } = useQuery({
     queryKey: ['me-cats'],
@@ -323,21 +334,21 @@ export function MyCatsClient({ firstName }: { firstName: string }) {
             <FilterChip
               active={statusFilter === 'pending'}
               color="violet"
-              onClick={() => setStatusFilter((s) => (s === 'pending' ? 'all' : 'pending'))}
+              onClick={() => setStatusFilter(statusFilter === 'pending' ? 'all' : 'pending')}
             >
               <Timer className="h-3 w-3" /> {tf('status.pending')}
             </FilterChip>
             <FilterChip
               active={statusFilter === 'tickets'}
               color="rose"
-              onClick={() => setStatusFilter((s) => (s === 'tickets' ? 'all' : 'tickets'))}
+              onClick={() => setStatusFilter(statusFilter === 'tickets' ? 'all' : 'tickets')}
             >
               <AlertTriangle className="h-3 w-3" /> {tf('status.tickets')}
             </FilterChip>
             <FilterChip
               active={statusFilter === 'clean'}
               color="emerald"
-              onClick={() => setStatusFilter((s) => (s === 'clean' ? 'all' : 'clean'))}
+              onClick={() => setStatusFilter(statusFilter === 'clean' ? 'all' : 'clean')}
             >
               <Check className="h-3 w-3" /> {tf('status.clean')}
             </FilterChip>

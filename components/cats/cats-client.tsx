@@ -17,6 +17,7 @@ import { Home, User } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { BatchAssignModal } from '@/components/assignees/batch-assign-modal';
 import { BatchMedicationModal } from '@/components/medications/batch-medication-modal';
+import { useUrlState } from '@/lib/hooks/use-url-state';
 
 type CatRow = Cat & {
   current_room?: { id: string; name: string } | null;
@@ -37,7 +38,7 @@ export function CatsClient({ role }: { role: UserRole }) {
   const ts = useTranslations('cats.status');
   const ta = useTranslations('assignees');
   const tm = useTranslations('medications');
-  const [q, setQ] = useState('');
+  const [q, setQ] = useUrlState('q', '');
   const [selectMode, setSelectMode]     = useState(false);
   const [selectedIds, setSelectedIds]   = useState<Set<string>>(new Set());
   const [batchModalOpen, setBatchModalOpen] = useState(false);

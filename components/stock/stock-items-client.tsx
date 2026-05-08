@@ -21,6 +21,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 import { stockItemSchema, type StockItemInput } from '@/lib/schemas/stock';
 import { STOCK_CATEGORIES, STOCK_UNITS, type StockCategory, type StockItem, type StockLocation } from './stock-types';
+import { useUrlBoolState, useUrlState } from '@/lib/hooks/use-url-state';
+
+const CATEGORY_FILTER_VALUES = ['all', ...STOCK_CATEGORIES] as const;
 
 async function fetchItems(includeInactive: boolean): Promise<StockItem[]> {
   const qs = includeInactive ? '?include_inactive=1' : '';
@@ -46,9 +49,13 @@ export function StockItemsClient({ isAdmin }: StockItemsClientProps) {
   const params = useSearchParams();
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<StockItem | null>(null);
-  const [showInactive, setShowInactive] = useState(false);
-  const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<StockCategory | 'all'>('all');
+  const [showInactive, setShowInactive] = useUrlBoolState('inactive');
+  const [search, setSearch] = useUrlState('q', '');
+  const [categoryFilter, setCategoryFilter] = useUrlState<StockCategory | 'all'>(
+    'category',
+    'all',
+    { allowed: CATEGORY_FILTER_VALUES }
+  );
 
   // Auto-open "new" sheet via ?new=1 from the overview CTA
   useEffect(() => {
@@ -99,7 +106,7 @@ export function StockItemsClient({ isAdmin }: StockItemsClientProps) {
           <p className="text-sm text-muted-foreground">{t('items.subtitle')}</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => setShowInactive((v) => !v)}>
+          <Button variant="outline" size="sm" onClick={() => setShowInactive(!showInactive)}>
             {showInactive ? t('showActive') : t('showInactive')}
           </Button>
           <Button onClick={() => setCreateOpen(true)}>

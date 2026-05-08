@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
@@ -14,13 +13,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 import type { StockLocation, StockMovement, StockMovementType } from './stock-types';
 import { STOCK_MOVEMENT_TYPES } from './stock-types';
+import { useUrlState } from '@/lib/hooks/use-url-state';
+
+const TYPE_FILTER_VALUES = ['all', ...STOCK_MOVEMENT_TYPES] as const;
 
 export function StockMovementsClient() {
   const t = useTranslations('stock');
   const tc = useTranslations('common');
-  const [type, setType] = useState<StockMovementType | 'all'>('all');
-  const [locationId, setLocationId] = useState<string>('all');
-  const [since, setSince] = useState<string>(''); // YYYY-MM-DD
+  const [type, setType] = useUrlState<StockMovementType | 'all'>(
+    'type',
+    'all',
+    { allowed: TYPE_FILTER_VALUES }
+  );
+  const [locationId, setLocationId] = useUrlState('location', 'all');
+  const [since, setSince] = useUrlState('since', ''); // YYYY-MM-DD
 
   const qs = new URLSearchParams();
   if (type !== 'all') qs.set('type', type);

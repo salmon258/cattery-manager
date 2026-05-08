@@ -23,6 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 import { financialTransactionSchema, type FinancialTransactionInput } from '@/lib/schemas/finance';
 import { downloadCsv, toCsv } from '@/lib/export/csv';
+import { useUrlState } from '@/lib/hooks/use-url-state';
 
 import type {
   FinancialTransaction, TransactionCategory, FinancialType, PaymentMethod
@@ -60,10 +61,20 @@ export function FinanceClient({ defaultCurrency }: Props) {
   const tc = useTranslations('common');
   const qc = useQueryClient();
 
-  const [range, setRange] = useState({ from: monthsAgo(5), to: lastOfMonth() });
-  const [filterType, setFilterType] = useState<'all' | FinancialType>('all');
-  const [filterCategory, setFilterCategory] = useState<string>('all');
-  const [filterAuto, setFilterAuto] = useState<'all' | 'manual' | 'auto'>('all');
+  const [from, setFrom] = useUrlState('from', monthsAgo(5));
+  const [to, setTo] = useUrlState('to', lastOfMonth());
+  const range = { from, to };
+  const [filterType, setFilterType] = useUrlState<'all' | FinancialType>(
+    'type',
+    'all',
+    { allowed: ['all', 'income', 'expense'] as const }
+  );
+  const [filterCategory, setFilterCategory] = useUrlState('category', 'all');
+  const [filterAuto, setFilterAuto] = useUrlState<'all' | 'manual' | 'auto'>(
+    'source',
+    'all',
+    { allowed: ['all', 'manual', 'auto'] as const }
+  );
   const [createOpen, setCreateOpen] = useState(false);
   const [createType, setCreateType] = useState<FinancialType>('expense');
   const [editing, setEditing] = useState<FinancialTransaction | null>(null);
@@ -200,7 +211,7 @@ export function FinanceClient({ defaultCurrency }: Props) {
             <Input
               type="date"
               value={range.from}
-              onChange={(e) => setRange((r) => ({ ...r, from: e.target.value }))}
+              onChange={(e) => setFrom(e.target.value)}
             />
           </div>
           <div className="space-y-1">
@@ -208,7 +219,7 @@ export function FinanceClient({ defaultCurrency }: Props) {
             <Input
               type="date"
               value={range.to}
-              onChange={(e) => setRange((r) => ({ ...r, to: e.target.value }))}
+              onChange={(e) => setTo(e.target.value)}
             />
           </div>
           <div className="space-y-1">
