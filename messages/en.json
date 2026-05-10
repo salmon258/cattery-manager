@@ -235,6 +235,10 @@
     "confirmDelete": "Delete this vaccination?",
     "empty": "No vaccinations recorded yet.",
     "nextDue": "Next due",
+    "batchAction": "Vaccinate",
+    "batchTitle": "Vaccinate {count} cats",
+    "batchDesc": "Apply the same vaccination entry to every selected cat.",
+    "batchCreated": "Vaccinations recorded for {count} cats.",
     "fields": {
       "type": "Vaccine type",
       "vaccineName": "Vaccine name",
