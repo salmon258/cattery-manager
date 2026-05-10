@@ -32,3 +32,12 @@ export type VaccinationInput = z.infer<typeof vaccinationSchema>;
 
 export const vaccinationUpdateSchema = vaccinationBaseSchema.partial();
 export type VaccinationUpdateInput = z.infer<typeof vaccinationUpdateSchema>;
+
+// Batch-create the same vaccination entry for many cats at once. We reuse
+// vaccinationSchema unchanged so validation stays identical to the single-cat
+// endpoint — the only extra field is the list of target cats.
+export const batchCreateVaccinationsSchema = z.object({
+  cat_ids: z.array(z.string().uuid()).min(1).max(200),
+  vaccination: vaccinationSchema
+});
+export type BatchCreateVaccinationsInput = z.infer<typeof batchCreateVaccinationsSchema>;

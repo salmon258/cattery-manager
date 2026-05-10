@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { catDetailQueryOptions } from '@/lib/queries/cats';
 import { useTranslations } from 'next-intl';
-import { Pill, Plus, Search, UserPlus, X } from 'lucide-react';
+import { Pill, Plus, Search, Syringe, UserPlus, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +17,7 @@ import { Home, User } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { BatchAssignModal } from '@/components/assignees/batch-assign-modal';
 import { BatchMedicationModal } from '@/components/medications/batch-medication-modal';
+import { BatchVaccinationModal } from '@/components/health/batch-vaccination-modal';
 import { useUrlState } from '@/lib/hooks/use-url-state';
 
 type CatRow = Cat & {
@@ -38,11 +39,13 @@ export function CatsClient({ role }: { role: UserRole }) {
   const ts = useTranslations('cats.status');
   const ta = useTranslations('assignees');
   const tm = useTranslations('medications');
+  const tv = useTranslations('vaccines');
   const [q, setQ] = useUrlState('q', '');
   const [selectMode, setSelectMode]     = useState(false);
   const [selectedIds, setSelectedIds]   = useState<Set<string>>(new Set());
   const [batchModalOpen, setBatchModalOpen] = useState(false);
   const [batchMedModalOpen, setBatchMedModalOpen] = useState(false);
+  const [batchVaccModalOpen, setBatchVaccModalOpen] = useState(false);
   const isAdmin = role === 'admin';
 
   const qc = useQueryClient();
@@ -116,6 +119,13 @@ export function CatsClient({ role }: { role: UserRole }) {
                 onClick={() => setBatchMedModalOpen(true)}
               >
                 <Pill className="h-4 w-4" /> {tm('batchSchedule')}
+              </Button>
+              <Button
+                variant="outline"
+                disabled={selectedIds.size === 0}
+                onClick={() => setBatchVaccModalOpen(true)}
+              >
+                <Syringe className="h-4 w-4" /> {tv('batchAction')}
               </Button>
               <Button variant="outline" size="icon" onClick={exitSelectMode} aria-label={tc('cancel')}>
                 <X className="h-4 w-4" />
@@ -238,6 +248,13 @@ export function CatsClient({ role }: { role: UserRole }) {
       <BatchMedicationModal
         open={batchMedModalOpen}
         onClose={() => setBatchMedModalOpen(false)}
+        catIds={Array.from(selectedIds)}
+        onSuccess={() => { exitSelectMode(); }}
+      />
+
+      <BatchVaccinationModal
+        open={batchVaccModalOpen}
+        onClose={() => setBatchVaccModalOpen(false)}
         catIds={Array.from(selectedIds)}
         onSuccess={() => { exitSelectMode(); }}
       />
