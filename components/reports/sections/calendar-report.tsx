@@ -2,9 +2,10 @@
 
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { cn, formatDate } from '@/lib/utils';
 
 type CalendarCategory =
@@ -62,9 +63,12 @@ function ymd(d: Date): string {
 }
 
 function startOfMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth(), 1); }
-function endOfMonth(d: Date)   { return new Date(d.getFullYear(), d.getMonth() + 1, 0); }
 function addDays(d: Date, n: number) { const c = new Date(d); c.setDate(c.getDate() + n); return c; }
 function addMonths(d: Date, n: number) { return new Date(d.getFullYear(), d.getMonth() + n, 1); }
+function addYears(d: Date, n: number)  { return new Date(d.getFullYear() + n, d.getMonth(), 1); }
+function monthInputValue(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
 
 export function CalendarReport() {
   const today = useMemo(() => { const t = new Date(); t.setHours(0, 0, 0, 0); return t; }, []);
@@ -125,6 +129,13 @@ export function CalendarReport() {
     setSelectedDate(ymd(t));
   }
 
+  function onMonthInputChange(value: string) {
+    if (!value) return;
+    const [y, m] = value.split('-').map(Number);
+    if (!y || !m) return;
+    setCursor(new Date(y, m - 1, 1));
+  }
+
   return (
     <Card>
       <CardHeader className="space-y-3">
@@ -135,15 +146,32 @@ export function CalendarReport() {
               History and scheduled events: birth, vaccination, deworming, flea, mating, heat, vet visits.
             </p>
           </div>
-          <div className="flex items-center gap-1">
-            <Button size="sm" variant="outline" onClick={() => setCursor(addMonths(cursor, -1))}>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button size="sm" variant="outline" onClick={gotoToday}>Today</Button>
-            <Button size="sm" variant="outline" onClick={() => setCursor(addMonths(cursor, 1))}>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
+          {isLoading && <span className="text-xs text-muted-foreground">Loading…</span>}
+        </div>
+
+        {/* Period navigation */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <Button size="sm" variant="outline" onClick={() => setCursor(addYears(cursor, -1))} title="Previous year" aria-label="Previous year">
+            <ChevronsLeft className="h-4 w-4" />
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => setCursor(addMonths(cursor, -1))} title="Previous month" aria-label="Previous month">
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Input
+            type="month"
+            value={monthInputValue(cursor)}
+            onChange={(e) => onMonthInputChange(e.target.value)}
+            className="h-8 w-40 text-sm"
+            aria-label="Pick month"
+          />
+          <Button size="sm" variant="outline" onClick={() => setCursor(addMonths(cursor, 1))} title="Next month" aria-label="Next month">
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => setCursor(addYears(cursor, 1))} title="Next year" aria-label="Next year">
+            <ChevronsRight className="h-4 w-4" />
+          </Button>
+          <Button size="sm" variant="outline" onClick={gotoToday}>Today</Button>
+          <span className="text-sm font-medium ml-2">{monthLabel}</span>
         </div>
 
         {/* Category filter chips */}
@@ -177,16 +205,14 @@ export function CalendarReport() {
       </CardHeader>
 
       <CardContent className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="text-sm font-medium">{monthLabel}</div>
-          {isLoading && <span className="text-xs text-muted-foreground">Loading…</span>}
-        </div>
-
         {/* Calendar grid */}
         <div className="rounded-md border overflow-hidden">
-          <div className="grid grid-cols-7 bg-muted/40 text-xs uppercase tracking-wider text-muted-foreground">
+          <div className="grid grid-cols-7 bg-muted/40 text-[10px] sm:text-xs uppercase tracking-wider text-muted-foreground">
             {WEEKDAYS.map((w) => (
-              <div key={w} className="px-2 py-1.5 text-center">{w}</div>
+              <div key={w} className="px-1 sm:px-2 py-1.5 text-center">
+                <span className="hidden sm:inline">{w}</span>
+                <span className="sm:hidden">{w[0]}</span>
+              </div>
             ))}
           </div>
           <div className="grid grid-cols-7">
@@ -196,15 +222,17 @@ export function CalendarReport() {
               const isToday   = key === ymd(today);
               const isSelected = key === selectedDate;
               const dayEvents = eventsByDate.get(key) ?? [];
-              const visible   = dayEvents.slice(0, 3);
-              const overflow  = dayEvents.length - visible.length;
+              const dotsVisible = dayEvents.slice(0, 6);
+              const dotsOverflow = dayEvents.length - dotsVisible.length;
+              const chipsVisible = dayEvents.slice(0, 3);
+              const chipsOverflow = dayEvents.length - chipsVisible.length;
               return (
                 <button
                   key={i}
                   type="button"
                   onClick={() => setSelectedDate(key)}
                   className={cn(
-                    'min-h-[84px] border-t border-l p-1.5 text-left flex flex-col gap-1 transition-colors',
+                    'min-h-[60px] sm:min-h-[88px] border-t border-l p-1 sm:p-1.5 text-left flex flex-col gap-1 transition-colors',
                     i % 7 === 6 && 'border-r',
                     i >= 35 && 'border-b',
                     !inMonth && 'bg-muted/20 text-muted-foreground',
@@ -215,15 +243,35 @@ export function CalendarReport() {
                   <div className="flex items-center justify-between">
                     <span
                       className={cn(
-                        'inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-xs font-medium',
+                        'inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full px-1 text-xs font-medium',
                         isToday && 'bg-primary text-primary-foreground'
                       )}
                     >
                       {d.getDate()}
                     </span>
                   </div>
-                  <div className="flex flex-col gap-0.5">
-                    {visible.map((ev) => (
+
+                  {/* Mobile: just dots */}
+                  <div className="sm:hidden flex flex-wrap gap-0.5">
+                    {dotsVisible.map((ev) => (
+                      <span
+                        key={ev.id}
+                        className={cn(
+                          'h-1.5 w-1.5 rounded-full',
+                          DOT_BY_CAT[ev.category],
+                          ev.kind === 'scheduled' && 'ring-1 ring-offset-1 ring-current opacity-80'
+                        )}
+                        title={`${ev.cat?.name ? ev.cat.name + ' · ' : ''}${ev.title}${ev.detail ? ' · ' + ev.detail : ''}`}
+                      />
+                    ))}
+                    {dotsOverflow > 0 && (
+                      <span className="text-[9px] text-muted-foreground leading-none">+{dotsOverflow}</span>
+                    )}
+                  </div>
+
+                  {/* Desktop: text chips */}
+                  <div className="hidden sm:flex flex-col gap-0.5">
+                    {chipsVisible.map((ev) => (
                       <div
                         key={ev.id}
                         className={cn(
@@ -239,8 +287,8 @@ export function CalendarReport() {
                         </span>
                       </div>
                     ))}
-                    {overflow > 0 && (
-                      <div className="text-[10px] text-muted-foreground pl-1">+{overflow} more</div>
+                    {chipsOverflow > 0 && (
+                      <div className="text-[10px] text-muted-foreground pl-1">+{chipsOverflow} more</div>
                     )}
                   </div>
                 </button>
@@ -261,23 +309,25 @@ export function CalendarReport() {
               {selectedEvents.map((ev) => {
                 const meta = CATEGORIES.find((c) => c.key === ev.category)!;
                 return (
-                  <li key={ev.id} className="flex items-center gap-2 px-3 py-2 text-sm">
-                    <span className={cn('h-2.5 w-2.5 rounded-full shrink-0', meta.dot)} />
-                    <span className={cn('text-xs uppercase tracking-wider rounded px-1.5 py-0.5 border', meta.chipOn)}>
-                      {meta.label}
-                    </span>
-                    <span className="font-medium">{ev.cat?.name ?? '—'}</span>
-                    <span className="text-muted-foreground">·</span>
-                    <span>{ev.title}</span>
-                    {ev.detail && (
-                      <>
-                        <span className="text-muted-foreground">·</span>
-                        <span className="text-xs text-muted-foreground">{ev.detail}</span>
-                      </>
-                    )}
+                  <li key={ev.id} className="flex items-start gap-2 px-3 py-2 text-sm">
+                    <span className={cn('h-2.5 w-2.5 rounded-full shrink-0 mt-1.5', meta.dot)} />
+                    <div className="flex-1 min-w-0 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                      <span className={cn('text-[10px] uppercase tracking-wider rounded px-1.5 py-0.5 border', meta.chipOn)}>
+                        {meta.label}
+                      </span>
+                      <span className="font-medium">{ev.cat?.name ?? '—'}</span>
+                      <span className="text-muted-foreground">·</span>
+                      <span>{ev.title}</span>
+                      {ev.detail && (
+                        <>
+                          <span className="text-muted-foreground">·</span>
+                          <span className="text-xs text-muted-foreground">{ev.detail}</span>
+                        </>
+                      )}
+                    </div>
                     <span
                       className={cn(
-                        'ml-auto text-[10px] uppercase tracking-wider rounded-full border px-1.5 py-0.5',
+                        'shrink-0 text-[10px] uppercase tracking-wider rounded-full border px-1.5 py-0.5 mt-0.5',
                         ev.kind === 'scheduled'
                           ? 'border-dashed text-muted-foreground'
                           : 'text-muted-foreground'
