@@ -275,6 +275,10 @@
     "confirmDelete": "Hapus pemberian ini?",
     "empty": "Belum ada pemberian.",
     "nextDue": "Jatuh tempo",
+    "batchAction": "Obat cacing",
+    "batchTitle": "Beri pengobatan {count} kucing",
+    "batchDesc": "Catat obat cacing / kutu yang sama untuk semua kucing terpilih.",
+    "batchCreated": "Pemberian tercatat untuk {count} kucing.",
     "fields": {
       "type": "Jenis",
       "productName": "Nama produk",
