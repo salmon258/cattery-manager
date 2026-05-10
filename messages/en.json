@@ -1009,6 +1009,7 @@
     "title": "Reports",
     "tabs": {
       "calendar": "Calendar",
+      "careDue": "Care due",
       "weight": "Weight",
       "eating": "Eating",
       "medication": "Medication",
@@ -1019,6 +1020,25 @@
       "rooms": "Room movements",
       "activity": "Activity",
       "spending": "Spending"
+    },
+    "careDue": {
+      "title": "Care due",
+      "description": "Latest vaccination, flea, or deworming entry per active cat with the next scheduled date and overdue indicator.",
+      "loading": "Loading…",
+      "empty": "No active cats.",
+      "never": "Never",
+      "overdueAlert": "{count} cats need attention",
+      "types": {
+        "vaccination": "Vaccination",
+        "flea": "Flea",
+        "deworming": "Deworming"
+      },
+      "columns": {
+        "cat": "Cat",
+        "lastAdministered": "Last administered",
+        "nextDue": "Next due",
+        "status": "Status"
+      }
     }
   },
   "settings": {

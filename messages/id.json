@@ -1009,6 +1009,7 @@
     "title": "Laporan",
     "tabs": {
       "calendar": "Kalender",
+      "careDue": "Perawatan jatuh tempo",
       "weight": "Berat",
       "eating": "Makan",
       "medication": "Obat",
@@ -1019,6 +1020,25 @@
       "rooms": "Perpindahan ruangan",
       "activity": "Aktivitas",
       "spending": "Pengeluaran"
+    },
+    "careDue": {
+      "title": "Perawatan jatuh tempo",
+      "description": "Vaksinasi, kutu, atau obat cacing terakhir per kucing aktif beserta jadwal berikutnya dan indikator keterlambatan.",
+      "loading": "Memuat…",
+      "empty": "Tidak ada kucing aktif.",
+      "never": "Belum pernah",
+      "overdueAlert": "{count} kucing perlu perhatian",
+      "types": {
+        "vaccination": "Vaksinasi",
+        "flea": "Kutu",
+        "deworming": "Obat cacing"
+      },
+      "columns": {
+        "cat": "Kucing",
+        "lastAdministered": "Pemberian terakhir",
+        "nextDue": "Jatuh tempo",
+        "status": "Status"
+      }
     }
   },
   "settings": {
