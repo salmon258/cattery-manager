@@ -14,9 +14,11 @@ import { RoomMovementsReport } from './sections/room-movements-report';
 import { ActivityReport } from './sections/activity-report';
 import { SpendingReport } from './sections/spending-report';
 import { CalendarReport } from './sections/calendar-report';
+import { CareDueReport } from './sections/care-due-report';
 
 type TabKey =
   | 'calendar'
+  | 'care-due'
   | 'weight'
   | 'eating'
   | 'medication'
@@ -34,6 +36,7 @@ export function ReportsClient() {
 
   const tabs: { key: TabKey; label: string }[] = [
     { key: 'calendar',     label: t('tabs.calendar') },
+    { key: 'care-due',     label: t('tabs.careDue') },
     { key: 'weight',       label: t('tabs.weight') },
     { key: 'eating',       label: t('tabs.eating') },
     { key: 'medication',   label: t('tabs.medication') },
@@ -73,6 +76,7 @@ export function ReportsClient() {
       </div>
 
       {tab === 'calendar'     && <CalendarReport />}
+      {tab === 'care-due'     && <CareDueReport />}
       {tab === 'weight'       && <WeightReport />}
       {tab === 'eating'       && <EatingReport />}
       {tab === 'medication'   && <MedicationComplianceReport />}
