@@ -275,6 +275,10 @@
     "confirmDelete": "Delete this treatment?",
     "empty": "No treatments recorded yet.",
     "nextDue": "Next due",
+    "batchAction": "Deworm",
+    "batchTitle": "Treat {count} cats",
+    "batchDesc": "Apply the same deworming / flea treatment to every selected cat.",
+    "batchCreated": "Treatments recorded for {count} cats.",
     "fields": {
       "type": "Treatment type",
       "productName": "Product name",

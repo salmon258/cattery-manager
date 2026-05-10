@@ -14,3 +14,12 @@ export const preventiveTreatmentSchema = z.object({
   notes: z.string().max(2000).nullable().optional()
 });
 export type PreventiveTreatmentInput = z.infer<typeof preventiveTreatmentSchema>;
+
+// Batch-create the same preventive treatment for many cats at once. We reuse
+// preventiveTreatmentSchema unchanged so validation stays identical to the
+// single-cat endpoint — the only extra field is the list of target cats.
+export const batchCreatePreventiveSchema = z.object({
+  cat_ids: z.array(z.string().uuid()).min(1).max(200),
+  treatment: preventiveTreatmentSchema
+});
+export type BatchCreatePreventiveInput = z.infer<typeof batchCreatePreventiveSchema>;
