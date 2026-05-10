@@ -21,9 +21,9 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
  *   const [type, setType] = useUrlState<FoodType | 'all'>('type', 'all');
  *   const [showInactive, setShowInactive] = useUrlBoolState('inactive', false);
  */
-export function useUrlState<T extends string>(
+export function useUrlState<T extends string = string>(
   key: string,
-  defaultValue: T,
+  defaultValue: NoInfer<T>,
   options?: { allowed?: readonly T[] }
 ): [T, (next: T) => void] {
   const router = useRouter();
