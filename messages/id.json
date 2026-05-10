@@ -1004,6 +1004,7 @@
   "reports": {
     "title": "Laporan",
     "tabs": {
+      "calendar": "Kalender",
       "weight": "Berat",
       "eating": "Makan",
       "medication": "Obat",

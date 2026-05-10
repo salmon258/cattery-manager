@@ -13,8 +13,10 @@ import { HeatLogsReport } from './sections/heat-logs-report';
 import { RoomMovementsReport } from './sections/room-movements-report';
 import { ActivityReport } from './sections/activity-report';
 import { SpendingReport } from './sections/spending-report';
+import { CalendarReport } from './sections/calendar-report';
 
 type TabKey =
+  | 'calendar'
   | 'weight'
   | 'eating'
   | 'medication'
@@ -28,9 +30,10 @@ type TabKey =
 
 export function ReportsClient() {
   const t = useTranslations('reports');
-  const [tab, setTab] = useState<TabKey>('weight');
+  const [tab, setTab] = useState<TabKey>('calendar');
 
   const tabs: { key: TabKey; label: string }[] = [
+    { key: 'calendar',     label: t('tabs.calendar') },
     { key: 'weight',       label: t('tabs.weight') },
     { key: 'eating',       label: t('tabs.eating') },
     { key: 'medication',   label: t('tabs.medication') },
@@ -69,6 +72,7 @@ export function ReportsClient() {
         </div>
       </div>
 
+      {tab === 'calendar'     && <CalendarReport />}
       {tab === 'weight'       && <WeightReport />}
       {tab === 'eating'       && <EatingReport />}
       {tab === 'medication'   && <MedicationComplianceReport />}

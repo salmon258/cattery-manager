@@ -1004,6 +1004,7 @@
   "reports": {
     "title": "Reports",
     "tabs": {
+      "calendar": "Calendar",
       "weight": "Weight",
       "eating": "Eating",
       "medication": "Medication",
