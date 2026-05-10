@@ -228,7 +228,11 @@
   "vaccines": {
     "title": "Vaksinasi",
     "log": "Catat",
+    "edit": "Ubah vaksinasi",
     "logged": "Vaksinasi tercatat.",
+    "updated": "Vaksinasi diperbarui.",
+    "deleted": "Vaksinasi dihapus.",
+    "confirmDelete": "Hapus vaksinasi ini?",
     "empty": "Belum ada vaksinasi tercatat.",
     "nextDue": "Jatuh tempo",
     "fields": {

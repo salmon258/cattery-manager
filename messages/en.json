@@ -228,7 +228,11 @@
   "vaccines": {
     "title": "Vaccinations",
     "log": "Log",
+    "edit": "Edit vaccination",
     "logged": "Vaccination recorded.",
+    "updated": "Vaccination updated.",
+    "deleted": "Vaccination deleted.",
+    "confirmDelete": "Delete this vaccination?",
     "empty": "No vaccinations recorded yet.",
     "nextDue": "Next due",
     "fields": {

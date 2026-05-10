@@ -29,55 +29,85 @@ function addDays(yyyyMmDd: string, days: number): string {
   return d.toISOString().slice(0, 10);
 }
 
+export type EditableVaccination = {
+  id: string;
+  vaccine_type: VaccineTypeInput;
+  vaccine_name: string | null;
+  administered_date: string;
+  batch_number: string | null;
+  administered_by_vet: string | null;
+  next_due_date: string | null;
+  notes: string | null;
+};
+
 export function LogVaccinationModal({
   open,
   onClose,
-  catId
+  catId,
+  editVaccination
 }: {
   open: boolean;
   onClose: () => void;
   catId: string;
+  editVaccination?: EditableVaccination | null;
 }) {
   const t = useTranslations('vaccines');
   const tc = useTranslations('common');
   const qc = useQueryClient();
+  const isEditing = !!editVaccination;
 
   const today = new Date().toISOString().slice(0, 10);
   const form = useForm<VaccinationInput>({
     resolver: zodResolver(vaccinationSchema),
-    defaultValues: {
-      vaccine_type: 'f3',
-      vaccine_name: '',
-      administered_date: today,
-      batch_number: '',
-      administered_by_vet: '',
-      next_due_date: addDays(today, VACCINE_DEFAULT_INTERVAL_DAYS.f3 ?? 365),
-      notes: ''
-    }
+    defaultValues: editVaccination
+      ? {
+          vaccine_type: editVaccination.vaccine_type,
+          vaccine_name: editVaccination.vaccine_name ?? '',
+          administered_date: editVaccination.administered_date,
+          batch_number: editVaccination.batch_number ?? '',
+          administered_by_vet: editVaccination.administered_by_vet ?? '',
+          next_due_date: editVaccination.next_due_date ?? '',
+          notes: editVaccination.notes ?? ''
+        }
+      : {
+          vaccine_type: 'f3',
+          vaccine_name: '',
+          administered_date: today,
+          batch_number: '',
+          administered_by_vet: '',
+          next_due_date: addDays(today, VACCINE_DEFAULT_INTERVAL_DAYS.f3 ?? 365),
+          notes: ''
+        }
   });
 
   const watchedType = form.watch('vaccine_type');
   const watchedAdmin = form.watch('administered_date');
 
-  // Recompute next_due_date when type or administered_date changes.
+  // Recompute next_due_date when type or administered_date changes — only on
+  // create. Editing shouldn't clobber the existing due date that the user may
+  // have manually adjusted.
   useEffect(() => {
+    if (isEditing) return;
     const interval = VACCINE_DEFAULT_INTERVAL_DAYS[watchedType as VaccineTypeInput];
     if (interval && watchedAdmin) {
       form.setValue('next_due_date', addDays(watchedAdmin, interval), { shouldValidate: false });
     }
-  }, [watchedType, watchedAdmin, form]);
+  }, [watchedType, watchedAdmin, form, isEditing]);
 
   const m = useMutation({
     mutationFn: async (v: VaccinationInput) => {
-      const r = await fetch(`/api/cats/${catId}/vaccinations`, {
-        method: 'POST',
+      const url = isEditing
+        ? `/api/vaccinations/${editVaccination!.id}`
+        : `/api/cats/${catId}/vaccinations`;
+      const r = await fetch(url, {
+        method: isEditing ? 'PATCH' : 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(v)
       });
       if (!r.ok) throw new Error((await r.json()).error ?? 'Failed');
     },
     onSuccess: () => {
-      toast.success(t('logged'));
+      toast.success(isEditing ? t('updated') : t('logged'));
       qc.invalidateQueries({ queryKey: ['vaccinations', catId] });
       qc.invalidateQueries({ queryKey: ['me-cats'] });
       onClose();
@@ -88,7 +118,11 @@ export function LogVaccinationModal({
   const errors = form.formState.errors;
 
   return (
-    <ResponsiveModal open={open} onOpenChange={(o) => !o && onClose()} title={t('log')}>
+    <ResponsiveModal
+      open={open}
+      onOpenChange={(o) => !o && onClose()}
+      title={isEditing ? t('edit') : t('log')}
+    >
       <form onSubmit={form.handleSubmit((v) => m.mutate(v))} className="space-y-3 py-2">
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label={t('fields.type')}>
