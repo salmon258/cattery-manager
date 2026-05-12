@@ -1,11 +1,36 @@
-// Vaul and Radix Dialog lock <body> scroll (overflow / position:fixed /
-// pointer-events / data-scroll-locked) while a drawer or dialog is open and
-// rely on their close-animation cleanup to put those styles back. That
-// cleanup can race with route changes, router.refresh(), and React Query
-// invalidations, leaving the styles behind and freezing the page. This
-// helper is the defense-in-depth: if nothing is actually open, rip the
-// styles off <body>/<html>. If something legitimate is open, bail — the
-// overlay will re-apply its own lock on the next render.
+// Vaul and Radix Dialog lock <body> scroll while a drawer or dialog is open.
+// They set position/top/left/right/height + an `overflow:hidden` style and
+// also rely on the `data-scroll-locked` attribute applied by
+// `react-remove-scroll-bar` (used internally by Radix), which triggers a
+// global CSS rule `body[data-scroll-locked] { overflow: hidden !important }`.
+//
+// Their close-animation cleanup can race with route changes, `router.refresh()`,
+// and React Query cache invalidations, leaving the body styles or the
+// `data-scroll-locked` attribute behind and freezing the page. These helpers
+// are the defense-in-depth.
+
+function stripBodyLockStyles() {
+  if (typeof document === 'undefined') return;
+  const body = document.body;
+  body.style.removeProperty('overflow');
+  body.style.removeProperty('position');
+  body.style.removeProperty('top');
+  body.style.removeProperty('left');
+  body.style.removeProperty('right');
+  body.style.removeProperty('height');
+  body.style.removeProperty('pointer-events');
+  body.removeAttribute('data-scroll-locked');
+
+  const html = document.documentElement;
+  html.style.removeProperty('overflow');
+  html.style.removeProperty('scroll-behavior');
+}
+
+/**
+ * Conservative release: only strips the body lock styles if no overlay is
+ * actually open. Safe to call after route changes — if a new overlay
+ * legitimately opens on the destination page, it re-applies its own lock.
+ */
 export function releaseScrollLockIfIdle() {
   if (typeof document === 'undefined') return;
 
@@ -14,16 +39,18 @@ export function releaseScrollLockIfIdle() {
   );
   if (stillOpen) return;
 
-  const body = document.body;
-  body.style.removeProperty('overflow');
-  body.style.removeProperty('position');
-  body.style.removeProperty('top');
-  body.style.removeProperty('left');
-  body.style.removeProperty('right');
-  body.style.removeProperty('pointer-events');
-  body.removeAttribute('data-scroll-locked');
+  stripBodyLockStyles();
+}
 
-  const html = document.documentElement;
-  html.style.removeProperty('overflow');
-  html.style.removeProperty('scroll-behavior');
+/**
+ * Aggressive release: strips the body lock styles unconditionally. Use after
+ * a pull-to-refresh, where the user just performed a touch gesture on the
+ * page itself — so any lingering "open" state attribute is stale and any
+ * lock must be cleared. (The conservative variant misses cases where
+ * Radix Popover content keeps `role="dialog"` + `data-state="open"` in the
+ * DOM during its close animation, or where vaul leaves `height: auto` on
+ * <body> after the route re-renders.)
+ */
+export function forceReleaseScrollLock() {
+  stripBodyLockStyles();
 }

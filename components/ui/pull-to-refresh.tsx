@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { releaseScrollLockIfIdle } from '@/lib/scroll-lock';
+import { forceReleaseScrollLock } from '@/lib/scroll-lock';
 
 const THRESHOLD = 70;
 const MAX_PULL = 110;
@@ -48,10 +48,14 @@ export function PullToRefresh({ children }: { children: React.ReactNode }) {
       setDistance(0);
       distanceRef.current = 0;
       // router.refresh() + invalidateQueries() can re-render in place while a
-      // Vaul drawer or Radix dialog is mid-close-animation, racing its
-      // scroll-lock cleanup and leaving <body> frozen. ScrollLockGuard only
-      // fires on pathname change, so clear the lock here too.
-      window.setTimeout(releaseScrollLockIfIdle, 150);
+      // Vaul drawer or Radix Popover is mid-close-animation, racing the
+      // scroll-lock cleanup and leaving <body> frozen. We just completed a
+      // touch gesture on the page itself, so nothing should legitimately be
+      // holding the lock — force-clear it unconditionally. Two passes catch
+      // the case where react-remove-scroll re-applies its CSS attribute on a
+      // late-running effect after our first sweep.
+      window.setTimeout(forceReleaseScrollLock, 150);
+      window.setTimeout(forceReleaseScrollLock, 600);
     }
   }, [qc, router]);
 
