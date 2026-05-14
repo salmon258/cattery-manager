@@ -65,8 +65,9 @@ export function SitterShell({ profile, brandName, children }: Props) {
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-violet-50/40 via-background to-sky-50/40 dark:from-violet-950/20 dark:via-background dark:to-sky-950/20">
-      {/* Top bar */}
-      <header className="sticky top-0 z-20 flex h-14 items-center justify-between gap-3 border-b bg-background/80 px-4 backdrop-blur">
+      {/* Top bar (fixed so it stays pinned even when ancestors set
+          overflow-x: hidden, which can break position:sticky on iOS Safari). */}
+      <header className="fixed inset-x-0 top-0 z-30 flex h-14 items-center justify-between gap-3 border-b bg-background/80 px-4 backdrop-blur">
         <Link href="/my-cats" className="flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-violet-500 via-fuchsia-500 to-rose-500 text-white shadow-sm">
             <Cat className="h-4 w-4" />
@@ -78,8 +79,8 @@ export function SitterShell({ profile, brandName, children }: Props) {
         <UserMenu profile={profile} />
       </header>
 
-      {/* Content */}
-      <main className="flex-1">
+      {/* Content (pt-14 reserves space for the fixed top bar) */}
+      <main className="flex-1 pt-14">
         <PullToRefresh>
           <div className="mx-auto max-w-3xl px-4 py-4 pb-24">{children}</div>
         </PullToRefresh>

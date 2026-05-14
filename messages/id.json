@@ -1019,7 +1019,8 @@
       "heat": "Siklus birahi",
       "rooms": "Perpindahan ruangan",
       "activity": "Aktivitas",
-      "spending": "Pengeluaran"
+      "spending": "Pengeluaran",
+      "stockHistory": "Riwayat stok"
     },
     "careDue": {
       "title": "Perawatan jatuh tempo",
@@ -1039,6 +1040,14 @@
         "nextDue": "Jatuh tempo",
         "status": "Status"
       }
+    },
+    "stockHistory": {
+      "title": "Pengambilan & pergerakan stok",
+      "subtitle": "Setiap pengambilan, perpindahan, penambahan, dan penyesuaian stok pada periode terpilih.",
+      "loading": "Memuat…",
+      "empty": "Tidak ada pergerakan stok pada periode ini.",
+      "allTypes": "Semua jenis",
+      "allLocations": "Semua lokasi"
     }
   },
   "settings": {

@@ -15,6 +15,7 @@ import { ActivityReport } from './sections/activity-report';
 import { SpendingReport } from './sections/spending-report';
 import { CalendarReport } from './sections/calendar-report';
 import { CareDueReport } from './sections/care-due-report';
+import { StockHistoryReport } from './sections/stock-history-report';
 
 type TabKey =
   | 'calendar'
@@ -28,7 +29,8 @@ type TabKey =
   | 'heat'
   | 'rooms'
   | 'activity'
-  | 'spending';
+  | 'spending'
+  | 'stock-history';
 
 export function ReportsClient() {
   const t = useTranslations('reports');
@@ -46,7 +48,8 @@ export function ReportsClient() {
     { key: 'heat',         label: t('tabs.heat') },
     { key: 'rooms',        label: t('tabs.rooms') },
     { key: 'activity',     label: t('tabs.activity') },
-    { key: 'spending',     label: t('tabs.spending') }
+    { key: 'spending',     label: t('tabs.spending') },
+    { key: 'stock-history',label: t('tabs.stockHistory') }
   ];
 
   return (
@@ -87,6 +90,7 @@ export function ReportsClient() {
       {tab === 'rooms'        && <RoomMovementsReport />}
       {tab === 'activity'     && <ActivityReport />}
       {tab === 'spending'     && <SpendingReport />}
+      {tab === 'stock-history'&& <StockHistoryReport />}
     </div>
   );
 }

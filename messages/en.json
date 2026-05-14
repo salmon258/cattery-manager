@@ -1019,7 +1019,8 @@
       "heat": "Heat cycles",
       "rooms": "Room movements",
       "activity": "Activity",
-      "spending": "Spending"
+      "spending": "Spending",
+      "stockHistory": "Stock history"
     },
     "careDue": {
       "title": "Care due",
@@ -1039,6 +1040,14 @@
         "nextDue": "Next due",
         "status": "Status"
       }
+    },
+    "stockHistory": {
+      "title": "Stock checkout & movements",
+      "subtitle": "Every checkout, transfer, stock-in and adjustment in the selected period.",
+      "loading": "Loading…",
+      "empty": "No stock movements in this period.",
+      "allTypes": "All types",
+      "allLocations": "All locations"
     }
   },
   "settings": {
