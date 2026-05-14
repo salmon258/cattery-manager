@@ -33,8 +33,9 @@ export function AdminShell({ profile, brandName, children }: Props) {
         <AdminSidebar profile={profile} brandName={brandName} />
       </aside>
 
-      {/* Mobile top bar */}
-      <header className="sticky top-0 z-20 flex h-14 items-center justify-between gap-3 border-b bg-background/80 px-4 backdrop-blur md:hidden">
+      {/* Mobile top bar (fixed so it stays pinned even when ancestors set
+          overflow-x: hidden, which can break position:sticky on iOS Safari). */}
+      <header className="fixed inset-x-0 top-0 z-30 flex h-14 items-center justify-between gap-3 border-b bg-background/80 px-4 backdrop-blur md:hidden">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)} aria-label="Open menu">
             <Menu className="h-5 w-5" />
@@ -70,8 +71,8 @@ export function AdminShell({ profile, brandName, children }: Props) {
         </DrawerPortal>
       </Drawer>
 
-      {/* Content */}
-      <main className="md:pl-60">
+      {/* Content (pt-14 on mobile reserves space for the fixed top bar) */}
+      <main className="pt-14 md:pl-60 md:pt-0">
         <PullToRefresh>
           <div className="mx-auto max-w-6xl px-4 py-6 md:px-8 md:py-8">{children}</div>
         </PullToRefresh>

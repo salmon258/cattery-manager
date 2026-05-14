@@ -245,57 +245,61 @@ export async function AdminDashboardData() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Package className="h-4 w-4 text-muted-foreground" />
-              {ta('lowStock')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="text-2xl font-semibold">{lowStock.length}</div>
-            <ul className="space-y-1 text-xs">
-              {lowStock.length === 0 && <li className="text-muted-foreground">{ta('noLowStock')}</li>}
-              {lowStock.slice(0, 3).map((row) => (
-                <li key={row.stock_item_id} className="flex justify-between gap-2">
-                  <span className="truncate">{row.name}</span>
-                  <span className="text-muted-foreground shrink-0">
-                    {row.qty_on_hand} / {row.min_threshold}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <Button asChild variant="link" size="sm" className="h-auto p-0 text-xs">
-              <Link href="/stock">{ta('viewAll')} →</Link>
-            </Button>
-          </CardContent>
-        </Card>
+        <Link href="/stock?low=1" className="group block">
+          <Card className="h-full transition-all hover:border-primary/40 hover:shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Package className="h-4 w-4 text-muted-foreground" />
+                {ta('lowStock')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div className="text-2xl font-semibold">{lowStock.length}</div>
+              <ul className="space-y-1 text-xs">
+                {lowStock.length === 0 && <li className="text-muted-foreground">{ta('noLowStock')}</li>}
+                {lowStock.slice(0, 3).map((row) => (
+                  <li key={row.stock_item_id} className="flex justify-between gap-2">
+                    <span className="truncate">{row.name}</span>
+                    <span className="text-muted-foreground shrink-0">
+                      {row.qty_on_hand} / {row.min_threshold}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <span className="inline-block text-xs font-medium text-primary group-hover:underline">
+                {ta('viewAll')} →
+              </span>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              {ta('expiringStock')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="text-2xl font-semibold">{expiring.length}</div>
-            <ul className="space-y-1 text-xs">
-              {expiring.length === 0 && <li className="text-muted-foreground">{ta('noExpiring')}</li>}
-              {expiring.slice(0, 3).map((row) => (
-                <li key={row.batch_id} className="flex justify-between gap-2">
-                  <span className="truncate">{row.item_name}</span>
-                  <span className="text-muted-foreground shrink-0">
-                    {(row.days_to_expiry ?? 0) < 0 ? ta('expired') : `${row.days_to_expiry ?? 0}d`}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <Button asChild variant="link" size="sm" className="h-auto p-0 text-xs">
-              <Link href="/stock">{ta('viewAll')} →</Link>
-            </Button>
-          </CardContent>
-        </Card>
+        <Link href="/stock" className="group block">
+          <Card className="h-full transition-all hover:border-primary/40 hover:shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                {ta('expiringStock')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div className="text-2xl font-semibold">{expiring.length}</div>
+              <ul className="space-y-1 text-xs">
+                {expiring.length === 0 && <li className="text-muted-foreground">{ta('noExpiring')}</li>}
+                {expiring.slice(0, 3).map((row) => (
+                  <li key={row.batch_id} className="flex justify-between gap-2">
+                    <span className="truncate">{row.item_name}</span>
+                    <span className="text-muted-foreground shrink-0">
+                      {(row.days_to_expiry ?? 0) < 0 ? ta('expired') : `${row.days_to_expiry ?? 0}d`}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <span className="inline-block text-xs font-medium text-primary group-hover:underline">
+                {ta('viewAll')} →
+              </span>
+            </CardContent>
+          </Card>
+        </Link>
 
         <Card className="md:col-span-2">
           <CardHeader className="pb-2">
