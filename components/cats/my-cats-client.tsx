@@ -13,6 +13,7 @@ import {
   FlaskConical,
   Home,
   ListChecks,
+  Loader2,
   Pill,
   Scale,
   Search,
@@ -35,7 +36,7 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import type { Cat } from '@/lib/supabase/aliases';
-import { useUrlState } from '@/lib/hooks/use-url-state';
+import { useDebouncedUrlState, useUrlState } from '@/lib/hooks/use-url-state';
 import { LogWeightModal } from '@/components/weight/log-weight-modal';
 import { LogEatingModal } from '@/components/eating/log-eating-modal';
 import { LogAdHocMedModal } from '@/components/medications/log-ad-hoc-med-modal';
@@ -131,7 +132,7 @@ export function MyCatsClient({ firstName }: { firstName: string }) {
 
   // Filter / sort state for the cat list, mirrored to the URL so navigating
   // away (e.g. into a cat detail page) and back restores the same view.
-  const [search, setSearch] = useUrlState('q', '');
+  const [search, setSearch, searchPending] = useDebouncedUrlState('q', '');
   const [statusFilter, setStatusFilter] = useUrlState<StatusFilter>(
     'status',
     'all',
@@ -294,7 +295,9 @@ export function MyCatsClient({ firstName }: { firstName: string }) {
                 className="h-9 pl-9 pr-9"
                 aria-label={tf('searchPlaceholder')}
               />
-              {search && (
+              {searchPending ? (
+                <Loader2 className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+              ) : search ? (
                 <button
                   type="button"
                   onClick={() => setSearch('')}
@@ -303,7 +306,7 @@ export function MyCatsClient({ firstName }: { firstName: string }) {
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
-              )}
+              ) : null}
             </div>
 
             {/* Sort */}

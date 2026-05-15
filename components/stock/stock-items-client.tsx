@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Edit, Package, Plus, Search, Trash2 } from 'lucide-react';
+import { Edit, Loader2, Package, Plus, Search, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,7 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 import { stockItemSchema, type StockItemInput } from '@/lib/schemas/stock';
 import { STOCK_CATEGORIES, STOCK_UNITS, type StockCategory, type StockItem, type StockLocation } from './stock-types';
-import { useUrlBoolState, useUrlState } from '@/lib/hooks/use-url-state';
+import { useDebouncedUrlState, useUrlBoolState, useUrlState } from '@/lib/hooks/use-url-state';
 
 const CATEGORY_FILTER_VALUES = ['all', ...STOCK_CATEGORIES] as const;
 
@@ -50,7 +50,7 @@ export function StockItemsClient({ isAdmin }: StockItemsClientProps) {
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<StockItem | null>(null);
   const [showInactive, setShowInactive] = useUrlBoolState('inactive');
-  const [search, setSearch] = useUrlState('q', '');
+  const [search, setSearch, searchPending] = useDebouncedUrlState('q', '');
   const [categoryFilter, setCategoryFilter] = useUrlState<StockCategory | 'all'>(
     'category',
     'all',
@@ -122,8 +122,11 @@ export function StockItemsClient({ isAdmin }: StockItemsClientProps) {
             placeholder={t('searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
+            className="pl-9 pr-9"
           />
+          {searchPending && (
+            <Loader2 className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+          )}
         </div>
         <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v as StockCategory | 'all')}>
           <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>

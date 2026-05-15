@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { catDetailQueryOptions } from '@/lib/queries/cats';
 import { useTranslations } from 'next-intl';
-import { Pill, Plus, Search, Syringe, UserPlus, X } from 'lucide-react';
+import { Loader2, Pill, Plus, Search, Syringe, UserPlus, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,7 +18,7 @@ import { formatDate } from '@/lib/utils';
 import { BatchAssignModal } from '@/components/assignees/batch-assign-modal';
 import { BatchMedicationModal } from '@/components/medications/batch-medication-modal';
 import { BatchVaccinationModal } from '@/components/health/batch-vaccination-modal';
-import { useUrlState } from '@/lib/hooks/use-url-state';
+import { useDebouncedUrlState } from '@/lib/hooks/use-url-state';
 
 type CatRow = Cat & {
   current_room?: { id: string; name: string } | null;
@@ -40,7 +40,7 @@ export function CatsClient({ role }: { role: UserRole }) {
   const ta = useTranslations('assignees');
   const tm = useTranslations('medications');
   const tv = useTranslations('vaccines');
-  const [q, setQ] = useUrlState('q', '');
+  const [q, setQ, qPending] = useDebouncedUrlState('q', '');
   const [selectMode, setSelectMode]     = useState(false);
   const [selectedIds, setSelectedIds]   = useState<Set<string>>(new Set());
   const [batchModalOpen, setBatchModalOpen] = useState(false);
@@ -144,8 +144,11 @@ export function CatsClient({ role }: { role: UserRole }) {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder={tc('search')}
-          className="pl-9"
+          className="pl-9 pr-9"
         />
+        {qPending && (
+          <Loader2 className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+        )}
       </div>
 
       {isLoading && <Card><CardContent className="p-6 text-sm text-muted-foreground">{tc('loading')}</CardContent></Card>}
