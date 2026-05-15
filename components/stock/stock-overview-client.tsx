@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import {
   Package, AlertTriangle, Clock, PackagePlus, MapPin,
-  ClipboardList, ChevronRight, Boxes, Search
+  ClipboardList, ChevronRight, Boxes, Search, Loader2
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useUrlBoolState, useUrlState } from '@/lib/hooks/use-url-state';
+import { useDebouncedUrlState, useUrlBoolState, useUrlState } from '@/lib/hooks/use-url-state';
 
 import { StockCheckoutModal } from './stock-checkout-modal';
 import type {
@@ -45,7 +45,7 @@ export function StockOverviewClient({ isAdmin }: Props) {
   const tc = useTranslations('common');
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [preselectItemId, setPreselectItemId] = useState<string | null>(null);
-  const [search, setSearch] = useUrlState('q', '');
+  const [search, setSearch, searchPending] = useDebouncedUrlState('q', '');
   const [categoryFilter, setCategoryFilter] = useUrlState<StockCategory | 'all'>(
     'category',
     'all',
@@ -151,8 +151,11 @@ export function StockOverviewClient({ isAdmin }: Props) {
             placeholder={t('searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
+            className="pl-9 pr-9"
           />
+          {searchPending && (
+            <Loader2 className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+          )}
         </div>
         <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v as StockCategory | 'all')}>
           <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>

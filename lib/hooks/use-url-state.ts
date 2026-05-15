@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 /**
@@ -54,6 +54,63 @@ export function useUrlState<T extends string = string>(
   );
 
   return [value, setValue];
+}
+
+/**
+ * Same contract as `useUrlState`, but the URL write is debounced.
+ *
+ * The returned `value` updates synchronously on every `set()` so the
+ * controlled input stays snappy, while the actual `router.replace`
+ * (which kicks off a full Next.js route re-render) only fires after
+ * the user pauses typing. The third tuple element is `pending` — true
+ * while a debounced update is queued, useful for showing a small
+ * "searching…" indicator next to the input.
+ *
+ * Used for free-text search boxes where every keystroke would
+ * otherwise call `router.replace` and freeze the page for the
+ * duration of the route re-render.
+ */
+export function useDebouncedUrlState<T extends string = string>(
+  key: string,
+  defaultValue: NoInfer<T>,
+  options?: { allowed?: readonly T[]; delay?: number }
+): [T, (next: T) => void, boolean] {
+  const delay = options?.delay ?? 300;
+  const [urlValue, setUrlValue] = useUrlState<T>(key, defaultValue, options);
+  const [localValue, setLocalValue] = useState<T>(urlValue);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dirtyRef = useRef(false);
+
+  // Pull external URL changes (back/forward, programmatic nav) back into
+  // the input — but only when the user isn't mid-edit, so we don't clobber
+  // a debounced pending value.
+  useEffect(() => {
+    if (!dirtyRef.current) setLocalValue(urlValue);
+  }, [urlValue]);
+
+  // Clear the timer on unmount so we don't fire a router.replace after the
+  // page has navigated away.
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  const setValue = useCallback(
+    (next: T) => {
+      setLocalValue(next);
+      dirtyRef.current = true;
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+        dirtyRef.current = false;
+        setUrlValue(next);
+      }, delay);
+    },
+    [setUrlValue, delay]
+  );
+
+  const pending = localValue !== urlValue;
+  return [localValue, setValue, pending];
 }
 
 /** Boolean flag mirrored to a `?key=1` style param. */
