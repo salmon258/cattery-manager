@@ -217,21 +217,19 @@ export function MedicationsCard({ catId }: { catId: string }) {
                       >
                         <Check className="h-3.5 w-3.5" /> {t('confirm')}
                       </Button>
-                      {overdue && (
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8"
-                          disabled={deleteTask.isPending}
-                          onClick={() => {
-                            if (window.confirm(t('confirmDeleteTask'))) deleteTask.mutate(task.id);
-                          }}
-                          aria-label={t('deleteTask')}
-                          title={t('deleteTask')}
-                        >
-                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                        </Button>
-                      )}
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8"
+                        disabled={deleteTask.isPending}
+                        onClick={() => {
+                          if (window.confirm(t('confirmDeleteTask'))) deleteTask.mutate(task.id);
+                        }}
+                        aria-label={t('deleteTask')}
+                        title={t('deleteTask')}
+                      >
+                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                      </Button>
                     </div>
                   </li>
                 );

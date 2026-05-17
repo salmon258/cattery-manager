@@ -1,13 +1,15 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Pill, History } from 'lucide-react';
+import { toast } from 'sonner';
+import { Pill, History, Trash2 } from 'lucide-react';
 
 import type { Medication, MedRoute, UserRole } from '@/lib/supabase/aliases';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils';
 import { CatDetailHeader } from '@/components/cats/detail/cat-detail-header';
 import {
@@ -36,6 +38,13 @@ async function fetchMedications(catId: string): Promise<Medication[]> {
   return (await r.json()).medications;
 }
 
+function deleteEndpoint(entryId: string): string | null {
+  const [kind, id] = entryId.split(':');
+  if (kind === 'task' && id) return `/api/tasks/${id}`;
+  if (kind === 'adhoc' && id) return `/api/ad-hoc-meds/${id}`;
+  return null;
+}
+
 async function fetchHistory(catId: string, range: DateRange): Promise<HistoryEntry[]> {
   const since = startOfDayIso(new Date(range.from));
   const until = endOfDayIso(new Date(range.to));
@@ -58,6 +67,7 @@ export function MedicationsDetail({ catId, catName, profilePhotoUrl }: Props) {
   const t = useTranslations('medications');
   const tc = useTranslations('common');
   const td = useTranslations('catDetail');
+  const qc = useQueryClient();
 
   const [range, setRange] = useState<DateRange>(defaultLastNDays(90));
 
@@ -69,6 +79,20 @@ export function MedicationsDetail({ catId, catName, profilePhotoUrl }: Props) {
   const { data: history = [], isLoading: historyLoading } = useQuery({
     queryKey: ['medication-history-range', catId, range.from, range.to],
     queryFn: () => fetchHistory(catId, range)
+  });
+
+  const deleteEntry = useMutation({
+    mutationFn: async (entryId: string) => {
+      const endpoint = deleteEndpoint(entryId);
+      if (!endpoint) throw new Error('Failed');
+      const r = await fetch(endpoint, { method: 'DELETE' });
+      if (!r.ok) throw new Error((await r.json()).error ?? 'Failed');
+    },
+    onSuccess: () => {
+      toast.success(t('history.deleted'));
+      qc.invalidateQueries({ queryKey: ['medication-history-range', catId] });
+    },
+    onError: (e: Error) => toast.error(e.message)
   });
 
   const active = useMemo(() => meds.filter((m) => m.is_active), [meds]);
@@ -206,9 +230,24 @@ export function MedicationsDetail({ catId, catName, profilePhotoUrl }: Props) {
                       </p>
                     )}
                   </div>
-                  <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">
-                    {new Date(e.given_at).toLocaleString()}
-                  </span>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                      {new Date(e.given_at).toLocaleString()}
+                    </span>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7"
+                      disabled={deleteEntry.isPending}
+                      onClick={() => {
+                        if (window.confirm(t('history.confirmDelete'))) deleteEntry.mutate(e.id);
+                      }}
+                      aria-label={t('history.delete')}
+                      title={t('history.delete')}
+                    >
+                      <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                    </Button>
+                  </div>
                 </li>
               ))}
             </ul>
