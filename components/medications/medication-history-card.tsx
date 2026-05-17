@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { History } from 'lucide-react';
+import { toast } from 'sonner';
+import { History, Trash2 } from 'lucide-react';
 
 import type { MedRoute } from '@/lib/supabase/aliases';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,16 +29,40 @@ async function fetchHistory(catId: string): Promise<HistoryEntry[]> {
   return (await r.json()).entries;
 }
 
+function deleteEndpoint(entryId: string): string | null {
+  const [kind, id] = entryId.split(':');
+  if (kind === 'task' && id) return `/api/tasks/${id}`;
+  if (kind === 'adhoc' && id) return `/api/ad-hoc-meds/${id}`;
+  return null;
+}
+
 const INITIAL_VISIBLE = 8;
 
 export function MedicationHistoryCard({ catId }: { catId: string }) {
   const t = useTranslations('medications');
   const tc = useTranslations('common');
+  const qc = useQueryClient();
   const [showAll, setShowAll] = useState(false);
 
   const { data: entries = [], isLoading } = useQuery({
     queryKey: ['medication-history', catId],
     queryFn: () => fetchHistory(catId)
+  });
+
+  const deleteEntry = useMutation({
+    mutationFn: async (entryId: string) => {
+      const endpoint = deleteEndpoint(entryId);
+      if (!endpoint) throw new Error('Failed');
+      const r = await fetch(endpoint, { method: 'DELETE' });
+      if (!r.ok) throw new Error((await r.json()).error ?? 'Failed');
+    },
+    onSuccess: () => {
+      toast.success(t('history.deleted'));
+      qc.invalidateQueries({ queryKey: ['medication-history', catId] });
+      qc.invalidateQueries({ queryKey: ['medication-tasks', catId] });
+      qc.invalidateQueries({ queryKey: ['me-tasks'] });
+    },
+    onError: (e: Error) => toast.error(e.message)
   });
 
   const visible = showAll ? entries : entries.slice(0, INITIAL_VISIBLE);
@@ -89,12 +114,27 @@ export function MedicationHistoryCard({ catId }: { catId: string }) {
                       </p>
                     )}
                   </div>
-                  <span
-                    className="text-xs text-muted-foreground whitespace-nowrap shrink-0"
-                    title={new Date(e.given_at).toISOString()}
-                  >
-                    {new Date(e.given_at).toLocaleString()}
-                  </span>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <span
+                      className="text-xs text-muted-foreground whitespace-nowrap"
+                      title={new Date(e.given_at).toISOString()}
+                    >
+                      {new Date(e.given_at).toLocaleString()}
+                    </span>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7"
+                      disabled={deleteEntry.isPending}
+                      onClick={() => {
+                        if (window.confirm(t('history.confirmDelete'))) deleteEntry.mutate(e.id);
+                      }}
+                      aria-label={t('history.delete')}
+                      title={t('history.delete')}
+                    >
+                      <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                    </Button>
+                  </div>
                 </li>
               ))}
             </ul>

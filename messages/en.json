@@ -323,9 +323,9 @@
     "stopped": "Medication plan stopped.",
     "confirmStop": "Stop this medication plan? The schedule and all future doses will be removed.",
     "overdue": "Overdue",
-    "deleteTask": "Delete overdue dose",
-    "confirmDeleteTask": "Delete this overdue dose? This cannot be undone.",
-    "taskDeleted": "Overdue dose deleted.",
+    "deleteTask": "Delete dose",
+    "confirmDeleteTask": "Delete this dose? This cannot be undone.",
+    "taskDeleted": "Dose deleted.",
     "addSlot": "Add time",
     "slotsHint": "Each time slot creates one dose per dose-day. Use `interval_days > 1` for every-other-day schedules.",
     "intervalLabel": "every {n} day(s)",
@@ -367,6 +367,9 @@
       "by": "by {name}",
       "showAll": "Show all ({count})",
       "showLess": "Show less",
+      "delete": "Delete record",
+      "confirmDelete": "Delete this medicine record? This cannot be undone.",
+      "deleted": "Record deleted.",
       "source": {
         "scheduled": "Scheduled",
         "ad_hoc": "Ad hoc"

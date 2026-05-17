@@ -323,9 +323,9 @@
     "stopped": "Rencana obat dihentikan.",
     "confirmStop": "Hentikan rencana obat ini? Jadwal dan semua dosis mendatang akan dihapus.",
     "overdue": "Lewat tenggat",
-    "deleteTask": "Hapus dosis telat",
-    "confirmDeleteTask": "Hapus dosis yang telat ini? Tindakan ini tidak dapat dibatalkan.",
-    "taskDeleted": "Dosis telat dihapus.",
+    "deleteTask": "Hapus dosis",
+    "confirmDeleteTask": "Hapus dosis ini? Tindakan ini tidak dapat dibatalkan.",
+    "taskDeleted": "Dosis dihapus.",
     "addSlot": "Tambah waktu",
     "slotsHint": "Setiap slot waktu menghasilkan satu dosis per hari pemberian. Gunakan interval > 1 untuk jadwal tiap beberapa hari.",
     "intervalLabel": "tiap {n} hari",
@@ -367,6 +367,9 @@
       "by": "oleh {name}",
       "showAll": "Lihat semua ({count})",
       "showLess": "Lihat lebih sedikit",
+      "delete": "Hapus catatan",
+      "confirmDelete": "Hapus catatan obat ini? Tindakan ini tidak dapat dibatalkan.",
+      "deleted": "Catatan dihapus.",
       "source": {
         "scheduled": "Terjadwal",
         "ad_hoc": "Sekali pakai"
