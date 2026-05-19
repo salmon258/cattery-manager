@@ -69,19 +69,21 @@ export function LogPreventiveModal({
           treatment_type: 'deworming',
           product_name: '',
           administered_date: today,
-          next_due_date: addDays(today, PREVENTIVE_DEFAULT_INTERVAL_DAYS),
+          next_due_date: addDays(today, PREVENTIVE_DEFAULT_INTERVAL_DAYS.deworming),
           notes: ''
         }
   });
 
   const watchedAdmin = form.watch('administered_date');
+  const watchedType = form.watch('treatment_type');
   useEffect(() => {
     // Only auto-advance next_due_date when creating — editing shouldn't clobber
     // a user's existing due date every time they touch administered_date.
     if (!isEditing && watchedAdmin) {
-      form.setValue('next_due_date', addDays(watchedAdmin, PREVENTIVE_DEFAULT_INTERVAL_DAYS), { shouldValidate: false });
+      const interval = PREVENTIVE_DEFAULT_INTERVAL_DAYS[watchedType ?? 'deworming'];
+      form.setValue('next_due_date', addDays(watchedAdmin, interval), { shouldValidate: false });
     }
-  }, [watchedAdmin, form, isEditing]);
+  }, [watchedAdmin, watchedType, form, isEditing]);
 
   const m = useMutation({
     mutationFn: async (v: PreventiveTreatmentInput) => {
