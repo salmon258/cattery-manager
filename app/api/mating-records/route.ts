@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/current-user';
 import { matingRecordSchema, matingStatusSchema } from '@/lib/schemas/breeding';
+import { getGestationDays, expectedLaborDate } from '@/lib/breeding/expected-labor';
 
 /**
  * GET /api/mating-records
@@ -40,7 +41,13 @@ export async function GET(req: Request) {
 
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ records: data ?? [] });
+
+  const gestationDays = await getGestationDays(supabase);
+  const records = (data ?? []).map((r) => ({
+    ...r,
+    expected_labor_date: expectedLaborDate(r.mating_date, gestationDays)
+  }));
+  return NextResponse.json({ records });
 }
 
 /**
@@ -70,5 +77,8 @@ export async function POST(req: Request) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ record: data }, { status: 201 });
+
+  const gestationDays = await getGestationDays(supabase);
+  const record = { ...data, expected_labor_date: expectedLaborDate(data?.mating_date, gestationDays) };
+  return NextResponse.json({ record }, { status: 201 });
 }

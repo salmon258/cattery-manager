@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/current-user';
+import { getGestationDays, expectedLaborDate } from '@/lib/breeding/expected-labor';
 
 export type CalendarCategory =
   | 'birth'
@@ -127,10 +128,11 @@ export async function GET(req: Request) {
   }
 
   // ─── Mating records ─────────────────────────────────────────────────────
+  const gestationDays = await getGestationDays(supabase);
   const { data: matings } = await supabase
     .from('mating_records')
     .select(`
-      id, mating_date, expected_labor_date, status,
+      id, mating_date, status,
       female:cats!mating_records_female_cat_fkey(id, name),
       male:cats!mating_records_male_cat_fkey(id, name)
     `);
@@ -149,12 +151,13 @@ export async function GET(req: Request) {
         detail: 'Mating'
       });
     }
-    if (m.expected_labor_date && m.expected_labor_date >= from && m.expected_labor_date <= to) {
+    const laborDate = expectedLaborDate(m.mating_date, gestationDays);
+    if (laborDate && laborDate >= from && laborDate <= to) {
       events.push({
         id: `mat:labor:${m.id}`,
-        date: m.expected_labor_date,
+        date: laborDate,
         category: 'mating',
-        kind: m.expected_labor_date < todayStr ? 'past' : 'scheduled',
+        kind: laborDate < todayStr ? 'past' : 'scheduled',
         cat: female,
         title: pair,
         detail: 'Expected labor'

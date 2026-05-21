@@ -1218,7 +1218,6 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
-          expected_labor_date: string | null
           female_cat_id: string
           id: string
           male_cat_id: string
@@ -1231,7 +1230,6 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
-          expected_labor_date?: string | null
           female_cat_id: string
           id?: string
           male_cat_id: string
@@ -1244,7 +1242,6 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
-          expected_labor_date?: string | null
           female_cat_id?: string
           id?: string
           male_cat_id?: string
