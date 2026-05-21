@@ -20,7 +20,7 @@ import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 import { stockItemSchema, type StockItemInput } from '@/lib/schemas/stock';
-import { STOCK_CATEGORIES, STOCK_UNITS, type StockCategory, type StockItem, type StockLocation } from './stock-types';
+import { STOCK_CATEGORIES, STOCK_CATEGORY_DOT, STOCK_UNITS, groupByCategory, type StockCategory, type StockItem, type StockLocation } from './stock-types';
 import { useDebouncedUrlState, useUrlBoolState, useUrlState } from '@/lib/hooks/use-url-state';
 
 const CATEGORY_FILTER_VALUES = ['all', ...STOCK_CATEGORIES] as const;
@@ -85,6 +85,8 @@ export function StockItemsClient({ isAdmin }: StockItemsClientProps) {
     });
   }, [items, search, categoryFilter]);
 
+  const grouped = useMemo(() => groupByCategory(filteredItems), [filteredItems]);
+
   const del = useMutation({
     mutationFn: async (id: string) => {
       const r = await fetch(`/api/stock/items/${id}`, { method: 'DELETE' });
@@ -146,47 +148,57 @@ export function StockItemsClient({ isAdmin }: StockItemsClientProps) {
         <Card><CardContent className="p-6 text-sm text-muted-foreground">{t('items.empty')}</CardContent></Card>
       )}
 
-      <div className="grid gap-3">
-        {filteredItems.map((item) => (
-          <Card key={item.id}>
-            <CardContent className="p-4 flex flex-wrap items-center justify-between gap-3">
-              <Link href={`/stock/${item.id}`} className="flex min-w-0 flex-1 items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-md bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300 shrink-0">
-                  <Package className="h-4 w-4" />
-                </div>
-                <div className="min-w-0">
-                  <div className="font-medium flex items-center gap-2 flex-wrap">
-                    {item.name}
-                    {item.brand && <span className="text-xs text-muted-foreground">· {item.brand}</span>}
-                    <Badge variant="secondary">{t(`categories.${item.category}`)}</Badge>
-                    {!item.is_active && <Badge variant="destructive">{t('inactive')}</Badge>}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {t(`units.${item.unit}`)} · {t('items.minThreshold')}: {formatNum(item.min_threshold)}
-                    {item.default_location_id && locMap.get(item.default_location_id) && (
-                      <> · {locMap.get(item.default_location_id)}</>
+      <div className="space-y-5">
+        {grouped.map((group) => (
+          <div key={group.category} className="space-y-2">
+            <div className="flex items-center gap-2 px-1">
+              <span className={`h-2 w-2 rounded-full ${STOCK_CATEGORY_DOT[group.category]}`} />
+              <h2 className="text-sm font-semibold">{t(`categories.${group.category}`)}</h2>
+              <span className="text-xs text-muted-foreground">{group.items.length}</span>
+            </div>
+            <div className="grid gap-3">
+              {group.items.map((item) => (
+                <Card key={item.id}>
+                  <CardContent className="p-4 flex flex-wrap items-center justify-between gap-3">
+                    <Link href={`/stock/${item.id}`} className="flex min-w-0 flex-1 items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-md bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300 shrink-0">
+                        <Package className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-medium flex items-center gap-2 flex-wrap">
+                          {item.name}
+                          {item.brand && <span className="text-xs text-muted-foreground">· {item.brand}</span>}
+                          {!item.is_active && <Badge variant="destructive">{t('inactive')}</Badge>}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {t(`units.${item.unit}`)} · {t('items.minThreshold')}: {formatNum(item.min_threshold)}
+                          {item.default_location_id && locMap.get(item.default_location_id) && (
+                            <> · {locMap.get(item.default_location_id)}</>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                    {isAdmin && (
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => setEditing(item)}>
+                          <Edit className="h-4 w-4" /> {tc('edit')}
+                        </Button>
+                        {item.is_active && (
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => { if (confirm(t('items.deactivateConfirm'))) del.mutate(item.id); }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     )}
-                  </div>
-                </div>
-              </Link>
-              {isAdmin && (
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => setEditing(item)}>
-                    <Edit className="h-4 w-4" /> {tc('edit')}
-                  </Button>
-                  {item.is_active && (
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => { if (confirm(t('items.deactivateConfirm'))) del.mutate(item.id); }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
 
