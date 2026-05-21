@@ -20,7 +20,7 @@ import { StockCheckoutModal } from './stock-checkout-modal';
 import type {
   StockCategory, StockItemStatus, StockExpiringBatch
 } from './stock-types';
-import { STOCK_CATEGORIES } from './stock-types';
+import { STOCK_CATEGORIES, STOCK_CATEGORY_DOT, groupByCategory } from './stock-types';
 
 const CATEGORY_FILTER_VALUES = ['all', ...STOCK_CATEGORIES] as const;
 
@@ -74,6 +74,8 @@ export function StockOverviewClient({ isAdmin }: Props) {
       return true;
     });
   }, [status, search, categoryFilter, onlyLow]);
+
+  const grouped = useMemo(() => groupByCategory(filtered), [filtered]);
 
   const lowCount = status.filter((s) => s.is_low_stock && s.qty_on_hand >= 0).length;
   const expiringSoon = expiring.filter((b) => b.days_to_expiry <= 30).length;
@@ -182,59 +184,69 @@ export function StockOverviewClient({ isAdmin }: Props) {
       {!isLoading && filtered.length === 0 && (
         <Card><CardContent className="p-6 text-sm text-muted-foreground">{t('empty')}</CardContent></Card>
       )}
-      <div className="grid gap-3">
-        {filtered.map((row) => (
-          <Card key={row.stock_item_id} className="overflow-hidden">
-            <CardContent className="p-4 flex flex-wrap items-center justify-between gap-3">
-              <Link
-                href={`/stock/${row.stock_item_id}`}
-                className="flex min-w-0 flex-1 items-center gap-3 group"
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300 shrink-0">
-                  <Package className="h-4 w-4" />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2 font-medium">
-                    <span className="truncate group-hover:underline">{row.name}</span>
-                    {row.brand && <span className="text-xs text-muted-foreground">· {row.brand}</span>}
-                    <Badge variant="secondary">{t(`categories.${row.category}`)}</Badge>
-                    {row.is_low_stock && (
-                      <Badge variant="destructive">{t('flags.low')}</Badge>
-                    )}
-                    {row.earliest_expiry && daysBetween(row.earliest_expiry) <= 30 && (
-                      <Badge variant="destructive">
-                        {t('flags.expiringInDays', { n: Math.max(daysBetween(row.earliest_expiry), 0) })}
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {formatQty(row.qty_on_hand)} {t(`units.${row.unit}`)} · {row.active_batches} {t('batches', { count: row.active_batches })}
-                    {row.earliest_expiry && (
-                      <> · {t('earliestExpiry')} {row.earliest_expiry}</>
-                    )}
-                  </div>
-                </div>
-              </Link>
-              <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    setPreselectItemId(row.stock_item_id);
-                    setCheckoutOpen(true);
-                  }}
-                  disabled={row.qty_on_hand <= 0}
-                >
-                  {t('checkout.takeSome')}
-                </Button>
-                <Button size="icon" variant="ghost" asChild>
-                  <Link href={`/stock/${row.stock_item_id}`}>
-                    <ChevronRight className="h-4 w-4" />
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+      <div className="space-y-5">
+        {grouped.map((group) => (
+          <div key={group.category} className="space-y-2">
+            <div className="flex items-center gap-2 px-1">
+              <span className={`h-2 w-2 rounded-full ${STOCK_CATEGORY_DOT[group.category]}`} />
+              <h2 className="text-sm font-semibold">{t(`categories.${group.category}`)}</h2>
+              <span className="text-xs text-muted-foreground">{group.items.length}</span>
+            </div>
+            <div className="grid gap-3">
+              {group.items.map((row) => (
+                <Card key={row.stock_item_id} className="overflow-hidden">
+                  <CardContent className="p-4 flex flex-wrap items-center justify-between gap-3">
+                    <Link
+                      href={`/stock/${row.stock_item_id}`}
+                      className="flex min-w-0 flex-1 items-center gap-3 group"
+                    >
+                      <div className="flex h-10 w-10 items-center justify-center rounded-md bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300 shrink-0">
+                        <Package className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 font-medium">
+                          <span className="truncate group-hover:underline">{row.name}</span>
+                          {row.brand && <span className="text-xs text-muted-foreground">· {row.brand}</span>}
+                          {row.is_low_stock && (
+                            <Badge variant="destructive">{t('flags.low')}</Badge>
+                          )}
+                          {row.earliest_expiry && daysBetween(row.earliest_expiry) <= 30 && (
+                            <Badge variant="destructive">
+                              {t('flags.expiringInDays', { n: Math.max(daysBetween(row.earliest_expiry), 0) })}
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {formatQty(row.qty_on_hand)} {t(`units.${row.unit}`)} · {row.active_batches} {t('batches', { count: row.active_batches })}
+                          {row.earliest_expiry && (
+                            <> · {t('earliestExpiry')} {row.earliest_expiry}</>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setPreselectItemId(row.stock_item_id);
+                          setCheckoutOpen(true);
+                        }}
+                        disabled={row.qty_on_hand <= 0}
+                      >
+                        {t('checkout.takeSome')}
+                      </Button>
+                      <Button size="icon" variant="ghost" asChild>
+                        <Link href={`/stock/${row.stock_item_id}`}>
+                          <ChevronRight className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
 

@@ -117,6 +117,31 @@ export interface StockMovement {
 export const STOCK_CATEGORIES: StockCategory[] = [
   'food', 'human_food', 'medicine', 'supplement', 'litter', 'cleaning', 'grooming', 'equipment', 'other'
 ];
+
+// Solid dot colours for category section headers (work in light + dark).
+export const STOCK_CATEGORY_DOT: Record<StockCategory, string> = {
+  food:       'bg-emerald-500',
+  human_food: 'bg-lime-500',
+  medicine:   'bg-rose-500',
+  supplement: 'bg-violet-500',
+  litter:     'bg-amber-500',
+  cleaning:   'bg-sky-500',
+  grooming:   'bg-fuchsia-500',
+  equipment:  'bg-slate-500',
+  other:      'bg-zinc-400'
+};
+
+// Splits a list into category sections in STOCK_CATEGORIES order, dropping
+// empty categories. Order within each section is preserved (the API returns
+// items sorted by name).
+export function groupByCategory<T extends { category: StockCategory }>(
+  items: T[]
+): { category: StockCategory; items: T[] }[] {
+  return STOCK_CATEGORIES.map((category) => ({
+    category,
+    items: items.filter((item) => item.category === category)
+  })).filter((group) => group.items.length > 0);
+}
 export const STOCK_UNITS: StockUnit[] = [
   'pcs', 'box', 'bottle', 'pack', 'sachet', 'bag', 'kg', 'g', 'l', 'ml'
 ];
